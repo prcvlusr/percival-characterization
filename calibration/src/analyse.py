@@ -45,13 +45,16 @@ class Analyse(object):
         print("took time: ", time.time() - t)
 
     def generate_raw_path(self, base_dir):
-        return base_dir, "test.h5"
+        return base_dir, "{run}_raw_uint16.h5"
+
+    def generate_metadata_path(self, base_dir):
+        return base_dir, "file.dat"
 
     def generate_gather_path(self, base_dir):
-        return base_dir, "gather_test.h5"
+        return base_dir, "gathered.h5"
 
     def generate_process_path(self, base_dir):
-        return base_dir, "process_test.h5"
+        return base_dir, "processed.h5"
 
     def run_gather(self):
         if self.meas_type == "adccal":
@@ -67,9 +70,14 @@ class Analyse(object):
         in_dir, in_file_name = self.generate_raw_path(self.in_base_dir)
         in_fname = os.path.join(in_dir, in_file_name)
 
+        # define metadata file
+        meta_dir, meta_file_name = self.generate_metadata_path(self.in_base_dir)
+        meta_fname = os.path.join(meta_dir, meta_file_name)
+
         # define output files
         out_dir, out_file_name = self.generate_gather_path(self.out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
+
 
 #        if os.path.exists(out_fname):
 #            print("output filename = {}".format(out_fname))
@@ -80,6 +88,7 @@ class Analyse(object):
         if True:
             obj = Gather(in_fname=in_fname,
                          out_fname=out_fname,
+                         meta_fname=meta_fname,
                          runs=self.runs)
             obj.run()
 
@@ -113,7 +122,8 @@ class Analyse(object):
 
 
 if __name__ == "__main__":
-    in_base_dir = BASE_PATH
+    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
+    #in_base_dir = BASE_PATH
     out_base_dir = BASE_PATH
 
     run_type = "gather"
@@ -123,11 +133,11 @@ if __name__ == "__main__":
     g_obj = Analyse(in_base_dir, out_base_dir, run_type, meas_type, method)
     g_obj.run()
 
-    del g_obj
+#    del g_obj
 
-    run_type = "process"
-    meas_type = "adccal"
-    method = "process_adccal_default"
+#    run_type = "process"
+#    meas_type = "adccal"
+#    method = "process_adccal_default"
 
-    p_obj = Analyse(in_base_dir, out_base_dir, run_type, meas_type, method)
-    p_obj.run()
+#    p_obj = Analyse(in_base_dir, out_base_dir, run_type, meas_type, method)
+#    p_obj.run()

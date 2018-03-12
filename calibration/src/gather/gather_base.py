@@ -24,10 +24,12 @@ class GatherBase(object):
     def __init__(self,
                  in_fname,
                  out_fname,
+                 meta_fname,
                  runs):
 
         self._in_fname = in_fname
         self._out_fname = out_fname
+        self._meta_fname = meta_fname
 
         self.runs = [int(r) for r in runs]
 
@@ -85,21 +87,21 @@ class GatherBase(object):
         with h5py.File(self._out_fname, "w", libver='latest') as f:
             f.create_dataset("data", data=self._data, dtype=np.int16)
 
-            # save metadata from original files
-            idx = 0
-            for set_name, set_value in iter(self.metadata.items()):
-                    gname = "metadata_{}".format(idx)
-
-                    name = "{}/source".format(gname)
-                    f.create_dataset(name, data=set_name)
-
-                    for key, value in iter(set_value.items()):
-                        try:
-                            name = "{}/{}".format(gname, key)
-                            f.create_dataset(name, data=value)
-                        except:
-                            print("Error in", name, value.dtype)
-                            raise
-                    idx += 1
+#            # save metadata from original files
+#            idx = 0
+#            for set_name, set_value in iter(self.metadata.items()):
+#                    gname = "metadata_{}".format(idx)
+#
+#                    name = "{}/source".format(gname)
+#                    f.create_dataset(name, data=set_name)
+#
+#                    for key, value in iter(set_value.items()):
+#                        try:
+#                            name = "{}/{}".format(gname, key)
+#                            f.create_dataset(name, data=value)
+#                        except:
+#                            print("Error in", name, value.dtype)
+#                            raise
+#                    idx += 1
 
             f.flush()
