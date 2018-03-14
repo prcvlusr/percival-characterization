@@ -63,6 +63,11 @@ class Gather(GatherBase):
                            self._n_adc,
                            self._n_cols)
 
+        # (n_frames, n_groups, n_rows, n_cols)
+        # is transposed to
+        # (n_rows, n_cols, n_groups, n_frames)
+        self._transpose_order = (2, 3, 1, 0)
+
         self._metadata = {
             "n_frames_per_run": self._n_frames_per_run,
             "n_frames": self._n_frames,
@@ -180,3 +185,22 @@ class Gather(GatherBase):
         r_fine.shape = self._raw_shape
         r_gain.shape = self._raw_shape
         print(s_coarse.shape)
+
+        # optimize memory layout for further processing
+        s_coarse = s_coarse.transpose(self._transpose_order)
+        s_fine = s_fine.transpose(self._transpose_order)
+        s_gain = s_gain.transpose(self._transpose_order)
+
+        r_coarse = r_coarse.transpose(self._transpose_order)
+        r_fine = r_fine.transpose(self._transpose_order)
+        r_gain = r_gain.transpose(self._transpose_order)
+        print(s_coarse.shape)
+
+        # the transpose is not done on the original arrays but creates a copy
+        self._data_to_write["s_coarse"]["data"] = s_coarse
+        self._data_to_write["s_fine"]["data"] = s_fine
+        self._data_to_write["s_gain"]["data"] = s_gain
+
+        self._data_to_write["r_coarse"]["data"] = r_coarse
+        self._data_to_write["r_fine"]["data"] = r_fine
+        self._data_to_write["r_gain"]["data"] = r_gain
