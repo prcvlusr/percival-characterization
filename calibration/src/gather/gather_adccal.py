@@ -26,8 +26,7 @@ class Gather(GatherBase):
         self._n_rows_total = 1484
         self._n_cols_total = 1440
 
-        # TODO determine a proper size
-        self._n_rows = 42
+        self._n_rows = self._n_rows_total
         self._n_cols = 40
 
         self._fixed_n_frames_per_run = 20
@@ -63,6 +62,24 @@ class Gather(GatherBase):
             "n_adc_groups": self. _n_adc_groups
         }
 
+        self._data_to_write = {
+            "data": {
+                "path": "data",
+                "data": np.zeros(self._raw_tmp_shape),
+                "type": np.uint16
+            },
+            "reset": {
+                "path": "reset",
+                "data": np.zeros(self._raw_tmp_shape),
+                "type": np.uint16
+            },
+            "vin": {
+                "path": "vin",
+                "data": np.zeros(self._n_frames),
+                "type": np.uint16
+            }
+        }
+
     def read_register(self):
         print("meta_fname", self._meta_fname)
 
@@ -76,58 +93,41 @@ class Gather(GatherBase):
 
         self._register = sorted(file_content)
 
-    def run(self):
-        self.read_data()
+    def _load_data(self):
+        # for convenience
+        data = self._data_to_write["data"]["data"]
+        reset = self._data_to_write["reset"]["data"]
+        vin = self._data_to_write["vin"]["data"]
 
-    def read_data(self):
-
-        raw_tmp = np.zeros(self._raw_tmp_shape)
-        vin_values = np.zeros(self._n_runs)
-
-        for i, (vin, prefix) in enumerate(self._register[:10]):
+        for i, (v, prefix) in enumerate(self._register):
             in_fname = self._in_fname.format(run=prefix)
 
+            #  split the raw data in slices to handle the size
             load_idx_rows = slice(0, self._n_rows)
             load_idx_cols = slice(0, self._n_cols)
             idx = (Ellipsis, load_idx_rows, load_idx_cols)
 
             print("in_fname", in_fname)
+            # read in data for this slice
             with h5py.File(in_fname, "r") as f:
-                data = f[self._paths["data"]][idx]
+                in_data = f[self._paths["data"]][idx]
+                in_reset = f[self._paths["reset"]][idx]
 
+            # determine where this data block should go in the result
+            # matrix
             start = i * self._n_frames_per_run[i]
             stop = (i + 1) * self._n_frames_per_run[i]
             t_idx = slice(start, stop)
-            print("t_idx", t_idx)
-            raw_tmp[t_idx, Ellipsis] = data
+            print("Getting frames {} to {} of {}"
+                  .format(start, stop, data.shape[0]))
 
-            vin_values[i] = vin
+            data[t_idx, Ellipsis] = in_data
+            reset[t_idx, Ellipsis] = in_reset
 
-        print(raw_tmp.shape)
-        raw_tmp.shape = self._raw_shape
-        print(raw_tmp.shape)
+            vin[i] = v
 
-        self._data = raw_tmp
-        self._vin = vin_values
-
-        self._write_data()
-
-    def _write_data(self):
-
-        with h5py.File(self._out_fname, "w", libver='latest') as f:
-            f.create_dataset("data", data=self._data, dtype=np.int16)
-            f.create_dataset("vin", data=self._vin, dtype=np.uint16)
-
-            # save metadata from original files
-            for key, value in iter(self._metadata.items()):
-                gname = "metadata"
-
-                name = "{}/{}".format(gname, key)
-                try:
-                    f.create_dataset(name, data=value)
-                except:
-                    print("Error in", name, value.dtype)
-                    raise
-
-
-            f.flush()
+        # split the data into ADC groups
+        print(data.shape)
+        data.shape = self._raw_shape
+        reset.shape = self._raw_shape
+        print(data.shape)
