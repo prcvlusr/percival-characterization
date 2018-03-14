@@ -24,14 +24,11 @@ class GatherBase(object):
     def __init__(self,
                  in_fname,
                  out_fname,
-                 meta_fname,
-                 runs):
+                 meta_fname):
 
         self._in_fname = in_fname
         self._out_fname = out_fname
         self._meta_fname = meta_fname
-
-        self.runs = [int(r) for r in runs]
 
         self._data_to_write = {}
 

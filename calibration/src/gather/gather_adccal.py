@@ -10,27 +10,35 @@ try:
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
+BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
+SRC_DIR = os.path.join(BASE_DIR, "src")
+
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
 from gather_base import GatherBase
 
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
+
+import utils
+
+
 class Gather(GatherBase):
-    def __init__(self, **kwargs):
+    def __init__(self, n_rows, n_cols, part, **kwargs):
         super().__init__(**kwargs)
 
         self._metadata = None
         self._register = None
 
-        self._n_adc_groups = 7
-        self._n_rows_total = 1484
-        self._n_cols_total = 1440
+        self._n_adc = 7
+        self._n_rows = n_rows
+        self._n_cols = n_cols
 
-        self._n_rows = self._n_rows_total
-        self._n_cols = 40
+        self._part = part
 
         self._fixed_n_frames_per_run = 20
-        self._n_rows_per_group = self._n_rows // self._n_adc_groups
+        self._n_rows_per_group = self._n_rows // self._n_adc
 
         self._paths = {
             "data": "data",
@@ -99,16 +107,17 @@ class Gather(GatherBase):
         reset = self._data_to_write["reset"]["data"]
         vin = self._data_to_write["vin"]["data"]
 
+        #  split the raw data in slices to handle the size
+        load_idx_rows = slice(0, self._n_rows)
+        load_idx_cols = slice(self._part * self._n_cols,
+                              (self._part + 1) * self._n_cols)
+        idx = (Ellipsis, load_idx_rows, load_idx_cols)
+
         for i, (v, prefix) in enumerate(self._register):
             in_fname = self._in_fname.format(run=prefix)
 
-            #  split the raw data in slices to handle the size
-            load_idx_rows = slice(0, self._n_rows)
-            load_idx_cols = slice(0, self._n_cols)
-            idx = (Ellipsis, load_idx_rows, load_idx_cols)
-
-            print("in_fname", in_fname)
             # read in data for this slice
+            print("in_fname", in_fname)
             with h5py.File(in_fname, "r") as f:
                 in_data = f[self._paths["data"]][idx]
                 in_reset = f[self._paths["reset"]][idx]

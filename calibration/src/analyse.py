@@ -24,6 +24,14 @@ class Analyse(object):
         self.in_base_dir = in_base_dir
         self.out_base_dir = out_base_dir
 
+        self._n_rows_total = 1484
+        self._n_cols_total = 1440
+
+        self._n_rows = self._n_rows_total
+        self._n_cols = 32
+
+        self._n_parts = self._n_cols_total // self._n_cols
+
         self.runs = "0"
         self.run_type = run_type
 
@@ -51,10 +59,10 @@ class Analyse(object):
         return base_dir, "file.dat"
 
     def generate_gather_path(self, base_dir):
-        return base_dir, "gathered.h5"
+        return base_dir, "part{part}_gathered.h5"
 
     def generate_process_path(self, base_dir):
-        return base_dir, "processed.h5"
+        return base_dir, "part{part}_processed.h5"
 
     def run_gather(self):
         if self.meas_type == "adccal":
@@ -78,18 +86,22 @@ class Analyse(object):
         out_dir, out_file_name = self.generate_gather_path(self.out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
+        #for p in range(1):
+        for p in range(self._n_parts):
+            out_f = out_fname.format(part=p)
 
-#        if os.path.exists(out_fname):
-#            print("output filename = {}".format(out_fname))
-#            print("WARNING: output file already exist. Skipping gather.")
-#        else:
-#            utils.create_dir(out_dir)
+#            if os.path.exists(out_f):
+#                print("output filename = {}".format(out_f))
+#                print("WARNING: output file already exist. Skipping gather.")
+#            else:
+#                utils.create_dir(out_dir)
 
-        if True:
             obj = Gather(in_fname=in_fname,
-                         out_fname=out_fname,
+                         out_fname=out_f,
                          meta_fname=meta_fname,
-                         runs=self.runs)
+                         n_rows=self._n_rows,
+                         n_cols=self._n_cols,
+                         part=p)
             obj.run()
 
     def run_process(self):
@@ -104,16 +116,19 @@ class Analyse(object):
         out_dir, out_file_name = self.generate_process_path(self.out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
-#        if os.path.exists(out_fname):
-#            print("output filename = {}".format(out_fname))
-#            print("WARNING: output file already exist. Skipping process.")
-#        else:
-#            utils.create_dir(out_dir)
+        for p in range(1):
+            in_f = in_fname.format(part=p)
+            out_f = out_fname.format(part=p)
 
-        if True:
+#            if os.path.exists(out_f):
+#                print("output filename = {}".format(out_f))
+#                print("WARNING: output file already exist. Skipping process.")
+#            else:
+#                utils.create_dir(out_dir)
+
             # generate out_put
-            self.process_m(in_fname=in_fname,
-                           out_fname=out_fname,
+            self.process_m(in_fname=in_f,
+                           out_fname=out_f,
                            runs=self.runs)
 
     def cleanup(self):
