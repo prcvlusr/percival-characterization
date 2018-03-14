@@ -103,7 +103,7 @@ class Gather(GatherBase):
             },
             "vin": {
                 "path": "vin",
-                "data": np.zeros(self._n_frames, dtype=np.float16),
+                "data": np.zeros(self._n_runs, dtype=np.float16),
                 "type": np.float16
             }
         }
