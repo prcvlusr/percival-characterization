@@ -41,7 +41,7 @@ class Gather(GatherBase):
         self._n_rows_per_group = self._n_rows // self._n_adc
 
         self._paths = {
-            "data": "data",
+            "sample": "data",
             "reset": "reset"
         }
 
@@ -60,31 +60,51 @@ class Gather(GatherBase):
                                self._n_cols)
         self._raw_shape = (-1,
                            self._n_rows_per_group,
-                           self._n_adc_groups,
+                           self._n_adc,
                            self._n_cols)
 
         self._metadata = {
             "n_frames_per_run": self._n_frames_per_run,
             "n_frames": self._n_frames,
             "n_runs": self._n_runs,
-            "n_adc_groups": self. _n_adc_groups
+            "n_adc": self. _n_adc
         }
 
         self._data_to_write = {
-            "data": {
-                "path": "data",
-                "data": np.zeros(self._raw_tmp_shape),
-                "type": np.uint16
+            "s_coarse": {
+                "path": "sample/coarse",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
             },
-            "reset": {
-                "path": "reset",
-                "data": np.zeros(self._raw_tmp_shape),
-                "type": np.uint16
+            "s_fine": {
+                "path": "sample/fine",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "s_gain": {
+                "path": "sample/gain",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_coarse": {
+                "path": "reset/coarse",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_fine": {
+                "path": "reset/fine",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
+            },
+            "r_gain": {
+                "path": "reset/gain",
+                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
+                "type": np.uint8
             },
             "vin": {
                 "path": "vin",
-                "data": np.zeros(self._n_frames),
-                "type": np.uint16
+                "data": np.zeros(self._n_frames, dtype=np.float16),
+                "type": np.float16
             }
         }
 
@@ -103,8 +123,14 @@ class Gather(GatherBase):
 
     def _load_data(self):
         # for convenience
-        data = self._data_to_write["data"]["data"]
-        reset = self._data_to_write["reset"]["data"]
+        s_coarse = self._data_to_write["s_coarse"]["data"]
+        s_fine = self._data_to_write["s_fine"]["data"]
+        s_gain = self._data_to_write["s_gain"]["data"]
+
+        r_coarse = self._data_to_write["r_coarse"]["data"]
+        r_fine = self._data_to_write["r_fine"]["data"]
+        r_gain = self._data_to_write["r_gain"]["data"]
+
         vin = self._data_to_write["vin"]["data"]
 
         #  split the raw data in slices to handle the size
@@ -119,7 +145,7 @@ class Gather(GatherBase):
             # read in data for this slice
             print("in_fname", in_fname)
             with h5py.File(in_fname, "r") as f:
-                in_data = f[self._paths["data"]][idx]
+                in_sample = f[self._paths["sample"]][idx]
                 in_reset = f[self._paths["reset"]][idx]
 
             # determine where this data block should go in the result
@@ -128,15 +154,29 @@ class Gather(GatherBase):
             stop = (i + 1) * self._n_frames_per_run[i]
             t_idx = slice(start, stop)
             print("Getting frames {} to {} of {}"
-                  .format(start, stop, data.shape[0]))
+                  .format(start, stop, s_coarse.shape[0]))
 
-            data[t_idx, Ellipsis] = in_data
-            reset[t_idx, Ellipsis] = in_reset
+            # split the 16 bit into coarse, fine and gain
+            # and set them on the correct position in the result matrix
+            coarse, fine, gain = utils.split(in_sample)
+            s_coarse[t_idx, Ellipsis] = coarse
+            s_fine[t_idx, Ellipsis] = fine
+            s_gain[t_idx, Ellipsis] = gain
+
+            coarse, fine, gain = utils.split(in_reset)
+            r_coarse[t_idx, Ellipsis] = coarse
+            r_fine[t_idx, Ellipsis] = fine
+            r_gain[t_idx, Ellipsis] = gain
 
             vin[i] = v
 
-        # split the data into ADC groups
-        print(data.shape)
-        data.shape = self._raw_shape
-        reset.shape = self._raw_shape
-        print(data.shape)
+        # split the rows into ADC groups
+        print(s_coarse.shape)
+        s_coarse.shape = self._raw_shape
+        s_fine.shape = self._raw_shape
+        s_gain.shape = self._raw_shape
+
+        r_coarse.shape = self._raw_shape
+        r_fine.shape = self._raw_shape
+        r_gain.shape = self._raw_shape
+        print(s_coarse.shape)

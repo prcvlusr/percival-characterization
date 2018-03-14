@@ -77,3 +77,71 @@ def load_file_content(fname, excluded=[]):
         f.visititems(get_file_content)
 
     return file_content
+
+
+def decode_dataset_8bit(arr_in, bit_mask, bit_shift):
+    """Masks out bits and shifts.
+
+    For every entry in the input array is the undelying binary representation
+    of the integegers the bit-wise AND is computed with the bit mask.
+    Bit wise AND means:
+    e.g. number 13 in binary representation: 00001101
+         number 17 in binary representation: 00010001
+         The bit-wise AND of these two is:   00000001, or 1
+    Then the result if shifted and converted to uint8.
+
+    Args:
+        arr_in: Array to decode.
+        bit_mask: Bit mask to apply on the arra.
+        bit_shift: How much the bits should be shifted.
+
+    Return:
+        Array where for each entry in the input array the bit mask is applied,
+        the result is shifted and converted to uint8.
+
+    """
+
+    arr_out = np.bitwise_and(arr_in, bit_mask)
+    arr_out = np.right_shift(arr_out, bit_shift)
+    arr_out = arr_out.astype(np.uint8)
+
+    return arr_out
+
+
+def split(raw_dset):
+    """Extracts the coarse, fine and gain bits.
+
+    Readout bit number
+    14  13  12  11  10  9   8   7   6   5   4   3   2   1   0
+    C0  C1  C2  C3  C4  F0  F1  F2  F3  F4  F5  F6  F7  B0  B1
+    ADC bit numbers
+
+    C: ADC coarse
+    F: ADC fine
+    B: Gain bit
+
+    Args:
+        raw_dset: Array containing 16 bit entries.
+
+    Return:
+        Each a coarse, fine and gain bit array.
+
+    """
+
+    # 0x7C00 -> 0111110000000000
+    coarse_adc = decode_dataset_8bit(arr_in=raw_dset,
+                                     bit_mask=0x7C00,
+                                     bit_shift=2+8)
+
+    # 0x03FC -> 0000001111111100
+    fine_adc = decode_dataset_8bit(arr_in=raw_dset,
+                                   bit_mask=0x03FC,
+                                   bit_shift=2)
+
+    # 0x0003 -> 0000000000000011
+    gain_bits = decode_dataset_8bit(arr_in=raw_dset,
+                                    bit_mask=0x0003,
+                                    bit_shift=0)
+
+    return coarse_adc, fine_adc, gain_bits
+
