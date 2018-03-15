@@ -20,7 +20,7 @@ if ADCCAL_METHOD_PATH not in sys.path:
 
 
 class Analyse(object):
-    def __init__(self, in_base_dir, out_base_dir, run_type, meas_type, method):
+    def __init__(self, in_base_dir, out_base_dir, run_id, run_type, meas_type, method):
         self.in_base_dir = in_base_dir
         self.out_base_dir = out_base_dir
 
@@ -28,11 +28,14 @@ class Analyse(object):
         self._n_cols_total = 1440
 
         self._n_rows = self._n_rows_total
-        self._n_cols = 32
+        self._n_cols = self._n_cols_total
+        #self._n_cols = 32
+        #self._n_cols = 64
 
         self._n_parts = self._n_cols_total // self._n_cols
 
         self.runs = "0"
+        self._run_id = run_id
         self.run_type = run_type
 
         self.meas_type = meas_type
@@ -53,7 +56,9 @@ class Analyse(object):
         print("took time: ", time.time() - t)
 
     def generate_raw_path(self, base_dir):
-        return base_dir, "{run}_raw_uint16.h5"
+        return base_dir, "{run}_" + "{}.h5".format(self._run_id)
+        #return base_dir, "{run}_raw_uint16.h5"
+        #return base_dir, "{run}_DLSraw.h5"
 
     def generate_metadata_path(self, base_dir):
         return base_dir, "file.dat"
@@ -137,15 +142,20 @@ class Analyse(object):
 
 
 if __name__ == "__main__":
-    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
-    #in_base_dir = BASE_PATH
-    out_base_dir = BASE_PATH
+
+    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+    run_id = "DLSraw"
+
+#    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
+#    run_id = "raw_uint16"
+
+    out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
 
     run_type = "gather"
     meas_type = "adccal"
     method = None
 
-    g_obj = Analyse(in_base_dir, out_base_dir, run_type, meas_type, method)
+    g_obj = Analyse(in_base_dir, out_base_dir, run_id, run_type, meas_type, method)
     g_obj.run()
 
 #    del g_obj

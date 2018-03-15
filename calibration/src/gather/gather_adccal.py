@@ -37,7 +37,6 @@ class Gather(GatherBase):
 
         self._part = part
 
-        self._fixed_n_frames_per_run = 20
         self._n_rows_per_group = self._n_rows // self._n_adc
 
         self._paths = {
@@ -51,8 +50,9 @@ class Gather(GatherBase):
         self.read_register()
 
         self._n_runs = len(self._register)
-        self._n_frames_per_run = (np.ones(self._n_runs, np.int16)
-                                  * self._fixed_n_frames_per_run)
+
+        self.set_n_frames_per_run()
+
         self._n_frames = np.sum(self._n_frames_per_run)
 
         self._raw_tmp_shape = (self._n_frames,
@@ -126,6 +126,16 @@ class Gather(GatherBase):
 
         self._register = sorted(file_content)
 
+    def set_n_frames_per_run(self):
+        self._n_frames_per_run = []
+
+        for i in self._register:
+            in_fname = self._in_fname.format(run=i[1])
+
+            with h5py.File(in_fname, "r") as f:
+                n_frames = f[self._paths["sample"]].shape[0]
+                self._n_frames_per_run.append(n_frames)
+
     def _load_data(self):
         # for convenience
         s_coarse = self._data_to_write["s_coarse"]["data"]
@@ -152,6 +162,19 @@ class Gather(GatherBase):
             with h5py.File(in_fname, "r") as f:
                 in_sample = f[self._paths["sample"]][idx]
                 in_reset = f[self._paths["reset"]][idx]
+
+#            print(idx)
+#            test = in_sample[0, 0, 36]
+            #test = in_sample[0, 0, 100]
+#            print(test, bin(test))
+#            print(hex(0b0110000000000000))
+#            arr_out = np.bitwise_and(test, 0x6000)
+#            arr_out = np.right_shift(arr_out, 5+8)
+#            arr_out = arr_out.astype(np.uint8)
+#            print(arr_out)
+
+#            continue
+
 
             # determine where this data block should go in the result
             # matrix
