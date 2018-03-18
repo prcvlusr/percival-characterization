@@ -20,81 +20,90 @@ import utils  # noqa E402
 
 
 class ProcessBase(object):
-    def __init__(self, in_fname, out_fname, runs):
+    def __init__(self, in_fname, out_fname):
 
+        self._in_fname = in_fname
         self._out_fname = out_fname
 
-        # public attributes for use in inherited classes
-        self.in_fname = in_fname
-
-        self.runs = runs
-
-        # TODO extract n_cols and n_rows from raw_shape
-        self.n_rows = 128
-        self.n_cols = 512
-
-        in_fname = self.in_fname.format(run_number=self.runs[0])
-
-        self.shapes = {}
-        self.result = {}
-
-        in_fname = self.in_fname.format(run_number=self.runs[0])
+        self._result = {}
 
         print("\n\nStart process")
-        print("in_fname:", self.in_fname)
+        print("in_fname:", self._in_fname)
         print("out_fname:", self._out_fname)
         print()
 
-        self.run()
-
-    def check_input_parameters(self):
-        pass
-
-    def load_data(self, in_fname):
-        with h5py.File(in_fname, "r") as f:
-            data = f['data'][()]
-
-        return data
-
-    def initiate(self):
+    def _load_data(self, in_fname):
         pass
 
     def run(self):
-
         total_time = time.time()
 
-        self.initiate()
+        self._initiate()
 
-        self.calculate()
+        self._calculate()
 
         print("Start saving results at {} ... ".format(self._out_fname), end='')
-        self.write_data()
+        self._write_data()
         print("Done.")
 
         print("Process took time: {}\n".format(time.time() - total_time))
 
-    def calculate(self):
+    def _initiate(self):
         pass
 
-    def write_data(self):
+    def _calculate(self):
+        pass
+
+    def _get_mask(self, data):
+        # find out if the col was effected by frame loss
+        return (data == 0)
+
+    def _mask_out_problems(self, data, mask=None):
+        if mask is None:
+            mask = self._get_mask(data)
+
+        # remove the ones with frameloss
+        m_data = np.ma.masked_array(data=data, mask=mask)
+
+        return m_data
+
+    def _fit_linear(self, x, y, mask=None):
+        if mask is None:
+            y_masked = y
+            x_masked = x
+        else:
+            y_masked = y[~mask]
+            x_masked = x[~mask]
+
+        number_of_points = len(x_masked)
+        try:
+            A = np.vstack([x_masked, np.ones(number_of_points)]).T
+        except:
+            print("number_of_points", number_of_points)
+            print("x (after masking)", x_masked)
+            print("y (after masking)", y_masked)
+            print("len y_masked", len(y_masked))
+            raise
+
+        # lstsq returns: Least-squares solution (i.e. slope and offset),
+        #                residuals,
+        #                rank,
+        #                singular values
+        res = np.linalg.lstsq(A, y_masked)
+
+        return res
+
+
+    def _write_data(self):
         with  h5py.File(self._out_fname, "w", libver='latest') as f:
-            for key in self.result:
-                f.create_dataset(self.result[key]['path'],
-                                 data=self.result[key]['data'],
-                                 dtype=self.result[key]['type'])
+            for key in self._result:
+                f.create_dataset(self._result[key]['path'],
+                                 data=self._result[key]['data'],
+                                 dtype=self._result[key]['type'])
 
-            # convert into unicode
-            if type(self.runs[0]) == str:
-                used_run_numbers = [run.encode('utf8') for run in self.runs]
-            else:
-                used_run_numbers = ["r{:04d}".format(run).encode('utf8')
-                                    for run in self.runs]
-
-            today = str(date.today())
             metadata_base_path = "collection"
 
-            f.create_dataset("{}/run_number".format(metadata_base_path),
-                             data=used_run_numbers)
+            today = str(date.today())
             f.create_dataset("{}/creation_date".format(metadata_base_path),
                              data=today)
 

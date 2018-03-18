@@ -110,7 +110,7 @@ class Analyse(object):
             obj.run()
 
     def run_process(self):
-        self.process_m = __import__(self.method).ProcessAdccalMethod
+        self.process_m = __import__(self.method).Process
 
         # define input files
         # the input files for process is the output from gather
@@ -132,9 +132,10 @@ class Analyse(object):
 #                utils.create_dir(out_dir)
 
             # generate out_put
-            self.process_m(in_fname=in_f,
-                           out_fname=out_f,
-                           runs=self.runs)
+            obj = self.process_m(in_fname=in_f,
+                                 out_fname=out_f)
+
+            obj.run()
 
     def cleanup(self):
         # remove gather dir
@@ -143,26 +144,27 @@ class Analyse(object):
 
 if __name__ == "__main__":
 
-    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
     run_id = "DLSraw"
+    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
 
 #    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
 #    run_id = "raw_uint16"
 
-    out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
+    g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
+    p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
 
     run_type = "gather"
     meas_type = "adccal"
     method = None
 
-    g_obj = Analyse(in_base_dir, out_base_dir, run_id, run_type, meas_type, method)
+    g_obj = Analyse(in_base_dir, g_out_base_dir, run_id, run_type, meas_type, method)
     g_obj.run()
 
-#    del g_obj
+    del g_obj
 
-#    run_type = "process"
-#    meas_type = "adccal"
-#    method = "process_adccal_default"
+    run_type = "process"
+    meas_type = "adccal"
+    method = "process_adccal_default"
 
-#    p_obj = Analyse(in_base_dir, out_base_dir, run_type, meas_type, method)
-#    p_obj.run()
+    p_obj = Analyse(g_out_base_dir, p_out_base_dir, run_id, run_type, meas_type, method)
+    p_obj.run()

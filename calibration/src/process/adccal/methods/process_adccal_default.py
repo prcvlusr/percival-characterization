@@ -23,39 +23,38 @@ if ADCCAL_PATH not in sys.path:
 
 from process_adccal_base import ProcessAdccalBase
 
-class ProcessAdccalMethod(ProcessAdccalBase):
-    #def __init__(self, in_fname, out_fname, runs):
+class Process(ProcessAdccalBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    def initiate(self):
-        self.shapes = {
-            "offset": (self.n_rows, self.n_cols)
+    def _initiate(self):
+        shapes = {
+            "offset": (self._n_rows, self._n_adcs)
         }
 
-        self.result = {
+        self._result = {
             # must have entries for correction
-            "offset": {
-                "data": np.empty(self.shapes["offset"]),
-                "path": "offset",
+            "s_coarse_offset": {
+                "data": np.empty(shapes["offset"]),
+                "path": "sample/coarse/offset",
                 "type": np.int16
             },
             # additional information
             "stddev": {
-                "data": np.empty(self.shapes["offset"]),
+                "data": np.empty(shapes["offset"]),
                 "path": "stddev",
                 "type": np.int16
             },
         }
 
-    def calculate(self):
-        print("Start loading data from {} ...".format(self.in_fname), end="")
-        data = self.load_data(self.in_fname)
+    def _calculate(self):
+        print("Start loading data from {} ...".format(self._in_fname), end="")
+        data = self._load_data(self._in_fname)
         print("Done.")
 
         print("Start computing means and standard deviations ...", end="")
-        offset = np.mean(data, axis=0).astype(np.int)
-        self.result["offset"]["data"] = offset
+        offset = np.mean(data["s_coarse"], axis=3).astype(np.int)
+        self._result["s_coarse_offset"]["data"] = offset
 
-        self.result["stddev"]["data"] = data.std(axis=0)
+        self._result["stddev"]["data"] = data["s_coarse"].std(axis=3)
         print("Done.")

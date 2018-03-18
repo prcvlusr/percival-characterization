@@ -47,11 +47,11 @@ class Gather(GatherBase):
         self.initiate()
 
     def initiate(self):
-        self.read_register()
+        self._read_register()
 
         self._n_runs = len(self._register)
 
-        self.set_n_frames_per_run()
+        self._set_n_frames_per_run()
 
         self._n_frames = np.sum(self._n_frames_per_run)
 
@@ -113,7 +113,7 @@ class Gather(GatherBase):
             }
         }
 
-    def read_register(self):
+    def _read_register(self):
         print("meta_fname", self._meta_fname)
 
         with open(self._meta_fname, "r") as f:
@@ -126,7 +126,7 @@ class Gather(GatherBase):
 
         self._register = sorted(file_content)
 
-    def set_n_frames_per_run(self):
+    def _set_n_frames_per_run(self):
         self._n_frames_per_run = []
 
         for i in self._register:
