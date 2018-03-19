@@ -20,7 +20,15 @@ if ADCCAL_METHOD_PATH not in sys.path:
 
 
 class Analyse(object):
-    def __init__(self, in_base_dir, out_base_dir, run_id, run_type, meas_type, method):
+    def __init__(self,
+                 in_base_dir,
+                 out_base_dir,
+                 run_id,
+                 run_type,
+                 meas_type,
+                 n_cols,
+                 method):
+
         self.in_base_dir = in_base_dir
         self.out_base_dir = out_base_dir
 
@@ -28,13 +36,13 @@ class Analyse(object):
         self._n_cols_total = 1440
 
         self._n_rows = self._n_rows_total
-        self._n_cols = self._n_cols_total
-        #self._n_cols = 32
-        #self._n_cols = 64
+        if n_cols is None:
+            self._n_cols = self._n_cols_total
+        else:
+            self._n_cols = n_cols
 
         self._n_parts = self._n_cols_total // self._n_cols
 
-        self.runs = "0"
         self._run_id = run_id
         self.run_type = run_type
 
@@ -64,10 +72,10 @@ class Analyse(object):
         return base_dir, "file.dat"
 
     def generate_gather_path(self, base_dir):
-        return base_dir, "part{part}_gathered.h5"
+        return base_dir, "col{col_start}-{col_stop}_gathered.h5"
 
     def generate_process_path(self, base_dir):
-        return base_dir, "part{part}_processed.h5"
+        return base_dir, "col{col_start}-{col_stop}_processed.h5"
 
     def run_gather(self):
         if self.meas_type == "adccal":
@@ -93,7 +101,10 @@ class Analyse(object):
 
         #for p in range(1):
         for p in range(self._n_parts):
-            out_f = out_fname.format(part=p)
+            col_start = p * self._n_cols
+            col_stop = (p+1) * self._n_cols
+
+            out_f = out_fname.format(col_start=col_start, col_stop=col_stop)
 
 #            if os.path.exists(out_f):
 #                print("output filename = {}".format(out_f))
@@ -122,8 +133,13 @@ class Analyse(object):
         out_fname = os.path.join(out_dir, out_file_name)
 
         for p in range(1):
-            in_f = in_fname.format(part=p)
-            out_f = out_fname.format(part=p)
+            col_start = p * self._n_cols
+            col_stop = (p+1) * self._n_cols
+
+            in_f = in_fname.format(col_start=col_start,
+                                   col_stop=col_stop)
+            out_f = out_fname.format(col_start=col_start,
+                                     col_stop=col_stop)
 
 #            if os.path.exists(out_f):
 #                print("output filename = {}".format(out_f))
@@ -146,9 +162,11 @@ if __name__ == "__main__":
 
     run_id = "DLSraw"
     in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+    n_cols = None
 
 #    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
 #    run_id = "raw_uint16"
+#    n_cols = 64
 
     g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
     p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
@@ -157,7 +175,14 @@ if __name__ == "__main__":
     meas_type = "adccal"
     method = None
 
-    g_obj = Analyse(in_base_dir, g_out_base_dir, run_id, run_type, meas_type, method)
+    # run gather
+    g_obj = Analyse(in_base_dir,
+                    g_out_base_dir,
+                    run_id,
+                    run_type,
+                    meas_type,
+                    n_cols,
+                    method)
     g_obj.run()
 
     del g_obj
@@ -166,5 +191,12 @@ if __name__ == "__main__":
     meas_type = "adccal"
     method = "process_adccal_default"
 
-    p_obj = Analyse(g_out_base_dir, p_out_base_dir, run_id, run_type, meas_type, method)
-    p_obj.run()
+    # run process
+#    p_obj = Analyse(g_out_base_dir,
+#                    p_out_base_dir,
+#                    run_id,
+#                    run_type,
+#                    meas_type,
+#                    n_cols,
+#                    method)
+#    p_obj.run()
