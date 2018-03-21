@@ -34,7 +34,7 @@ class Process(ProcessAdccalBase):
 
         self._result = {
             # must have entries for correction
-            "s_coarse_offset": {
+            "sample_coarse_offset": {
                 "data": np.empty(shapes["offset"]),
                 "path": "sample/coarse/offset",
                 "type": np.int16
@@ -53,8 +53,8 @@ class Process(ProcessAdccalBase):
         print("Done.")
 
         print("Start computing means and standard deviations ...", end="")
-        offset = np.mean(data["s_coarse"], axis=3).astype(np.int)
-        self._result["s_coarse_offset"]["data"] = offset
+        offset = np.mean(data["sample_coarse"], axis=3).astype(np.int)
+        self._result["sample_coarse_offset"]["data"] = offset
 
-        self._result["stddev"]["data"] = data["s_coarse"].std(axis=3)
+        self._result["stddev"]["data"] = data["sample_coarse"].std(axis=3)
         print("Done.")

@@ -145,13 +145,16 @@ class Analyse(object):
 if __name__ == "__main__":
 
     run_id = "DLSraw"
-    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+#   in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+    in_base_dir = "/Users/ben/PostDoc/P2M_HDF5"
 
 #    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
 #    run_id = "raw_uint16"
 
-    g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
-    p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
+   # g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
+    #p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
+    g_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_gathered".format(run_id)
+    p_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_processed".format(run_id)
 
     run_type = "gather"
     meas_type = "adccal"
