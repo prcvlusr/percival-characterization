@@ -176,27 +176,27 @@ if __name__ == "__main__":
     method = None
 
     # run gather
-    g_obj = Analyse(in_base_dir,
-                    g_out_base_dir,
-                    run_id,
-                    run_type,
-                    meas_type,
-                    n_cols,
-                    method)
-    g_obj.run()
+#    g_obj = Analyse(in_base_dir,
+#                    g_out_base_dir,
+#                    run_id,
+#                    run_type,
+#                    meas_type,
+#                    n_cols,
+#                    method)
+#    g_obj.run()
 
-    del g_obj
+#    del g_obj
 
     run_type = "process"
     meas_type = "adccal"
     method = "process_adccal_default"
 
     # run process
-#    p_obj = Analyse(g_out_base_dir,
-#                    p_out_base_dir,
-#                    run_id,
-#                    run_type,
-#                    meas_type,
-#                    n_cols,
-#                    method)
-#    p_obj.run()
+    p_obj = Analyse(g_out_base_dir,
+                    p_out_base_dir,
+                    run_id,
+                    run_type,
+                    meas_type,
+                    n_cols,
+                    method)
+    p_obj.run()
