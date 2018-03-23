@@ -16,7 +16,10 @@ class Hist2dGathered(PlotBase):
 
         fig = plt.figure(figsize=None)
 
-        plt.hist2d(stacked_x, stacked_data, bins=100)#, cmin=1)
+        cmap = matplotlib.pyplot.cm.jet # or whatever are you using
+        cmap.set_under(color='white')
+
+        plt.hist2d(x, data, bins=nbins, cmap=cmap, vmin=0.1)
 
         plt.colorbar()
 
