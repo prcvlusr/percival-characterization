@@ -123,8 +123,16 @@ class Gather(GatherBase):
 
         # data looks like this: <V_in>  <file_prefix>
         file_content = [s.split("\t") for s in file_content]
-        for s in file_content:
-            s[0]=float(s[0])
+        for i, s in enumerate(file_content):
+            try:
+                s[0]=float(s[0])
+            except:
+                if s == ['']:
+                    # remove empty lines
+                    del file_content[i]
+                else:
+                    raise
+#                print("file_content", file_content)
 
         self._register = sorted(file_content)
 
