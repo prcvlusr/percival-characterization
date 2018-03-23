@@ -12,14 +12,8 @@ class PlotGathered(PlotBase):
     def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
 
         fig = plt.figure(figsize=None)
-        if len(data.shape) == 1:
-            stacked_x = x
-            stacked_data = data
-        else:
-            stacked_x = np.tile(x, data.shape[0])
-            stacked_data = np.hstack(data)
 
-        plt.plot(stacked_x, stacked_data, ".", markersize=0.5, label=label)
+        plt.plot(x, data, ".", markersize=0.5, label=label)
 
         plt.legend()
 

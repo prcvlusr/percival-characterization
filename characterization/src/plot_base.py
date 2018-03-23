@@ -32,6 +32,8 @@ class PlotBase():
             "n_frames_per_run": "collection/n_frames_per_run"
         }
 
+        self._n_frames_per_vin = None
+
         self._x, self._data = self._load_data(rows)
 
     def create_dir(self):
@@ -71,18 +73,47 @@ class PlotBase():
 
         with h5py.File(self._input_fname, "r") as f:
             vin = f[self._metadata_paths["vin"]][()]
-            n_frames_per_vin = f[self._metadata_paths["n_frames_per_run"]][()]
+            self._n_frames_per_vin = f[self._metadata_paths["n_frames_per_run"]][()]
 
             data = {}
             for key, path in self._paths.items():
-                data[key] = f[path][self._adc, self._col, rows, :]
+                d = f[path][self._adc, self._col, rows, :]
 
+                data[key] = self._merge_groups_with_frames(d)
+
+            if len(d.shape) == 1:
+                n_groups = 1
+            else:
+                n_groups = d.shape[0]
+
+        vin = self._fill_up_vin(vin, n_groups)
+
+        return vin, data
+
+    def _fill_up_vin(self, vin, n_groups):
         # create as many entries for each vin as there were original frames
-        x = [np.full(n_frames_per_vin[i], v)  for i, v in enumerate(vin)]
-        # merge the individual arrays per vin into one big one
+        x = [np.full(self._n_frames_per_vin[i] * n_groups, v)
+             for i, v in enumerate(vin)]
+
         x = np.hstack(x)
 
-        return x, data
+        return x
+
+    def _merge_groups_with_frames(self, data):
+        if len(data.shape) == 1:
+            return data
+        else:
+            # data has the dimension (n_groups, n_frames)
+            # should be transformed into (n_groups * n_frames)
+            n_groups = data.shape[0]
+            n_frames = data.shape[1]
+
+            transpose_order = (1,0)
+            tr_data = data.transpose(transpose_order)
+
+            new_data = tr_data.reshape(n_groups * n_frames)
+
+            return new_data
 
     def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
         print("_generate_singl_plot method is not implemented.")

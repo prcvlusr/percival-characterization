@@ -15,14 +15,9 @@ class Hist2dGathered(PlotBase):
     def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
 
         fig = plt.figure(figsize=None)
-        if len(data.shape) == 1:
-            stacked_x = x
-            stacked_data = data
-        else:
-            stacked_x = np.tile(x, data.shape[0]).astype(np.float)
-            stacked_data = np.hstack(data).astype(np.int)
 
         plt.hist2d(stacked_x, stacked_data, bins=100)#, cmin=1)
+
         plt.colorbar()
 
         fig.suptitle(plot_title)

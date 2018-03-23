@@ -54,4 +54,4 @@ if __name__ == "__main__":
         print("Plot reset")
         plotter.plot_reset()
         hist_creator.plot_reset(nbins=30)
-        hist_2d_creator.plot_sample(nbins=100)
+        hist_2d_creator.plot_reset(nbins=100)
