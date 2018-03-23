@@ -14,8 +14,6 @@ class HistGathered(PlotBase):
 
     def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
 
-        data = np.hstack(data)
-
         # plot data
         fig = plt.figure(figsize=None)
 
