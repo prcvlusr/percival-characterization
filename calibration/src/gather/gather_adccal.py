@@ -65,8 +65,8 @@ class Gather(GatherBase):
 
         # (n_frames, n_groups, n_rows, n_cols)
         # is transposed to
-        # (n_rows, n_cols, n_groups, n_frames)
-        self._transpose_order = (2, 3, 1, 0)
+        # (n_rows, n_cols, n_frames, n_groups)
+        self._transpose_order = (2, 3, 0, 1)
 
         self._metadata = {
             "n_frames_per_run": self._n_frames_per_run,
