@@ -34,6 +34,10 @@ class PlotBase():
 
         self._n_frames_per_vin = None
 
+        self._n_frames = None
+        self._n_groups = None
+        self._n_total_frames = None
+
         self._x, self._data = self._load_data(rows)
 
     def create_dir(self):
@@ -73,11 +77,27 @@ class PlotBase():
 
         with h5py.File(self._input_fname, "r") as f:
             vin = f[self._metadata_paths["vin"]][()]
-            self._n_frames_per_vin = f[self._metadata_paths["n_frames_per_run"]][()]
+
+            n_frames_per_run = self._metadata_paths["n_frames_per_run"]
+            self._n_frames_per_vin = f[n_frames_per_run][()]
 
             data = {}
             for key, path in self._paths.items():
-                d = f[path][self._adc, self._col, rows, :]
+                d = f[path][self._adc, self._col, :, rows].astype(np.float)
+
+                # determine number of frames
+                # should be the same for all -> only once
+                if self._n_total_frames is None:
+                    if len(d.shape) == 1:
+                        self._n_frames = 1
+                        self._n_groups = 1
+                        self._n_total_frames = 1
+
+                    else:
+                        self._n_frames = d.shape[0]
+                        self._n_groups = d.shape[1]
+
+                        self._n_total_frames = self._n_frames * self._n_groups
 
                 data[key] = self._merge_groups_with_frames(d)
 
@@ -86,7 +106,7 @@ class PlotBase():
             else:
                 n_groups = d.shape[0]
 
-        vin = self._fill_up_vin(vin, n_groups)
+        vin = self._fill_up_vin(vin, self._n_groups)
 
         return vin, data
 
@@ -103,17 +123,12 @@ class PlotBase():
         if len(data.shape) == 1:
             return data
         else:
-            # data has the dimension (n_groups, n_frames)
-            # should be transformed into (n_groups * n_frames)
-            n_groups = data.shape[0]
-            n_frames = data.shape[1]
+            # data has the dimension (n_adcs, n_cols, n_groups, n_frames)
+            # should be transformed into (n_adcs, n_cols, n_groups * n_frames)
 
-            transpose_order = (1,0)
-            tr_data = data.transpose(transpose_order)
+            data.shape = (self._n_total_frames)
 
-            new_data = tr_data.reshape(n_groups * n_frames)
-
-            return new_data
+        return data
 
     def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
         print("_generate_singl_plot method is not implemented.")
