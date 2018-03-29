@@ -1,9 +1,9 @@
 import argparse
 import os
 
-from plot_gathered import PlotGathered
-from hist_gathered import HistGathered
-from hist_2d_gathered import Hist2dGathered
+from methods.plot_gathered import PlotGathered
+from methods.hist_gathered import HistGathered
+from methods.hist_2d_gathered import Hist2dGathered
 
 def get_arguments():
     parser = argparse.ArgumentParser(description="Characterization tools of "
