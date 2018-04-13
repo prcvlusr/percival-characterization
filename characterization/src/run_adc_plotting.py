@@ -4,36 +4,41 @@ import sys
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 BASE_DIR = os.path.dirname(CURRENT_DIR)
-print(BASE_DIR)
+CALIBRATION_DIR = os.path.join(os.path.dirname(BASE_DIR), "calibration")
 
+CONFIG_DIR = os.path.join(BASE_DIR, "conf")
 METHOD_DIR = os.path.join(BASE_DIR, "src", "methods")
 
 if METHOD_DIR not in sys.path:
     sys.path.insert(0, METHOD_DIR)
 
+CALIBRATION_SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
+print(CALIBRATION_SRC_DIR)
+
+if CALIBRATION_SRC_DIR not in sys.path:
+    sys.path.insert(0, CALIBRATION_SRC_DIR)
+
+import utils
+
+
 def get_arguments():
     parser = argparse.ArgumentParser(description="Characterization tools of "
                                                  "gathered results for P2M")
     parser.add_argument("-i", "--input",
-                        dest="input_dir",
-                        required=True,
+                        dest="input",
                         type=str,
                         help="Path of input directory containing HDF5 files to "
                              "characterize. These have to be the ouput of 'gather'.")
     parser.add_argument("-o", "--output",
-                        dest="output_dir",
-                        required=True,
+                        dest="output",
                         type=str,
                         help="Path of output directory to create plots in.")
     parser.add_argument("--adc",
                         type=int,
-                        default=0,
-                        help="The ADC to create plots for. (default: 0)")
+                        help="The ADC to create plots for.")
     parser.add_argument("--col",
                         type=int,
-                        default=100,
-                        help=("The column of the data to create plots for. "
-                              "(default: 100)"))
+                        help="The column of the data to create plots for.")
     parser.add_argument("--rows",
                         type=int,
                         nargs="+",
@@ -44,12 +49,12 @@ def get_arguments():
                              "only first row of ADC group"
                              "specify start and stop value, e.g. --rows 0 5 "
                              "means to take the first 5 rows of the ADC group"
-                             "do not set this paramater: meaning take everything")
+                             "do not set this paramater: take everything")
 
-    parser.add_argument("--method",
+    parser.add_argument("-m", "--method",
+                        dest="method",
                         type=str,
                         nargs="+",
-                        required=True,
                         help="The plot type to use")
 
     parser.add_argument("--plot_sample",
@@ -60,20 +65,101 @@ def get_arguments():
                         action="store_true",
                         default=False,
                         help="Plot only the reset data")
+    parser.add_argument("--config_file",
+                        type=str,
+                        help="The name of the config file to use.")
 
     args = parser.parse_args()
 
+    required_arguments_set = (
+        args.input
+        and args.output
+        and args.col
+        and args.adc
+        and args.method
+    )
+
+    if args.config_file is not None:
+        args.config_file = os.path.join(CONFIG_DIR, args.config_file)
+        if not os.path.exists(args.config_file):
+            msg = "Configuration file {} does not exist.".format(args.config_file)
+            parser.error(msg)
+    elif not required_parameters_set:
+        msg = ("Either specify a config_file or the command line parameters:"
+               "-i/--input, -o/--output, --col, --adc, --rows, -m/--method")
+        parser.error(msg)
+
     return args
+
+
+def insert_args_into_config(args, config):
+
+    # general
+    c_general = config["general"]
+
+    try:
+        c_general["input"] = args.input or c_general["input"]
+    except:
+        raise Exception("No input specified. Abort.")
+        sys.exit(1)
+
+    try:
+        c_general["output"] = args.output or c_general["output"]
+    except:
+        raise Exception("No output specified. Abort.")
+        sys.exit(1)
+
+    # for adc equals 0 ".. or .." does not work
+    if args.adc is not None:
+        c_general["adc"] = args.adc
+    elif "adc" not in c_general:
+        raise Exception("No ADC specified. Abort.")
+        sys.exit(1)
+
+    # for col equals 0 ".. or .." does not work
+    if args.col is not None:
+        c_general["col"] = args.col
+    elif "col" not in c_general:
+        raise Exception("No column specified. Abort.")
+        sys.exit(1)
+
+    # for row equals 0 ".. or .." does not work
+    if args.rows is not None:
+        c_general["rows"] = args.rows
+    elif "rows" not in c_general:
+        raise Exception("No rows specified. Abort.")
+        sys.exit(1)
+
+    try:
+        c_general["method"] = args.method or c_general["method"]
+    except:
+        raise Exception("No method specified. Abort.")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     args = get_arguments()
 
-    input_dir = args.input_dir
-    output_dir = args.output_dir
-    adc = args.adc
-    col = args.col
-    rows = args.rows
-    method_list = args.method
+    if args.config_file is None:
+        config = {"general": {}}
+    else:
+        config = utils.load_config(args.config_file)
+
+    insert_args_into_config(args, config)
+
+#    input_dir = args.input_dir
+#    output_dir = args.output_dir
+#    adc = args.adc
+#    col = args.col
+#    rows = args.rows
+#    method_list = args.method
+
+    input_dir = config["general"]["input"]
+    output_dir = config["general"]["output"]
+    adc = config["general"]["adc"]
+    col = config["general"]["col"]
+    rows = config["general"]["rows"]
+    method_list = config["general"]["method"]
 
     if rows is None:
         rows = slice(rows)

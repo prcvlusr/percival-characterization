@@ -1,0 +1,12 @@
+general:
+    data_type: gathered
+
+    input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed/DLSraw_dataset2/DLSraw_gathered
+    output: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed/DLSraw_dataset2/plots
+
+    adc: 0
+    col: 100
+    rows: null
+
+    method: [plot, hist, hist_2d]
+    #method: [plot_sample_vs_reset]
