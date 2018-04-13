@@ -130,10 +130,10 @@ class PlotBase():
 
         return data
 
-    def _generate_single_plot(self, x, data, plot_title, label, out_fname, nbins):
-        print("_generate_singl_plot method is not implemented.")
+    def _generate_single_plot(self, x, data, plot_title, label, out_fname):
+        print("_generate_single_plot method is not implemented.")
 
-    def plot_sample(self, nbins=None):
+    def plot_sample(self):
         self.create_dir()
 
         pos = "ADC={}, Col={}".format(self._adc, self._col)
@@ -142,22 +142,19 @@ class PlotBase():
                                    data=self._data["s_coarse"],
                                    plot_title="Sample Coarse, "+pos,
                                    label="Coarse",
-                                   out_fname=self._output_dir+"/"+"sample_coarse",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"sample_coarse")
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_fine"],
                                    plot_title="Sample Fine, "+pos,
                                    label="Fine",
-                                   out_fname=self._output_dir+"/"+"sample_fine",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"sample_fine")
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_gain"],
                                    plot_title="Sample Gain, "+pos,
                                    label="Gain",
-                                   out_fname=self._output_dir+"/"+"sample_gain",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"sample_gain")
 
-    def plot_reset(self, nbins=None):
+    def plot_reset(self):
         self.create_dir()
 
         pos = "ADC={}, Col={}".format(self._adc, self._col)
@@ -166,17 +163,14 @@ class PlotBase():
                                    data=self._data["r_coarse"],
                                    plot_title="Reset Coarse, "+pos,
                                    label="Coarse",
-                                   out_fname=self._output_dir+"/"+"reset_coarse",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"reset_coarse")
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_fine"],
                                    plot_title="Reset Fine, "+pos,
                                    label="Fine",
-                                   out_fname=self._output_dir+"/"+"reset_fine",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"reset_fine")
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_gain"],
                                    plot_title="Reset Gain, "+pos,
                                    label="Gain",
-                                   out_fname=self._output_dir+"/"+"reset_gain",
-                                   nbins=nbins)
+                                   out_fname=self._output_dir+"/"+"reset_gain")
