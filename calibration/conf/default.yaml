@@ -1,0 +1,24 @@
+general:
+    run_type: gather
+    n_cols: 32
+
+    measurement: adccal
+
+    run: DLSraw
+
+all:
+    input: &input /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/
+    output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed/DLSraw_dataset2
+
+gather:
+    method: null
+
+    input: *input
+    output: *output
+
+process:
+    method: process_adccal_default
+
+    input: *output
+    output: *output
+
