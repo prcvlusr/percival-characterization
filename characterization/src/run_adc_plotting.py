@@ -10,11 +10,13 @@ def get_arguments():
                                                  "gathered results for P2M")
     parser.add_argument("-i", "--input",
                         dest="input_dir",
+                        required=True,
                         type=str,
                         help=("Path of input directory containing HDF5 files to "
                               "characterize. These have to be the ouput of 'gather'."))
     parser.add_argument("-o", "--output",
                         dest="output_dir",
+                        required=True,
                         type=str,
                         help="Path of output directory to create plots in.")
     parser.add_argument("--adc",

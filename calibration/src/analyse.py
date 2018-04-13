@@ -160,25 +160,30 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calibration tools for P2M")
     parser.add_argument("-i", "--input",
                         dest="in_base_dir",
+                        required=True,
                         type=str,
                         help=("Path of input directory containing HDF5 files "
                               "to analyse"))
     parser.add_argument("-o", "--output",
                         dest="out_base_dir",
+                        required=True,
                         type=str,
                         help="Path of output directory for storing files")
     parser.add_argument("-r", "--run",
                         dest="run_id",
+                        required=True,
                         type=str,
-                        help="Run id")
+                        help="Non-changing part of file name")
     parser.add_argument("-m", "--method",
                         dest="method",
+                        required=True,
                         type=str,
                         help="Method to use during the analysis: "
                              "process_adccal_default, "
                              "None")
     parser.add_argument("-t", "--type",
                         dest="run_type",
+                        required=True,
                         type=str,
                         help="Run type: gather, process")
     args = parser.parse_args()
