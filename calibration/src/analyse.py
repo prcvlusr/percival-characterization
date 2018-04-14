@@ -206,7 +206,8 @@ def get_arguments():
     if args.config_file is not None:
         args.config_file = os.path.join(CONFIG_DIR, args.config_file)
         if not os.path.exists(args.config_file):
-            msg = "Configuration file {} does not exist.".format(args.config_file)
+            msg = ("Configuration file {} does not exist."
+                   .format(args.config_file))
             parser.error(msg)
 
     elif not required_arguments_set:

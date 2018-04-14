@@ -18,7 +18,7 @@ print(CALIBRATION_SRC_DIR)
 if CALIBRATION_SRC_DIR not in sys.path:
     sys.path.insert(0, CALIBRATION_SRC_DIR)
 
-import utils
+import utils  # noqa E402
 
 
 def get_arguments():
@@ -27,8 +27,9 @@ def get_arguments():
     parser.add_argument("-i", "--input",
                         dest="input",
                         type=str,
-                        help="Path of input directory containing HDF5 files to "
-                             "characterize. These have to be the ouput of 'gather'.")
+                        help="Path of input directory containing HDF5 files "
+                             "to characterize. These have to be the ouput of "
+                             "'gather'.")
     parser.add_argument("-o", "--output",
                         dest="output",
                         type=str,
@@ -82,9 +83,10 @@ def get_arguments():
     if args.config_file is not None:
         args.config_file = os.path.join(CONFIG_DIR, args.config_file)
         if not os.path.exists(args.config_file):
-            msg = "Configuration file {} does not exist.".format(args.config_file)
+            msg = ("Configuration file {} does not exist."
+                   .format(args.config_file))
             parser.error(msg)
-    elif not required_parameters_set:
+    elif not required_arguments_set:
         msg = ("Either specify a config_file or the command line parameters:"
                "-i/--input, -o/--output, --col, --adc, --rows, -m/--method")
         parser.error(msg)
@@ -176,7 +178,8 @@ if __name__ == "__main__":
         plot_sample = True
         plot_reset = True
 
-    input_fname_templ = os.path.join(input_dir, "col{col_start}-{col_stop}_gathered.h5")
+    input_fname_templ = os.path.join(input_dir,
+                                     "col{col_start}-{col_stop}_gathered.h5")
 
     kwargs = dict(
         input_fname_templ=input_fname_templ,

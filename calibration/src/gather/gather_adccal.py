@@ -2,8 +2,6 @@ import h5py
 import numpy as np
 import os
 import sys
-import time
-import glob
 
 try:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -16,12 +14,12 @@ SRC_DIR = os.path.join(BASE_DIR, "src")
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-from gather_base import GatherBase
+from gather_base import GatherBase  # noqa E402
 
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-import utils
+import utils  # noqa E402
 
 
 class Gather(GatherBase):
@@ -125,7 +123,7 @@ class Gather(GatherBase):
         file_content = [s.split("\t") for s in file_content]
         for i, s in enumerate(file_content):
             try:
-                s[0]=float(s[0])
+                s[0] = float(s[0])
             except:
                 if s == ['']:
                     # remove empty lines
@@ -172,19 +170,6 @@ class Gather(GatherBase):
             with h5py.File(in_fname, "r") as f:
                 in_sample = f[self._paths["sample"]][idx]
                 in_reset = f[self._paths["reset"]][idx]
-
-#            print(idx)
-#            test = in_sample[0, 0, 36]
-            #test = in_sample[0, 0, 100]
-#            print(test, bin(test))
-#            print(hex(0b0110000000000000))
-#            arr_out = np.bitwise_and(test, 0x6000)
-#            arr_out = np.right_shift(arr_out, 5+8)
-#            arr_out = arr_out.astype(np.uint8)
-#            print(arr_out)
-
-#            continue
-
 
             # determine where this data block should go in the result
             # matrix

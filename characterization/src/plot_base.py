@@ -1,10 +1,8 @@
 import glob
 import h5py
-import matplotlib
-matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
-import matplotlib.pyplot as plt  # noqa E402
 import numpy as np
 import os
+
 
 class PlotBase():
     def __init__(self, input_fname_templ, output_dir, adc, col, rows):
@@ -72,7 +70,6 @@ class PlotBase():
 
         return searched_file
 
-
     def _load_data(self, rows):
 
         with h5py.File(self._input_fname, "r") as f:
@@ -102,9 +99,9 @@ class PlotBase():
                 data[key] = self._merge_groups_with_frames(d)
 
             if len(d.shape) == 1:
-                n_groups = 1
+                self.n_groups = 1
             else:
-                n_groups = d.shape[0]
+                self.n_groups = d.shape[0]
 
         vin = self._fill_up_vin(vin, self._n_groups)
 
@@ -123,9 +120,8 @@ class PlotBase():
         if len(data.shape) == 1:
             return data
         else:
-            # data has the dimension (n_adcs, n_cols, n_groups, n_frames)
-            # should be transformed into (n_adcs, n_cols, n_groups * n_frames)
-
+            # data has the dimension (n_groups, n_frames)
+            # should be transformed into (n_groups * n_frames)
             data.shape = (self._n_total_frames)
 
         return data
@@ -137,40 +133,42 @@ class PlotBase():
         self.create_dir()
 
         pos = "ADC={}, Col={}".format(self._adc, self._col)
+        out = self._output_dir+"/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_coarse"],
                                    plot_title="Sample Coarse, "+pos,
                                    label="Coarse",
-                                   out_fname=self._output_dir+"/"+"sample_coarse")
+                                   out_fname=out+"sample_coarse")
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_fine"],
                                    plot_title="Sample Fine, "+pos,
                                    label="Fine",
-                                   out_fname=self._output_dir+"/"+"sample_fine")
+                                   out_fname=out+"sample_fine")
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_gain"],
                                    plot_title="Sample Gain, "+pos,
                                    label="Gain",
-                                   out_fname=self._output_dir+"/"+"sample_gain")
+                                   out_fname=out+"sample_gain")
 
     def plot_reset(self):
         self.create_dir()
 
         pos = "ADC={}, Col={}".format(self._adc, self._col)
+        out = self._output_dir+"/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_coarse"],
                                    plot_title="Reset Coarse, "+pos,
                                    label="Coarse",
-                                   out_fname=self._output_dir+"/"+"reset_coarse")
+                                   out_fname=out+"reset_coarse")
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_fine"],
                                    plot_title="Reset Fine, "+pos,
                                    label="Fine",
-                                   out_fname=self._output_dir+"/"+"reset_fine")
+                                   out_fname=out+"reset_fine")
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_gain"],
                                    plot_title="Reset Gain, "+pos,
                                    label="Gain",
-                                   out_fname=self._output_dir+"/"+"reset_gain")
+                                   out_fname=out+"reset_gain")

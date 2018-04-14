@@ -1,15 +1,10 @@
 from __future__ import print_function
 
-import collections
-import configparser
 import h5py
 import numpy as np
 import os
 import sys
 import yaml
-
-import logging
-from logging.config import dictConfig
 
 
 def create_dir(directory_name):
@@ -75,7 +70,8 @@ def load_file_content(fname, excluded=[]):
 
     Args:
         fname: The name of the HDF5 file to be loaded.
-        excluded (optional): The data paths which should be excluded from loading.
+        excluded (optional): The data paths which should be excluded from
+        loading.
 
     Return:
         A dictionary containing the content of the content of the file where
@@ -133,6 +129,7 @@ def decode_dataset_8bit(arr_in, bit_mask, bit_shift):
     arr_out = arr_out.astype(np.uint8)
 
     return arr_out
+
 
 def split_Alessandro(raw_dset):
     """Extracts the coarse, fine and gain bits.
@@ -209,6 +206,7 @@ def split_Ulrik(raw_dset):
 
     return coarse_adc, fine_adc, gain_bits
 
+
 def split(raw_dset):
     """Extracts the coarse, fine and gain bits.
 
@@ -245,4 +243,3 @@ def split(raw_dset):
                                     bit_shift=5+8)
 
     return coarse_adc, fine_adc, gain_bits
-

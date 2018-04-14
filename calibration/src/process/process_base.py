@@ -42,7 +42,8 @@ class ProcessBase(object):
 
         self._calculate()
 
-        print("Start saving results at {} ... ".format(self._out_fname), end='')
+        print("Start saving results at {} ... ".format(self._out_fname),
+              end='')
         self._write_data()
         print("Done.")
 
@@ -93,9 +94,8 @@ class ProcessBase(object):
 
         return res
 
-
     def _write_data(self):
-        with  h5py.File(self._out_fname, "w", libver='latest') as f:
+        with h5py.File(self._out_fname, "w", libver='latest') as f:
             for key in self._result:
                 f.create_dataset(self._result[key]['path'],
                                  data=self._result[key]['data'],

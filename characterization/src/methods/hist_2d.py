@@ -1,10 +1,11 @@
-import glob
-import h5py
 import matplotlib
+# Generate images without having a window appear:
+# this prevents sending remote data to locale PC for rendering
 matplotlib.use('Agg')  # Must be before importing matplotlib.pyplot or pylab!
 import matplotlib.pyplot as plt  # noqa E402
 
-from plot_base import PlotBase
+from plot_base import PlotBase  # noqa E402
+
 
 class Plot(PlotBase):
     def __init__(self, **kwargs):
@@ -15,7 +16,7 @@ class Plot(PlotBase):
 
         fig = plt.figure(figsize=None)
 
-        cmap = matplotlib.pyplot.cm.jet # or whatever are you using
+        cmap = matplotlib.pyplot.cm.jet
         cmap.set_under(color='white')
 
         plt.hist2d(x, data, bins=n_bins, cmap=cmap, vmin=0.1)
