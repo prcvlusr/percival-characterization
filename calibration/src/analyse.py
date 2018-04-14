@@ -197,28 +197,15 @@ def get_arguments():
 
     parser.add_argument("--config_file",
                         type=str,
+                        default="default.yaml",
                         help="The name of the config file.")
 
     args = parser.parse_args()
 
-    required_arguments_set = (
-        args.input
-        and args.output
-        and args.run_id
-        and args.method
-        and args.run_type
-    )
-
-    if args.config_file is not None:
-        args.config_file = os.path.join(CONFIG_DIR, args.config_file)
-        if not os.path.exists(args.config_file):
-            msg = ("Configuration file {} does not exist."
-                   .format(args.config_file))
-            parser.error(msg)
-
-    elif not required_arguments_set:
-        msg = ("Either specify a config_file or the command line parameters:"
-               "-i/--input, -o/--output, -r/--run, -m/--method, -t/--type")
+    args.config_file = os.path.join(CONFIG_DIR, args.config_file)
+    if not os.path.exists(args.config_file):
+        msg = ("Configuration file {} does not exist."
+               .format(args.config_file))
         parser.error(msg)
 
     return args
@@ -291,11 +278,7 @@ def insert_args_into_config(args, config):
 if __name__ == "__main__":
     args = get_arguments()
 
-    if args.config_file is None:
-        config = dict()
-    else:
-        config = utils.load_config(args.config_file)
-
+    config = utils.load_config(args.config_file)
     insert_args_into_config(args, config)
 
     # fix format of command line parameter

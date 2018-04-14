@@ -64,29 +64,18 @@ def get_arguments():
                         action="store_true",
                         default=False,
                         help="Plot only the reset data")
+
     parser.add_argument("--config_file",
                         type=str,
+                        default="default.yaml",
                         help="The name of the config file to use.")
 
     args = parser.parse_args()
 
-    required_arguments_set = (
-        args.input
-        and args.output
-        and args.col
-        and args.adc
-        and args.method
-    )
-
-    if args.config_file is not None:
-        args.config_file = os.path.join(CONFIG_DIR, args.config_file)
-        if not os.path.exists(args.config_file):
-            msg = ("Configuration file {} does not exist."
-                   .format(args.config_file))
-            parser.error(msg)
-    elif not required_arguments_set:
-        msg = ("Either specify a config_file or the command line parameters:"
-               "-i/--input, -o/--output, --col, --adc, --rows, -m/--method")
+    args.config_file = os.path.join(CONFIG_DIR, args.config_file)
+    if not os.path.exists(args.config_file):
+        msg = ("Configuration file {} does not exist."
+               .format(args.config_file))
         parser.error(msg)
 
     return args
@@ -140,19 +129,8 @@ def insert_args_into_config(args, config):
 if __name__ == "__main__":
     args = get_arguments()
 
-    if args.config_file is None:
-        config = {"general": {}}
-    else:
-        config = utils.load_config(args.config_file)
-
+    config = utils.load_config(args.config_file)
     insert_args_into_config(args, config)
-
-#    input_dir = args.input_dir
-#    output_dir = args.output_dir
-#    adc = args.adc
-#    col = args.col
-#    rows = args.rows
-#    method_list = args.method
 
     input_dir = config["general"]["input"]
     output_dir = config["general"]["output"]
