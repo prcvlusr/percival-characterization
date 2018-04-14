@@ -6,16 +6,22 @@ import sys
 import datetime
 import time
 
-import utils
-
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-BASE_DIR = os.path.dirname(CURRENT_DIR)
-CONFIG_DIR = os.path.join(BASE_DIR, "conf")
-SRC_DIR = os.path.join(BASE_DIR, "src")
+CALIBRATION_DIR = os.path.dirname(CURRENT_DIR)
+CONFIG_DIR = os.path.join(CALIBRATION_DIR, "conf")
+SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
+
+BASE_DIR = os.path.dirname(CALIBRATION_DIR)
+SHARED_DIR = os.path.join(BASE_DIR, "shared")
 
 PROCESS_DIR = os.path.join(SRC_DIR, "process")
 ADCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
 PTCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
+
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)
+
+import utils  # noqa E402
 
 if ADCCAL_METHOD_DIR not in sys.path:
     sys.path.insert(0, ADCCAL_METHOD_DIR)
