@@ -8,20 +8,21 @@ from plot_base import PlotBase  # noqa E402
 
 
 class Plot(PlotBase):
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # noqa F811
         super().__init__(**kwargs)
 
     def _generate_single_plot(self, x, data, plot_title, label, out_fname):
-        n_bins = 30
 
-        # plot data
         fig = plt.figure(figsize=None)
 
-        plt.hist(data, bins=n_bins)
-        plt.xlabel('ADU')
-        plt.ylabel('#values')
+        plt.plot(x, data, ".", markersize=0.5, label=label)
+
+        plt.legend()
 
         fig.suptitle(plot_title)
+        plt.xlabel("V")
+        plt.ylabel("ADU")
+
         fig.savefig(out_fname)
 
         fig.clf()
