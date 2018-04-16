@@ -5,8 +5,6 @@ from process_adccal_base import ProcessAdccalBase
 
 
 class Process(ProcessAdccalBase):
-    def __init__(self, **kwargs):  # noqa F811
-        super().__init__(**kwargs)
 
     def _initiate(self):
         shapes = {
