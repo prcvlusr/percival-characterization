@@ -32,7 +32,7 @@ def get_arguments():
 
     parser.add_argument("--data_type",
                         type=str,
-                        choices=["gathered"],
+                        choices=["gathered", "processed"],
                         help="The data type to analyse")
 
     parser.add_argument("--adc",
