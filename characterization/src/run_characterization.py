@@ -89,6 +89,12 @@ def insert_args_into_config(args, config):
     # general
     c_general = config["general"]
 
+    try:
+        c_general["data_type"] = args.data_type or c_general["data_type"]
+    except:
+        raise Exception("No data type specified. Abort.")
+        sys.exit(1)
+
     data_type = c_general["data_type"]
 
     # data type specific

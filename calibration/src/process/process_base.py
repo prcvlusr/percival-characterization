@@ -98,9 +98,13 @@ class ProcessBase(object):
     def _write_data(self):
         with h5py.File(self._out_fname, "w", libver='latest') as f:
             for key in self._result:
-                f.create_dataset(self._result[key]['path'],
-                                 data=self._result[key]['data'],
-                                 dtype=self._result[key]['type'])
+                if "type" in self._result[key]:
+                    f.create_dataset(self._result[key]['path'],
+                                     data=self._result[key]['data'],
+                                     dtype=self._result[key]['type'])
+                else:
+                    f.create_dataset(self._result[key]['path'],
+                                     data=self._result[key]['data'])
 
             metadata_base_path = "collection"
 
