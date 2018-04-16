@@ -6,8 +6,8 @@ try:
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
-SRC_DIR = os.path.join(BASE_DIR, "src")
+CALIBRATION_DIR = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
+SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
 PROCESS_DIR = os.path.join(SRC_DIR, "process")
 
 if PROCESS_DIR not in sys.path:

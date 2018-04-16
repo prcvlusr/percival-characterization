@@ -248,25 +248,45 @@ def insert_args_into_config(args, config):
     c_run_type = config[run_type]
     c_all = config["all"]
 
-    try:
-        # "all" takes higher priority than the run type specific config
-        if "input" in c_all:
-            c_run_type["input"] = args.input or c_all["input"]
-        else:
-            c_run_type["input"] = args.input or c_run_type["input"]
-    except KeyError:
-        raise Exception("No input specified. Abort.")
-        sys.exit(1)
+    if run_type == "all":
+        try:
+            # "all" takes higher priority than the run type specific config
+            if "input" in c_all:
+                c_run_type["input"] = args.input or c_all["input"]
+            else:
+                c_run_type["input"] = args.input or c_run_type["input"]
+        except KeyError:
+            raise Exception("No input specified. Abort.")
+            sys.exit(1)
 
-    try:
-        # "all" takes higher priority than the run type specific config
-        if "output" in c_all:
-            c_run_type["output"] = args.output or c_all["output"]
-        else:
-            c_run_type["output"] = args.output or c_run_type["output"]
-    except KeyError:
-        raise Exception("No output specified. Abort.")
-        sys.exit(1)
+        try:
+            # "all" takes higher priority than the run type specific config
+            if "output" in c_all:
+                c_run_type["output"] = args.output or c_all["output"]
+            else:
+                c_run_type["output"] = args.output or c_run_type["output"]
+        except KeyError:
+            raise Exception("No output specified. Abort.")
+            sys.exit(1)
+    else:
+        try:
+            if "input" in c_run_type:
+                c_run_type["input"] = args.input or c_run_type["input"]
+            else:
+                c_run_type["input"] = args.input or c_all["input"]
+        except KeyError:
+            raise Exception("No input specified. Abort.")
+            sys.exit(1)
+
+        try:
+            # "all" takes higher priority than the run type specific config
+            if "output" in c_run_type:
+                c_run_type["output"] = args.output or c_run_type["output"]
+            else:
+                c_run_type["output"] = args.output or c_all["output"]
+        except KeyError:
+            raise Exception("No output specified. Abort.")
+            sys.exit(1)
 
     try:
         c_run_type["method"] = args.method or c_run_type["method"]

@@ -16,13 +16,11 @@ class Plot(PlotBase):
         fig = plt.figure(figsize=None)
 
         plt.plot(x, data, ".", markersize=0.5, label=label)
-
-        plt.legend()
-
-        fig.suptitle(plot_title)
         plt.xlabel("V")
         plt.ylabel("ADU")
 
+        plt.legend()
+        fig.suptitle(plot_title)
         fig.savefig(out_fname)
 
         fig.clf()
