@@ -294,7 +294,6 @@ def insert_args_into_config(args, config):
         raise Exception("No method type specified. Abort.")
         sys.exit(1)
 
-
 if __name__ == "__main__":
     args = get_arguments()
 

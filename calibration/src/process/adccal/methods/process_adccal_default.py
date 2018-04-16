@@ -10,7 +10,7 @@ class Process(ProcessAdccalBase):
 
     def _initiate(self):
         shapes = {
-            "offset": (self._n_rows, self._n_adcs)
+            "offset": (self._n_cols, self._n_adcs)
         }
 
         self._result = {
@@ -33,9 +33,24 @@ class Process(ProcessAdccalBase):
         data = self._load_data(self._in_fname)
         print("Done.")
 
+        # convert (n_adcs, n_cols, n_groups, n_frames)
+        #      -> (n_adcs, n_cols, n_groups * n_frames)
+        self._merge_groups_with_frames(data["s_coarse"])
+
+        # create as many entries for each vin as there were original frames
+        vin = self._fill_up_vin(data["vin"])  # noqa F841
+
+        # TODO
+        for adc in range(self._n_adcs):
+            for col in range(self._n_cols):
+                # x = ... (subset of vin)
+                # y = ... (subset of data["s_coarse"][adc, col, :])
+                # res = self._fit_linear(x, y)
+                pass
+
         print("Start computing means and standard deviations ...", end="")
-        offset = np.mean(data["s_coarse"], axis=3).astype(np.int)
+        offset = np.mean(data["s_coarse"], axis=2).astype(np.int)
         self._result["s_coarse_offset"]["data"] = offset
 
-        self._result["stddev"]["data"] = data["s_coarse"].std(axis=3)
+        self._result["stddev"]["data"] = data["s_coarse"].std(axis=2)
         print("Done.")
