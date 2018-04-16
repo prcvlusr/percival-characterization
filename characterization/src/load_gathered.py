@@ -13,6 +13,8 @@ class LoadGathered():
         self._col = col
         self._rows = rows
 
+        self._data_type = "gathered"
+
         self._input_fname = self._get_input_fname(self._input_fname_templ,
                                                   self._col)
 
@@ -37,13 +39,24 @@ class LoadGathered():
         self._n_total_frames = None
 
     def _get_input_fname(self, input_fname_templ, col):
-        files = glob.glob(input_fname_templ.format(col_start="*",
-                                                   col_stop="*"))
+
+        input_fname = input_fname_templ.format(data_type=self._data_type,
+                                               col_start="*",
+                                               col_stop="*")
+
+        files = glob.glob(input_fname)
 
         # TODO do not use file name but "collections/columns_used" entry in
         # files
         prefix, middle = input_fname_templ.split("{col_start}")
         middle, suffix = middle.split("{col_stop}")
+
+        prefix = prefix.format(data_type=self._data_type)
+        middle = middle.format(data_type=self._data_type)
+        suffix = suffix.format(data_type=self._data_type)
+#        print("prefix", prefix)
+#        print("middle", middle)
+#        print("suffix", suffix)
 
         searched_file = None
         for f in files:
@@ -57,6 +70,8 @@ class LoadGathered():
                 break
 
         if searched_file is None:
+            print("input templates:", input_fname_templ)
+            print("input_fname", input_fname)
             raise Exception("No files found which contains column {}."
                             .format(col))
 

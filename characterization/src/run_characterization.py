@@ -144,6 +144,7 @@ class Analyse(object):
         insert_args_into_config(args, config)
 
         self.data_type = config["general"]["data_type"]
+        self.run_id = config["general"]["run_id"]
         self.input_dir = config[self.data_type]["input"]
         self.output_dir = config[self.data_type]["output"]
         self.adc = config[self.data_type]["adc"]
@@ -179,8 +180,11 @@ class Analyse(object):
 
     def run(self):
 
-        file_name = "col{col_start}-{col_stop}_gathered.h5"
-        input_fname_templ = os.path.join(self.input_dir, file_name)
+        file_name = "col{col_start}-{col_stop}_{data_type}.h5"
+        file_name = os.path.join("{data_type}", file_name)
+        input_fname_templ = os.path.join(self.input_dir,
+                                         self.run_id,
+                                         file_name)
 
         kwargs = dict(
             input_fname_templ=input_fname_templ,
@@ -195,7 +199,11 @@ class Analyse(object):
             print("loading method: {}".format(method))
             method_m = __import__(method).Plot
 
-            kwargs["output_dir"] = os.path.join(self.output_dir, method)
+            kwargs["output_dir"] = os.path.join(self.output_dir,
+                                                self.run_id,
+                                                "characterization",
+                                                self.data_type,
+                                                method)
             plotter = method_m(**kwargs, loaded_data=loaded_data)
 
             if self.plot_sample:

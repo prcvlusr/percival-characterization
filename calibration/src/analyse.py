@@ -72,16 +72,28 @@ class Analyse(object):
         print("took time: ", time.time() - t)
 
     def generate_raw_path(self, base_dir):
-        return base_dir, "{run}_" + "{}.h5".format(self._run_id)
+        dirname = base_dir
+        filename = "{run}_" + "{}.h5".format(self._run_id)
+
+        return dirname, filename
 
     def generate_metadata_path(self, base_dir):
-        return base_dir, "file.dat"
+        dirname = base_dir
+        filename = "file.dat"
+
+        return dirname, filename
 
     def generate_gather_path(self, base_dir):
-        return base_dir, "col{col_start}-{col_stop}_gathered.h5"
+        dirname = os.path.join(base_dir)
+        filename = "col{col_start}-{col_stop}_gathered.h5"
+
+        return dirname, filename
 
     def generate_process_path(self, base_dir):
-        return base_dir, "col{col_start}-{col_stop}_processed.h5"
+        dirname = os.path.join(base_dir)
+        filename = "col{col_start}-{col_stop}_processed.h5"
+
+        return dirname, filename
 
     def run_gather(self):
         if self.measurement == "adccal":
@@ -321,13 +333,10 @@ if __name__ == "__main__":
     # generate file paths
     if run_type == "gather":
         in_base_dir = in_base_dir
-        out_base_dir = os.path.join(out_base_dir,
-                                    "{}_gathered".format(run_id))
+        out_base_dir = os.path.join(out_base_dir, run_id, "gathered")
     else:
-        in_base_dir = os.path.join(in_base_dir,
-                                   "{}_gathered".format(run_id))
-        out_base_dir = os.path.join(out_base_dir,
-                                    "{}_processed".format(run_id))
+        in_base_dir = os.path.join(in_base_dir, run_id, "gathered")
+        out_base_dir = os.path.join(out_base_dir, run_id, "processed")
 
     obj = Analyse(in_base_dir=in_base_dir,
                   out_base_dir=out_base_dir,

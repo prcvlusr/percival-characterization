@@ -1,9 +1,10 @@
 general:
     data_type: gathered
+    run_id: DLSraw
 
 gathered:
-    input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed/DLSraw_dataset2/DLSraw_gathered
-    output: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed/DLSraw_dataset2/plots/gathered
+    input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
+    output: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
 
     measurement: adccal
 
