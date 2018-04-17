@@ -18,6 +18,7 @@ if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
+from _version import __version__  # noqa E402
 
 
 class ProcessBase(object):
@@ -111,5 +112,8 @@ class ProcessBase(object):
             today = str(date.today())
             f.create_dataset("{}/creation_date".format(metadata_base_path),
                              data=today)
+
+            name = "{}/{}".format(metadata_base_path, "version")
+            f.create_dataset(name, data=__version__)
 
             f.flush()
