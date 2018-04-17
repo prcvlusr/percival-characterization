@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
 import argparse
+import datetime
+import math
+import multiprocessing
 import os
 import sys
-import datetime
 import time
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
@@ -35,7 +37,8 @@ class Analyse(object):
                  run_type,
                  measurement,
                  n_cols,
-                 method):
+                 method,
+                 n_processes):
 
         self.in_base_dir = in_base_dir
         self.out_base_dir = out_base_dir
@@ -49,13 +52,26 @@ class Analyse(object):
         else:
             self._n_cols = n_cols
 
+        self._n_processes = n_processes
+
         self._n_parts = self._n_cols_total // self._n_cols
+        self._set_job_sets()
 
         self._run_id = run_id
         self.run_type = run_type
 
         self.measurement = measurement
         self.method = method
+
+    def _set_job_sets(self):
+        all_jobs = range(self._n_parts)
+        self._n_job_sets = math.ceil(self._n_parts / float(self._n_processes))
+
+        self._job_sets = []
+        for i in range(self._n_job_sets):
+            start = i*self._n_processes
+            stop = (i+1)*self._n_processes
+            self._job_sets.append(all_jobs[start:stop])
 
     def run(self):
         print("\nStarted at", str(datetime.datetime.now()))
@@ -96,13 +112,6 @@ class Analyse(object):
         return dirname, filename
 
     def run_gather(self):
-        if self.measurement == "adccal":
-            from gather.gather_adccal import Gather
-        elif self.measurement == "ptccal":
-            from gather.gather_base import GatherBase as Gather
-        else:
-            print("Unsupported type.")
-
         # define input files
         in_dir, in_file_name = self.generate_raw_path(self.in_base_dir)
         in_fname = os.path.join(in_dir, in_file_name)
@@ -117,29 +126,49 @@ class Analyse(object):
         out_dir, out_file_name = self.generate_gather_path(self.out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
-        for p in range(self._n_parts):
-            col_start = p * self._n_cols
-            col_stop = (p+1) * self._n_cols
+        for job_set in self._job_sets:
+            jobs = []
+            for p in job_set:
+                col_start = p * self._n_cols
+                col_stop = (p+1) * self._n_cols - 1
 
-            out_f = out_fname.format(col_start=col_start, col_stop=col_stop)
+                out_f = out_fname.format(col_start=col_start, col_stop=col_stop)
 
-#            if os.path.exists(out_f):
-#                print("output filename = {}".format(out_f))
-#                print("WARNING: output file already exist. Skipping gather.")
-#            else:
-            utils.create_dir(out_dir)
+#                if os.path.exists(out_f):
+#                    print("output filename = {}".format(out_f))
+#                    print("WARNING: output file already exist. Skipping gather.")
+#                else:
+                utils.create_dir(out_dir)
 
-            obj = Gather(in_fname=in_fname,
-                         out_fname=out_f,
-                         meta_fname=meta_fname,
-                         n_rows=self._n_rows,
-                         n_cols=self._n_cols,
-                         part=p)
-            obj.run()
+                kwargs = dict(
+                    in_fname=in_fname,
+                    out_fname=out_f,
+                    meta_fname=meta_fname,
+                    n_rows=self._n_rows,
+                    n_cols=self._n_cols,
+                    part=p
+                )
+
+                proc = multiprocessing.Process(target=self._call_gather, kwargs=kwargs)
+                jobs.append(proc)
+                proc.start()
+
+            for job in jobs:
+                job.join()
+
+
+    def _call_gather(self, **kwargs):
+        if self.measurement == "adccal":
+            from gather.gather_adccal import Gather
+        elif self.measurement == "ptccal":
+            from gather.gather_base import GatherBase as Gather
+        else:
+            print("Unsupported type.")
+
+        obj = Gather(**kwargs)
+        obj.run()
 
     def run_process(self):
-        self.process_m = __import__(self.method).Process
-
         # define input files
         # the input files for process is the output from gather
         in_dir, in_file_name = self.generate_gather_path(self.in_base_dir)
@@ -149,26 +178,40 @@ class Analyse(object):
         out_dir, out_file_name = self.generate_process_path(self.out_base_dir)
         out_fname = os.path.join(out_dir, out_file_name)
 
-        for p in range(1):
-            col_start = p * self._n_cols
-            col_stop = (p+1) * self._n_cols
+        for job_set in self._job_sets:
+            jobs = []
+            for p in job_set:
+                col_start = p * self._n_cols
+                col_stop = (p+1) * self._n_cols - 1
 
-            in_f = in_fname.format(col_start=col_start,
-                                   col_stop=col_stop)
-            out_f = out_fname.format(col_start=col_start,
-                                     col_stop=col_stop)
+                in_f = in_fname.format(col_start=col_start,
+                                       col_stop=col_stop)
+                out_f = out_fname.format(col_start=col_start,
+                                         col_stop=col_stop)
 
-#            if os.path.exists(out_f):
-#                print("output filename = {}".format(out_f))
-#                print("WARNING: output file already exist. Skipping process.")
-#            else:
-            utils.create_dir(out_dir)
+    #            if os.path.exists(out_f):
+    #                print("output filename = {}".format(out_f))
+    #                print("WARNING: output file already exist. Skipping process.")
+    #            else:
+                utils.create_dir(out_dir)
 
-            # generate out_put
-            obj = self.process_m(in_fname=in_f,
-                                 out_fname=out_f)
+                kwargs = dict(
+                    in_fname=in_f,
+                    out_fname=out_f
+                )
 
-            obj.run()
+                proc = multiprocessing.Process(target=self._call_process, kwargs=kwargs)
+                jobs.append(proc)
+                proc.start()
+
+            for job in jobs:
+                job.join()
+
+    def _call_process(self, **kwargs):
+        self.process_m = __import__(self.method).Process
+
+        obj = self.process_m(**kwargs)
+        obj.run()
 
     def cleanup(self):
         # remove gather dir
@@ -325,6 +368,7 @@ if __name__ == "__main__":
     run_id = config["general"]["run"]
     measurement = config["general"]["measurement"]
     n_cols = config["general"]["n_cols"]
+    n_processes = config["general"]["n_processes"]
 
     out_base_dir = config[run_type]["output"]
     in_base_dir = config[run_type]["input"]
@@ -344,5 +388,6 @@ if __name__ == "__main__":
                   run_type=run_type,
                   measurement=measurement,
                   n_cols=n_cols,
-                  method=method)
+                  method=method,
+                  n_processes = n_processes)
     obj.run()

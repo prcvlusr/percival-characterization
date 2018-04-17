@@ -6,6 +6,8 @@ general:
 
     run: DLSraw
 
+    n_processes: 1
+
 all:
     input: &input /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000
     output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed

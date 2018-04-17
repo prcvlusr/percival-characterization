@@ -141,9 +141,13 @@ class Gather(GatherBase):
         for i in self._register:
             in_fname = self._in_fname.format(run=i[1])
 
-            with h5py.File(in_fname, "r") as f:
-                n_frames = f[self._paths["sample"]].shape[0]
-                self._n_frames_per_run.append(n_frames)
+            try:
+                with h5py.File(in_fname, "r") as f:
+                    n_frames = f[self._paths["sample"]].shape[0]
+                    self._n_frames_per_run.append(n_frames)
+            except OSError:
+                print("in_fname", in_fname)
+                raise
 
     def _load_data(self):
         # for convenience
