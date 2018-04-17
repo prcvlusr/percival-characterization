@@ -22,10 +22,11 @@ from _version import __version__  # noqa E402
 
 
 class ProcessBase(object):
-    def __init__(self, in_fname, out_fname):
+    def __init__(self, in_fname, out_fname, method):
 
         self._in_fname = in_fname
         self._out_fname = out_fname
+        self.method = method
 
         self._result = {}
 
@@ -98,6 +99,9 @@ class ProcessBase(object):
 
     def _write_data(self):
         with h5py.File(self._out_fname, "w", libver='latest') as f:
+
+            # write data
+
             for key in self._result:
                 if "type" in self._result[key]:
                     f.create_dataset(self._result[key]['path'],
@@ -107,6 +111,9 @@ class ProcessBase(object):
                     f.create_dataset(self._result[key]['path'],
                                      data=self._result[key]['data'])
 
+
+            # write metadata
+
             metadata_base_path = "collection"
 
             today = str(date.today())
@@ -115,5 +122,8 @@ class ProcessBase(object):
 
             name = "{}/{}".format(metadata_base_path, "version")
             f.create_dataset(name, data=__version__)
+
+            name = "{}/{}".format(metadata_base_path, "method")
+            f.create_dataset(name, data=self.method)
 
             f.flush()

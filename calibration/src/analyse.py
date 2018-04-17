@@ -197,7 +197,8 @@ class Analyse(object):
 
                 kwargs = dict(
                     in_fname=in_f,
-                    out_fname=out_f
+                    out_fname=out_f,
+                    method=self.method
                 )
 
                 proc = multiprocessing.Process(target=self._call_process, kwargs=kwargs)
