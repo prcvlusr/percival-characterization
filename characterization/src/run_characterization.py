@@ -150,7 +150,7 @@ class Analyse(object):
         insert_args_into_config(args, config)
 
         self.data_type = config["general"]["data_type"]
-        self.run_id = config["general"]["run_id"]
+        self.run_id = config["general"]["run"]
         self.input_dir = config[self.data_type]["input"]
         self.output_dir = config[self.data_type]["output"]
         self.adc = config[self.data_type]["adc"]

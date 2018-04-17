@@ -1,6 +1,6 @@
 general:
     data_type: gathered
-    run_id: DLSraw
+    run: DLSraw
 
 gathered:
     input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed

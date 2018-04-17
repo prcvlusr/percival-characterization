@@ -15,8 +15,10 @@ class LoadGathered():
 
         self._data_type = "gathered"
 
-        self._input_fname = self._get_input_fname(self._input_fname_templ,
-                                                  self._col)
+        self._input_fname, self._col_offset = self._get_input_fname(
+                self._input_fname_templ,
+                self._col
+        )
 
         self._paths = {
             "s_coarse": "sample/coarse",
@@ -65,8 +67,9 @@ class LoadGathered():
             # convert str into int
             cols = list(map(int, cols))
 
-            if cols[0] < col and col < cols[1]:
+            if cols[0] <= col and col <= cols[1]:
                 searched_file = f
+                col_offset = cols[0]
                 break
 
         if searched_file is None:
@@ -75,9 +78,10 @@ class LoadGathered():
             raise Exception("No files found which contains column {}."
                             .format(col))
 
-        return searched_file
+        return searched_file, col_offset
 
     def load_data(self):
+        col = self._col - self._col_offset
 
         with h5py.File(self._input_fname, "r") as f:
             vin = f[self._metadata_paths["vin"]][()]
@@ -87,7 +91,7 @@ class LoadGathered():
 
             data = {}
             for key, path in self._paths.items():
-                idx = (self._adc, self._col, slice(None), self._rows)
+                idx = (self._adc, col, slice(None), self._rows)
                 d = f[path][idx].astype(np.float)
 
                 # determine number of frames
