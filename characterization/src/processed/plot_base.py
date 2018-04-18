@@ -100,27 +100,7 @@ class PlotBase():
 #                                   out_fname=out+"sample_gain"+suffix)
 
     def plot_reset(self):
-        self.create_dir()
+        pass
 
-        pos = "ADC={}, Col={}".format(self._adc, self._col)
-        suffix = "_adc{}_col{}".format(self._adc, self._col)
-        out = self._output_dir+"/"
-
-#        self._generate_single_plot(x=self._x,
-#                                   data=self._data["r_coarse"],
-#                                   constants=self._constants["s_coarse"],
-#                                   plot_title="Reset Coarse, "+pos,
-#                                   label="Coarse",
-#                                   out_fname=out+"reset_coarse"+suffix)
-#        self._generate_single_plot(x=self._x,
-#                                   data=self._data["r_fine"],
-#                                   constants=self._constants["s_fine"],
-#                                   plot_title="Reset Fine, "+pos,
-#                                   label="Fine",
-#                                   out_fname=out+"reset_fine"+suffix)
-#        self._generate_single_plot(x=self._x,
-#                                   data=self._data["r_gain"],
-#                                   constants=self._constants["s_gain"],
-#                                   plot_title="Reset Gain, "+pos,
-#                                   label="Gain",
-#                                   out_fname=out+"reset_gain"+suffix)
+    def plot_combined(self):
+        pass

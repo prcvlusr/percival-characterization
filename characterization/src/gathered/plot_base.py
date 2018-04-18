@@ -103,3 +103,6 @@ class PlotBase():
                                    plot_title="Reset Gain, "+pos,
                                    label="Gain",
                                    out_fname=out+"reset_gain"+suffix)
+
+    def plot_combined(self):
+        pass
