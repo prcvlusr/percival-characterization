@@ -32,8 +32,15 @@ def get_arguments():
 
     parser.add_argument("--data_type",
                         type=str,
-                        choices=["gathered", "processed"],
+                        choices=["raw",
+                                 "gathered",
+                                 "processed"],
                         help="The data type to analyse")
+
+    parser.add_argument("--frame",
+                        type=int,
+                        help="The frame to create plots for "
+                             "(when characterizing raw data).")
 
     parser.add_argument("--adc",
                         type=int,
@@ -61,12 +68,13 @@ def get_arguments():
 
     parser.add_argument("--plot_sample",
                         action="store_true",
-                        default=False,
                         help="Plot only the sample data")
     parser.add_argument("--plot_reset",
                         action="store_true",
-                        default=False,
                         help="Plot only the reset data")
+    parser.add_argument("--plot_combined",
+                        action="store_true",
+                        help="Plot the sample data combined with reset data")
 
     parser.add_argument("--config_file",
                         type=str,
@@ -95,6 +103,24 @@ def insert_args_into_config(args, config):
         raise Exception("No data type specified. Abort.")
         sys.exit(1)
 
+    try:
+        c_general["plot_sample"] = args.plot_sample or c_general["plot_sample"]
+    except:
+        raise Exception("No data type specified. Abort.")
+        sys.exit(1)
+
+    try:
+        c_general["plot_reset"] = args.plot_reset or c_general["plot_reset"]
+    except:
+        raise Exception("No data type specified. Abort.")
+        sys.exit(1)
+
+    try:
+        c_general["plot_combined"] = args.plot_combined or c_general["plot_combined"]
+    except:
+        raise Exception("No data type specified. Abort.")
+        sys.exit(1)
+
     data_type = c_general["data_type"]
 
     # data type specific
@@ -119,7 +145,15 @@ def insert_args_into_config(args, config):
         raise Exception("No method specified. Abort.")
         sys.exit(1)
 
-    if data_type != "raw":
+    if data_type == "raw":
+        # for adc equals 0 ".. or .." does not work
+        if args.frame is not None:
+            c_data_type["frame"] = args.frame
+        elif "frame" not in c_data_type:
+            raise Exception("No frame specified. Abort.")
+            sys.exit(1)
+
+    else:
         # for adc equals 0 ".. or .." does not work
         if args.adc is not None:
             c_data_type["adc"] = args.adc
@@ -127,19 +161,20 @@ def insert_args_into_config(args, config):
             raise Exception("No ADC specified. Abort.")
             sys.exit(1)
 
-        # for col equals 0 ".. or .." does not work
-        if args.col is not None:
-            c_data_type["col"] = args.col
-        elif "col" not in c_data_type:
-            raise Exception("No column specified. Abort.")
-            sys.exit(1)
 
-        # for row equals 0 ".. or .." does not work
-        if args.rows is not None:
-            c_data_type["rows"] = args.rows
-        elif "rows" not in c_data_type:
-            raise Exception("No rows specified. Abort.")
-            sys.exit(1)
+    # for col equals 0 ".. or .." does not work
+    if args.col is not None:
+        c_data_type["col"] = args.col
+    elif "col" not in c_data_type:
+        raise Exception("No column specified. Abort.")
+        sys.exit(1)
+
+    # for row equals 0 ".. or .." does not work
+    if args.rows is not None:
+        c_data_type["rows"] = args.rows
+    elif "rows" not in c_data_type:
+        raise Exception("No rows specified. Abort.")
+        sys.exit(1)
 
 
 class Analyse(object):
@@ -151,12 +186,20 @@ class Analyse(object):
 
         self.data_type = config["general"]["data_type"]
         self.run_id = config["general"]["run"]
+        self.plot_sample = config["general"]["plot_sample"]
+        self.plot_reset = config["general"]["plot_reset"]
+        self.plot_combined = config["general"]["plot_combined"]
         self.input_dir = config[self.data_type]["input"]
         self.output_dir = config[self.data_type]["output"]
-        self.adc = config[self.data_type]["adc"]
         self.col = config[self.data_type]["col"]
         self.rows = config[self.data_type]["rows"]
         self.method_list = config[self.data_type]["method"]
+
+        if self.data_type == "raw":
+            self.adc = config[self.data_type]["frame"]
+        else:
+            self.adc = config[self.data_type]["adc"]
+        print("ADC", self.adc)
 
         if self.rows is None:
             self.rows = slice(self.rows)
@@ -164,14 +207,6 @@ class Analyse(object):
             self.row = self.rows[0]
         else:
             self.rows = slice(*self.rows)
-
-        self.plot_sample = args.plot_sample
-        self.plot_reset = args.plot_reset
-
-        # if both options where not set plot sample and reset
-        if not self.plot_sample and not self.plot_reset:
-            self.plot_sample = True
-            self.plot_reset = True
 
         self.load_methods()
 
@@ -186,11 +221,14 @@ class Analyse(object):
 
     def run(self):
 
-        file_name = "col{col_start}-{col_stop}_{data_type}.h5"
-        file_name = os.path.join("{data_type}", file_name)
-        input_fname_templ = os.path.join(self.input_dir,
-                                         self.run_id,
-                                         file_name)
+        if self.data_type == "raw":
+            input_fname_templ = self.input_dir
+        else:
+            file_name = "col{col_start}-{col_stop}_{data_type}.h5"
+            file_name = os.path.join("{data_type}", file_name)
+            input_fname_templ = os.path.join(self.input_dir,
+                                             self.run_id,
+                                             file_name)
 
         kwargs = dict(
             input_fname_templ=input_fname_templ,
@@ -219,6 +257,10 @@ class Analyse(object):
             if self.plot_reset:
                 print("Plot reset")
                 plotter.plot_reset()
+
+            if self.plot_combined:
+                print("Plot combined")
+                plotter.plot_combined()
 
             loaded_data = plotter.get_data()
 

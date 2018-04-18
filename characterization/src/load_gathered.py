@@ -16,8 +16,8 @@ class LoadGathered():
         self._data_type = "gathered"
 
         self._input_fname, self._col_offset = self._get_input_fname(
-                self._input_fname_templ,
-                self._col
+            self._input_fname_templ,
+            self._col
         )
 
         self._paths = {
