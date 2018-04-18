@@ -1,3 +1,4 @@
+from collections import namedtuple
 import h5py
 import sys
 import numpy as np
@@ -22,6 +23,12 @@ from _version import __version__  # noqa E402
 
 
 class ProcessBase(object):
+    LinearFitResult = namedtuple("linear_fit_result", ["solution",
+                                                       "residuals",
+                                                       "rank",
+                                                       "singular_values",
+                                                       "r_squared"])
+
     def __init__(self, in_fname, out_fname, method):
 
         self._in_fname = in_fname
@@ -71,7 +78,22 @@ class ProcessBase(object):
 
         return m_data
 
-    def _fit_linear(self, x, y, mask=None):
+    def _fit_linear(self, x, y, mask=None, enable_r_squared=False):
+        """Solves the equation y = mx+ b for a given x and y.
+
+        Args:
+            x (numpy array): The x values corresponding to the data points to
+                             fit.
+            y (numpy array): The data points to fix.
+            mask (optional): A mask of entries to not consider for the fitting.
+            enable_r_squared (optional): enables the calculation of the
+                                         coefficient of determination
+
+        Return:
+            A namped tuple with the fitting results and additionally quality
+            measurements.
+        """
+
         if mask is None:
             y_masked = y
             x_masked = x
@@ -89,15 +111,59 @@ class ProcessBase(object):
             print("len y_masked", len(y_masked))
             raise
 
-        # lstsq returns: Least-squares solution (i.e. slope and offset),
-        #                residuals,
-        #                rank,
-        #                singular values
-        res = np.linalg.lstsq(A, y_masked)
+        y_mean = np.mean(y_masked)
+        y_diff = y_masked - y_mean
+        all_zero = not np.any(y_diff)
 
-        return res
+        if all_zero:
+            # the y values are constant
+            slope = 0
+            offset = y_mean
+
+            res = [
+                (slope, offset),  #solution
+                None,  # residuals
+                None,  # rang
+                None  # singular_values
+            ]
+
+        else:
+            # lstsq returns: Least-squares solution (i.e. slope and offset),
+            #                residuals,
+            #                rank,
+            #                singular values
+            res = np.linalg.lstsq(A, y_masked)
+
+        if enable_r_squared:
+            if all_zero:
+                r_squared = 1
+            else:
+                try:
+                    ss_tot = np.dot(y_diff, y_diff)
+                    ss_res = res[1]  # this are the residuals given by lstsq
+
+                    r_squared = 1 - ss_res/ss_tot
+                except:
+                    print("ERROR when calculating r squared.")
+                    print("ss_tot", ss_tot)
+                    print("ss_res", ss_res)
+                    raise
+
+        else:
+            r_squared = None
+
+        new_res = ProcessBase.LinearFitResult(solution=res[0],
+                                              residuals=res[1],
+                                              rank=res[2],
+                                              singular_values=res[3],
+                                              r_squared=r_squared)
+
+        return new_res
 
     def _write_data(self):
+        """Writes the result dictionary and additional metadata into a file.
+        """
+
         with h5py.File(self._out_fname, "w", libver='latest') as f:
 
             # write data

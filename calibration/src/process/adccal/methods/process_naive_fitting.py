@@ -14,14 +14,12 @@ class Process(ProcessAdccalBase):
         self._result = {
             # must have entries for correction
             "s_coarse_slope": {
-                "data": np.zeros(shapes["offset"], dtype=np.float16),
+                "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/slope",
-                "type": np.float16
             },
             "s_coarse_offset": {
-                "data": np.zeros(shapes["offset"], dtype=np.float16),
+                "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/offset",
-                "type": np.float16
             }
         }
 
@@ -53,7 +51,7 @@ class Process(ProcessAdccalBase):
                 #          singular values
                 res = self._fit_linear(x, y)
 
-                slope[adc, col] = res[0][0]
-                offset[adc, col] = res[0][1]
+                slope[adc, col] = res.solution[0]
+                offset[adc, col] = res.solution[1]
 
         print("Done.")
