@@ -241,3 +241,70 @@ def split(raw_dset):
                                     bit_shift=5+8)
 
     return coarse_adc, fine_adc, gain_bits
+
+
+class IndexTracker(object):
+    def __init__(self, fig, ax, data):
+        self.fig = fig
+
+        if len(ax) != 2 or len(ax[0]) != 3:
+            raise Exception("Figure has wrong layout. Need subplots(2,3)")
+        self.ax = ax
+
+        self.data = data
+
+        self.slices, rows, cols = data["s_coarse"].shape
+        self.frame = 0
+
+        self.im_s_coarse = ax[0][0].imshow(self.data["s_coarse"][self.frame])
+        self.im_s_fine = ax[0][1].imshow(self.data["s_fine"][self.frame])
+        self.im_s_gain = ax[0][2].imshow(self.data["s_gain"][self.frame])
+
+        self.im_r_coarse = ax[1][0].imshow(self.data["r_coarse"][self.frame])
+        self.im_r_fine = ax[1][1].imshow(self.data["r_fine"][self.frame])
+        self.im_r_gain = ax[1][2].imshow(self.data["r_gain"][self.frame])
+
+        self.ax[0][0].set_title("sample coarse")
+        self.ax[0][1].set_title("sample fine")
+        self.ax[0][2].set_title("sample gain")
+        self.ax[1][0].set_title("reset coarse")
+        self.ax[1][1].set_title("reset fine")
+        self.ax[1][2].set_title("reset gain")
+
+        self.update()
+
+    def onscroll(self, event):
+        """How to react if the mouse wheel is scrolled.
+        """
+
+#        print("%s %s" % (event.button, event.step))
+        if event.button == 'up':
+            self.frame = (self.frame + 1) % self.slices
+        else:
+            self.frame = (self.frame - 1) % self.slices
+        self.update()
+
+    def on_key_press(self, event):
+        """How to react if a key is pressed.
+        """
+
+        if event.key in ["right", "up"]:
+            self.frame = (self.frame + 1) % self.slices
+        elif event.key in ["left", "down"]:
+            self.frame = (self.frame - 1) % self.slices
+        self.update()
+
+    def update(self):
+        """Updates the plots.
+        """
+
+        self.im_s_coarse.set_data(self.data["s_coarse"][self.frame])
+        self.im_s_fine.set_data(self.data["s_fine"][self.frame])
+        self.im_s_gain.set_data(self.data["s_gain"][self.frame])
+        self.im_r_coarse.set_data(self.data["s_coarse"][self.frame])
+        self.im_r_fine.set_data(self.data["r_fine"][self.frame])
+        self.im_r_gain.set_data(self.data["r_gain"][self.frame])
+
+        self.fig.suptitle("Frame {}".format(self.frame))
+
+        self.fig.canvas.draw()
