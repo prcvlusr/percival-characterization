@@ -21,8 +21,8 @@ raw:
     col: 100
     row: 100
 
-    #method: [viewer]
-    method: [plot]
+    method: [viewer]
+    #method: [plot, plot_coarse_vs_fine]
 
 gathered:
     input: *output
