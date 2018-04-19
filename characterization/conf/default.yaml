@@ -17,6 +17,7 @@ raw:
 
     measurement: adccal
 
+    adc: null
     frame: 2
     col: 100
     row: 100
@@ -31,6 +32,7 @@ gathered:
     measurement: adccal
 
     adc: 0
+    frame: null
     col: 100
     row: null
 
@@ -44,6 +46,7 @@ processed:
     measurement: adccal
 
     adc: 0
+    frame: null
     col: 100
     row: null
 

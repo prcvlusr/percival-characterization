@@ -42,14 +42,12 @@ def get_arguments():
                                  "processed"],
                         help="The data type to analyse")
 
-    parser.add_argument("--frame",
-                        type=int,
-                        help="The frame to create plots for "
-                             "(when characterizing raw data).")
-
     parser.add_argument("--adc",
                         type=int,
                         help="The ADC to create plots for.")
+    parser.add_argument("--frame",
+                        type=int,
+                        help="The frame to create plots for.")
     parser.add_argument("--col",
                         type=int,
                         help="The column of the data to create plots for.")
@@ -159,23 +157,22 @@ def insert_args_into_config(args, config):
             raise Exception("No input specified. Abort.")
             sys.exit(1)
 
-        # for adc equals 0 ".. or .." does not work
-        if args.frame is not None:
-            c_data_type["frame"] = args.frame
-        elif "frame" not in c_data_type:
-            raise Exception("No frame specified. Abort.")
-            sys.exit(1)
-
     else:
         c_data_type["metadata_file"] = None
 
-        # for adc equals 0 ".. or .." does not work
-        if args.adc is not None:
-            c_data_type["adc"] = args.adc
-        elif "adc" not in c_data_type:
-            raise Exception("No ADC specified. Abort.")
-            sys.exit(1)
+    # for adc equals 0 ".. or .." does not work
+    if args.adc is not None:
+        c_data_type["adc"] = args.adc
+    elif "adc" not in c_data_type:
+        raise Exception("No ADC specified. Abort.")
+        sys.exit(1)
 
+    # for adc equals 0 ".. or .." does not work
+    if args.frame is not None:
+        c_data_type["frame"] = args.frame
+    elif "frame" not in c_data_type:
+        raise Exception("No frame specified. Abort.")
+        sys.exit(1)
 
     # for col equals 0 ".. or .." does not work
     if args.col is not None:
@@ -207,14 +204,12 @@ class Analyse(object):
         self._input_dir = config[self._data_type]["input"]
         self._metadata_file = config[self._data_type]["metadata_file"]
         self._output_dir = config[self._data_type]["output"]
+        self._adc = config[self._data_type]["adc"]
+        self._frame = config[self._data_type]["frame"]
         self._col = config[self._data_type]["col"]
         self._row = config[self._data_type]["row"]
         self._method_list = config[self._data_type]["method"]
 
-        if self._data_type == "raw":
-            self._adc = config[self._data_type]["frame"]
-        else:
-            self._adc = config[self._data_type]["adc"]
 
         if self._row is None:
             self._row = slice(None)
@@ -253,9 +248,13 @@ class Analyse(object):
             metadata_fname=self._metadata_file,
             output_dir=None,
             adc=self._adc,
-            col=self._col,
-            row=self._row
+            frame=self._frame,
+            row=self._row,
+            col=self._col
         )
+
+        print("Configured: adc={}, frame={}, row={}, col={}"
+              .format(self._adc, self._frame, self._row, self._col))
 
         loaded_data = None
         for method in self._method_list:

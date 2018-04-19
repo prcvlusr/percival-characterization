@@ -5,11 +5,12 @@ import os
 
 
 class LoadGathered():
-    def __init__(self, input_fname_templ, output_dir, adc, row, col):
+    def __init__(self, input_fname_templ, output_dir, adc, frame, row, col):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
+        self._frame = frame
         self._row = row
         self._col = col
 
@@ -109,11 +110,6 @@ class LoadGathered():
                         self._n_total_frames = self._n_frames * self._n_groups
 
                 data[key] = self._merge_groups_with_frames(d)
-
-            if len(d.shape) == 1:
-                self.n_groups = 1
-            else:
-                self.n_groups = d.shape[0]
 
         vin = self._fill_up_vin(vin, self._n_groups)
 

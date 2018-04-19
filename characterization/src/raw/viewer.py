@@ -16,6 +16,7 @@ class Plot():
              metadata_fname,
              output_dir,
              adc,
+             frame,
              col,
              row,
              loaded_data=None,
@@ -24,7 +25,8 @@ class Plot():
         self._input_fname = input_fname_templ
         self._metadata_fname = metadata_fname
         self._output_dir = os.path.normpath(output_dir)
-        self._frame = adc
+        self._adc = adc
+        self._frame = frame
         self._col = col
         self._row = row
         self._dims_overwritten = dims_overwritten

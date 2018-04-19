@@ -17,6 +17,7 @@ class PlotBase():
              metadata_fname,
              output_dir,
              adc,
+             frame,
              row,
              col,
              loaded_data=None,
@@ -26,6 +27,7 @@ class PlotBase():
         self._metadata_fname = metadata_fname
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
+        self._frame = frame
         self._row = row
         self._col = col
         self._dims_overwritten = dims_overwritten
@@ -34,6 +36,7 @@ class PlotBase():
             input_fname_templ=self._input_fname_templ,
             output_dir=self._output_dir,
             adc=self._adc,
+            frame=self._frame,
             row=self._row,
             col=self._col
         )
