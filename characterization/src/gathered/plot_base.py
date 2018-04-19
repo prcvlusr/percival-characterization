@@ -13,25 +13,29 @@ class PlotBase():
 
     def __init__(self,
              input_fname_templ,
+             metadata_fname,
              output_dir,
              adc,
+             row,
              col,
-             rows,
-             loaded_data=None):
+             loaded_data=None,
+             dims_overwritten=False):
 
         self._input_fname_templ = input_fname_templ
+        self._metadata_fname = metadata_fname
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
+        self._row = row
         self._col = col
-        self._rows = rows
+        self._dims_overwritten = dims_overwritten
 
         loader = LoadGathered(input_fname_templ=self._input_fname_templ,
                               output_dir=self._output_dir,
                               adc=self._adc,
-                              col=self._col,
-                              rows=self._rows)
+                              row=self._row,
+                              col=self._col)
 
-        if loaded_data is None:
+        if loaded_data is None or self._dims_overwritten:
             self._x, self._data = loader.load_data()
         else:
             self._x = loaded_data.x
@@ -42,6 +46,14 @@ class PlotBase():
             print("Output directory {} does not exist. Create it."
                   .format(self._output_dir))
             os.makedirs(self._output_dir)
+
+    def get_dims_overwritten(self):
+        """If the dimension originally configures overwritten.
+
+        Return:
+            A boolean if the config war overwritten or not.
+        """
+        return self._dims_overwritten
 
     def get_data(self):
         """Exposes data outside the class.

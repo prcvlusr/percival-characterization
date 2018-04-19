@@ -5,13 +5,13 @@ import os
 
 
 class LoadProcessed():
-    def __init__(self, input_fname_templ, output_dir, adc, col, rows):
+    def __init__(self, input_fname_templ, output_dir, adc, row, col):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
+        self._row = row
         self._col = col
-        self._rows = rows
 
         self._data_type = "processed"
 

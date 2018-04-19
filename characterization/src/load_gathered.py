@@ -5,13 +5,13 @@ import os
 
 
 class LoadGathered():
-    def __init__(self, input_fname_templ, output_dir, adc, col, rows):
+    def __init__(self, input_fname_templ, output_dir, adc, row, col):
 
         self._input_fname_templ = input_fname_templ
         self._output_dir = os.path.normpath(output_dir)
         self._adc = adc
+        self._row = row
         self._col = col
-        self._rows = rows
 
         self._data_type = "gathered"
 
@@ -91,7 +91,7 @@ class LoadGathered():
 
             data = {}
             for key, path in self._paths.items():
-                idx = (self._adc, col, slice(None), self._rows)
+                idx = (self._adc, col, slice(None), self._row)
                 d = f[path][idx].astype(np.float)
 
                 # determine number of frames
