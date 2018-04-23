@@ -77,6 +77,13 @@ class ProcessAdccalBase(ProcessBase):
         # data has the dimension (n_adcs, n_cols, n_groups, n_frames)
         # should be transformed into (n_adcs, n_cols, n_groups * n_frames)
 
-        data.shape = (self._n_adcs,
-                      self._n_cols,
-                      self._n_total_frames)
+        transpose_order=(0, 1, 3, 2)
+        tr_data = data.transpose(transpose_order)
+
+        newData = tr_data.reshape(self._n_adcs,
+                                  self._n_cols,
+                                  self._n_total_frames)
+#        data.shape = (self._n_adcs,
+#                      self._n_cols,
+#                      self._n_total_frames)
+        return newData

@@ -19,7 +19,7 @@ class PlotGathered(PlotBase):
             stacked_x = np.tile(x, data.shape[0])
             stacked_data = np.hstack(data)
 
-        plt.plot(stacked_x, stacked_data, ".", markersize=0.5, label=label)
+        plt.plot(stacked_x, stacked_data, ".", markersize = 0.5, label = label)
 
         plt.legend()
 

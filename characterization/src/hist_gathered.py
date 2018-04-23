@@ -17,9 +17,9 @@ class HistGathered(PlotBase):
         data = np.hstack(data)
 
         # plot data
-        fig = plt.figure(figsize=None)
+        fig = plt.figure(figsize = None)
 
-        plt.hist(data, bins=nbins)
+        plt.hist(data, bins = nbins)
         plt.xlabel('ADU');
         plt.ylabel('#values');
 

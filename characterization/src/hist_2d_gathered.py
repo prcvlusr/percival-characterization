@@ -22,7 +22,7 @@ class Hist2dGathered(PlotBase):
             stacked_x = np.tile(x, data.shape[0]).astype(np.float)
             stacked_data = np.hstack(data).astype(np.int)
 
-        plt.hist2d(stacked_x, stacked_data, bins=100)#, cmin=1)
+        plt.hist2d(stacked_x, stacked_data, bins = 100)#, cmin=1)
         plt.colorbar()
 
         fig.suptitle(plot_title)
