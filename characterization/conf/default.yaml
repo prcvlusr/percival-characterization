@@ -1,0 +1,53 @@
+general:
+    data_type: gathered
+    run: DLSraw
+
+    plot_sample: True
+    plot_reset: True
+    plot_combined: True
+
+all:
+    output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
+
+raw:
+    input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/PSVoltFromVin15000_DLSraw.h5
+    metadata_file: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+
+    #method: [viewer]
+    method: [image, plot_coarse_vs_fine]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+    #method: [plot_sample_vs_reset]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]

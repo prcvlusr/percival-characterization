@@ -1,35 +1,14 @@
-import sys
 import numpy as np
-import os
 
-try:
-    CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-except:
-    CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
-
-BASE_PATH = os.path.dirname(
-                os.path.dirname(
-                    os.path.dirname(
-                        os.path.dirname(CURRENT_DIR)
-                    )
-                )
-            )
-SRC_PATH = os.path.join(BASE_PATH, "src")
-PROCESS_PATH = os.path.join(SRC_PATH, "process")
-ADCCAL_PATH = os.path.join(PROCESS_PATH, "adccal")
-
-if ADCCAL_PATH not in sys.path:
-    sys.path.insert(0, ADCCAL_PATH)
-
+import __init__  # noqa F401
 from process_adccal_base import ProcessAdccalBase
 
+
 class Process(ProcessAdccalBase):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
 
     def _initiate(self):
         shapes = {
-            "offset": (self._n_total_frames, self._n_adcs)
+            "offset": (self._n_cols, self._n_adcs)
         }
 
         self._result = {
@@ -76,6 +55,7 @@ class Process(ProcessAdccalBase):
         #print(sample_coarse[1, 100, :]) # All values corresponding to one ADC of one column
 
         # create as many entries for each vin as there were original frames
+<<<<<<< HEAD
         vin = self._fill_up_vin(data["vin"])
         slope = self._result["s_coarse_slope"]["data"]
         offset = self._result["s_coarse_offset"]["data"]
@@ -126,6 +106,17 @@ class Process(ProcessAdccalBase):
                 ##else:
                 ##    fit_result = self._fit_linear(vin, adu_coarse)
                 #fit_result_list.append(fit_result[0])
+=======
+        vin = self._fill_up_vin(data["vin"])  # noqa F841
+
+        # TODO
+        for adc in range(self._n_adcs):
+            for col in range(self._n_cols):
+                # x = ... (subset of vin)
+                # y = ... (subset of data["s_coarse"][adc, col, :])
+                # res = self._fit_linear(x, y)
+                pass
+>>>>>>> master
 
         #print(fit_result_list)
         #self._result["s_coarse_offset"]["data"] = fit_result_list

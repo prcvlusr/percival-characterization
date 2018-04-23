@@ -1,13 +1,8 @@
-from __future__ import print_function
-
+import h5py
+import numpy as np
 import os
 import sys
-import numpy as np
-import h5py
-import collections
-
-import logging
-from logging.config import dictConfig
+import yaml
 
 
 def create_dir(directory_name):
@@ -19,7 +14,7 @@ def create_dir(directory_name):
     if not os.path.exists(directory_name):
         try:
             os.makedirs(directory_name)
-            print("Dir '{0}' does not exist. Create it."
+            print("Dir '{}' does not exist. Create it."
                   .format(directory_name))
         except IOError:
             if os.path.isdir(directory_name):
@@ -43,12 +38,38 @@ def check_file_exists(file_name, quit=True):
         print("File: ok")
 
 
+def load_config(config_file, config={}):
+    """ Loads the config from a ini_file and overwrites already exsiting config.
+
+    Overwriting an existing configuration dictionary enables multi-layered
+    configs.
+
+    Args:
+        config_file (str): Name of the ini file from which the config should be
+                        loaded.
+        config (optional, dict): Dictionary with already existing config to be
+                                 overwritten.
+
+    Return:
+        Configuration dictionary. Values in the config file onverwrite the ones
+        in the passed config dictionary.
+    """
+
+    with open(config_file) as f:
+        new_config = yaml.load(f)
+
+    config.update(new_config)
+
+    return config
+
+
 def load_file_content(fname, excluded=[]):
     """Load the HDF5 file into a dictionary.
 
     Args:
         fname: The name of the HDF5 file to be loaded.
-        excluded (optional): The data paths which should be excluded from loading.
+        excluded (optional): The data paths which should be excluded from
+        loading.
 
     Return:
         A dictionary containing the content of the content of the file where
@@ -106,6 +127,7 @@ def decode_dataset_8bit(arr_in, bit_mask, bit_shift):
     arr_out = arr_out.astype(np.uint8)
 
     return arr_out
+
 
 def split_Alessandro(raw_dset):
     """Extracts the coarse, fine and gain bits.
@@ -182,6 +204,7 @@ def split_Ulrik(raw_dset):
 
     return coarse_adc, fine_adc, gain_bits
 
+
 def split(raw_dset):
     """Extracts the coarse, fine and gain bits.
 
@@ -219,3 +242,69 @@ def split(raw_dset):
 
     return coarse_adc, fine_adc, gain_bits
 
+
+class IndexTracker(object):
+    def __init__(self, fig, ax, data):
+        self.fig = fig
+
+        if len(ax) != 2 or len(ax[0]) != 3:
+            raise Exception("Figure has wrong layout. Need subplots(2,3)")
+        self.ax = ax
+
+        self.data = data
+
+        self.slices, rows, cols = data["s_coarse"].shape
+        self.frame = 0
+
+        self.im_s_coarse = ax[0][0].imshow(self.data["s_coarse"][self.frame])
+        self.im_s_fine = ax[0][1].imshow(self.data["s_fine"][self.frame])
+        self.im_s_gain = ax[0][2].imshow(self.data["s_gain"][self.frame])
+
+        self.im_r_coarse = ax[1][0].imshow(self.data["r_coarse"][self.frame])
+        self.im_r_fine = ax[1][1].imshow(self.data["r_fine"][self.frame])
+        self.im_r_gain = ax[1][2].imshow(self.data["r_gain"][self.frame])
+
+        self.ax[0][0].set_title("sample coarse")
+        self.ax[0][1].set_title("sample fine")
+        self.ax[0][2].set_title("sample gain")
+        self.ax[1][0].set_title("reset coarse")
+        self.ax[1][1].set_title("reset fine")
+        self.ax[1][2].set_title("reset gain")
+
+        self.update()
+
+    def onscroll(self, event):
+        """How to react if the mouse wheel is scrolled.
+        """
+
+#        print("%s %s" % (event.button, event.step))
+        if event.button == 'up':
+            self.frame = (self.frame + 1) % self.slices
+        else:
+            self.frame = (self.frame - 1) % self.slices
+        self.update()
+
+    def on_key_press(self, event):
+        """How to react if a key is pressed.
+        """
+
+        if event.key in ["right", "up"]:
+            self.frame = (self.frame + 1) % self.slices
+        elif event.key in ["left", "down"]:
+            self.frame = (self.frame - 1) % self.slices
+        self.update()
+
+    def update(self):
+        """Updates the plots.
+        """
+
+        self.im_s_coarse.set_data(self.data["s_coarse"][self.frame])
+        self.im_s_fine.set_data(self.data["s_fine"][self.frame])
+        self.im_s_gain.set_data(self.data["s_gain"][self.frame])
+        self.im_r_coarse.set_data(self.data["s_coarse"][self.frame])
+        self.im_r_fine.set_data(self.data["r_fine"][self.frame])
+        self.im_r_gain.set_data(self.data["r_gain"][self.frame])
+
+        self.fig.suptitle("Frame {}".format(self.frame))
+
+        self.fig.canvas.draw()
