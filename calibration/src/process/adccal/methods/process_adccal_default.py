@@ -35,10 +35,16 @@ class Process(ProcessAdccalBase):
         self._result = {
             # must have entries for correction
             "s_coarse_offset": {
-
+                "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/offset",
                 "type": np.int16
             },
+            "s_coarse_slope":{
+                "data": np.zeros(shapes["offset"]),
+                "path": "sample/coarse/slope",
+                "type": np.int16
+            },
+
             # additional information
             "stddev": {
                 "data": np.empty(shapes["offset"]),
@@ -71,12 +77,22 @@ class Process(ProcessAdccalBase):
 
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])
+        slope = self._result["s_coarse_slope"]["data"]
+        offset = self._result["s_coarse_offset"]["data"]
 
         fit_result_list = []
         for adc in range(self._n_adcs):
             #print(adc)
             for col in range(33, self._n_cols):
                 adu_coarse = sample_coarse[adc, col, :]
+                fit_result = self._fit_linear(vin, adu_coarse)
+                slope[adc, col] = fit_result[0]
+                offset[adc, col] = fit_result[1]
+                self._result["s_coarse_slope"]["data"] = slope
+                self._result["s_coarse_offset"]["data"] = offset
+
+
+
                 #fit_result = self._fit_linear(vin, adu_coarse)
                 #fit_result_list.append(fit_result[0])
                 #fit_result.append(self._fit_linear(vin, adu_coarse))
@@ -84,11 +100,11 @@ class Process(ProcessAdccalBase):
                 #print(fit_result[0])
                 #print(adu_coarse)
                 #print(adu_coarse)
-                idx_max = np.where(adu_coarse < 30)      
-                idx_min = np.where(adu_coarse > 0 )
-                if(idx_max[0][0]):
-                    print(idx_max[0][0])
-                print(idx_min[-1][-1])
+                #idx_max = np.where(adu_coarse < 30)      
+                #idx_min = np.where(adu_coarse > 0 )
+                #if(idx_max[0][0]):
+                #    print(idx_max[0][0])
+                #print(idx_min[-1][-1])
 
                 #print("(", idx_max[0], ", ", idx_min[-1], ")")
                
