@@ -357,7 +357,7 @@ if __name__ == "__main__":
     insert_args_into_config(args, config)
 
     # fix format of command line parameter
-    if config["general"]["n_cols"] == "None":
+    if config["general"]["n_cols"] in ["None", "null"]:
         config["general"]["n_cols"] = None
     else:
         config["general"]["n_cols"] = int(config["general"]["n_cols"])
