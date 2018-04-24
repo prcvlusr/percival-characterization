@@ -1,16 +1,16 @@
 general:
-    run_type: gather
-    n_cols: 32
+    run_type: process
+    n_cols: 1440
 
-    measurement: adccal
+    measurement: process_adccal_default
 
     run: DLSraw
 
     n_processes: 1
 
 all:
-    input: &input /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000
-    output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
+    input: &input /Users/ben/PostDoc/P2M_HDF5/
+    output: &output /Users/ben/PostDoc/P2M_HDF5/
 
 gather:
     method: null
