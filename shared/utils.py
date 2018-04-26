@@ -301,7 +301,7 @@ class IndexTracker(object):
         self.im_s_coarse.set_data(self.data["s_coarse"][self.frame])
         self.im_s_fine.set_data(self.data["s_fine"][self.frame])
         self.im_s_gain.set_data(self.data["s_gain"][self.frame])
-        self.im_r_coarse.set_data(self.data["s_coarse"][self.frame])
+        self.im_r_coarse.set_data(self.data["r_coarse"][self.frame])
         self.im_r_fine.set_data(self.data["r_fine"][self.frame])
         self.im_r_gain.set_data(self.data["r_gain"][self.frame])
 
