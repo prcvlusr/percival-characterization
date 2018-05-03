@@ -1,1 +1,1 @@
-#PERCIVAL characterization software framework
+# PERCIVAL characterization software framework
