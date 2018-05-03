@@ -13,7 +13,7 @@ class Process(ProcessAdccalBase):
 
         self._result = {
             # must have entries for correction
-            "s_coarse_offset": {
+            "sample_coarse_offset": {
                 "data": np.empty(shapes["offset"]),
                 "path": "sample/coarse/offset",
                 "type": np.int16

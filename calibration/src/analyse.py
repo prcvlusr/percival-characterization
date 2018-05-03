@@ -350,6 +350,55 @@ def insert_args_into_config(args, config):
         raise Exception("No method type specified. Abort.")
         sys.exit(1)
 
+<<<<<<< HEAD
+    run_id = "DLSraw"
+<<<<<<< HEAD
+#   in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+    in_base_dir = "/Users/ben/PostDoc/P2M_HDF5"
+=======
+    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
+    n_cols = None
+>>>>>>> fdc33051e5b5932dcc54651fd5fd91ece1b23dbe
+
+#    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
+#    run_id = "raw_uint16"
+#    n_cols = 64
+
+   # g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
+    #p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
+    g_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_gathered".format(run_id)
+    p_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_processed".format(run_id)
+
+    run_type = "gather"
+    meas_type = "adccal"
+    method = None
+
+    # run gather
+    g_obj = Analyse(in_base_dir,
+                    g_out_base_dir,
+                    run_id,
+                    run_type,
+                    meas_type,
+                    n_cols,
+                    method)
+    g_obj.run()
+
+    del g_obj
+
+    run_type = "process"
+    meas_type = "adccal"
+    method = "process_adccal_default"
+
+    # run process
+#    p_obj = Analyse(g_out_base_dir,
+#                    p_out_base_dir,
+#                    run_id,
+#                    run_type,
+#                    meas_type,
+#                    n_cols,
+#                    method)
+#    p_obj.run()
+=======
 if __name__ == "__main__":
     args = get_arguments()
 
@@ -392,3 +441,4 @@ if __name__ == "__main__":
                   method=method,
                   n_processes = n_processes)
     obj.run()
+>>>>>>> c53a16f51c239e8280926c9708c087b8e766e64a
