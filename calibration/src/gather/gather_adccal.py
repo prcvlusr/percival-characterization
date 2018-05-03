@@ -2,26 +2,25 @@ import h5py
 import numpy as np
 import os
 import sys
-import time
-import glob
 
 try:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-BASE_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
-SRC_DIR = os.path.join(BASE_DIR, "src")
+CALIBRATION_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
+BASE_DIR = os.path.dirname(CALIBRATION_DIR)
+SHARED_DIR = os.path.join(BASE_DIR, "shared")
 
 if CURRENT_DIR not in sys.path:
     sys.path.insert(0, CURRENT_DIR)
 
-from gather_base import GatherBase
+from gather_base import GatherBase  # noqa E402
 
-if CURRENT_DIR not in sys.path:
-    sys.path.insert(0, CURRENT_DIR)
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)
 
-import utils
+import utils  # noqa E402
 
 
 class Gather(GatherBase):
@@ -65,8 +64,8 @@ class Gather(GatherBase):
 
         # (n_frames, n_groups, n_rows, n_cols)
         # is transposed to
-        # (n_rows, n_cols, n_groups, n_frames)
-        self._transpose_order = (2, 3, 1, 0)
+        # (n_rows, n_cols, n_frames, n_groups)
+        self._transpose_order = (2, 3, 0, 1)
 
         self._metadata = {
             "n_frames_per_run": self._n_frames_per_run,
@@ -123,8 +122,16 @@ class Gather(GatherBase):
 
         # data looks like this: <V_in>  <file_prefix>
         file_content = [s.split("\t") for s in file_content]
-        for s in file_content:
-            s[0]=float(s[0])
+        for i, s in enumerate(file_content):
+            try:
+                s[0] = float(s[0])
+            except:
+                if s == ['']:
+                    # remove empty lines
+                    del file_content[i]
+                else:
+                    raise
+#                print("file_content", file_content)
 
         self._register = sorted(file_content)
 
@@ -134,9 +141,13 @@ class Gather(GatherBase):
         for i in self._register:
             in_fname = self._in_fname.format(run=i[1])
 
-            with h5py.File(in_fname, "r") as f:
-                n_frames = f[self._paths["sample"]].shape[0]
-                self._n_frames_per_run.append(n_frames)
+            try:
+                with h5py.File(in_fname, "r") as f:
+                    n_frames = f[self._paths["sample"]].shape[0]
+                    self._n_frames_per_run.append(n_frames)
+            except OSError:
+                print("in_fname", in_fname)
+                raise
 
     def _load_data(self):
         # for convenience
@@ -164,19 +175,6 @@ class Gather(GatherBase):
             with h5py.File(in_fname, "r") as f:
                 in_sample = f[self._paths["sample"]][idx]
                 in_reset = f[self._paths["reset"]][idx]
-
-#            print(idx)
-#            test = in_sample[0, 0, 36]
-            #test = in_sample[0, 0, 100]
-#            print(test, bin(test))
-#            print(hex(0b0110000000000000))
-#            arr_out = np.bitwise_and(test, 0x6000)
-#            arr_out = np.right_shift(arr_out, 5+8)
-#            arr_out = arr_out.astype(np.uint8)
-#            print(arr_out)
-
-#            continue
-
 
             # determine where this data block should go in the result
             # matrix

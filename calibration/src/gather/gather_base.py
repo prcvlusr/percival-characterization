@@ -1,23 +1,22 @@
 import h5py
-import numpy as np
 import os
 import sys
 import time
-import glob
-
 
 try:
     CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-BASE_PATH = os.path.dirname(os.path.dirname(CURRENT_DIR))
-SRC_PATH = os.path.join(BASE_PATH, "src")
+CALIBRATION_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
+BASE_DIR = os.path.dirname(CALIBRATION_DIR)
+SHARED_DIR = os.path.join(BASE_DIR, "shared")
 
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
+from _version import __version__
 
 
 class GatherBase(object):
@@ -31,6 +30,7 @@ class GatherBase(object):
         self._meta_fname = meta_fname
 
         self._data_to_write = {}
+        self._metadata = {}
 
         print("\nStart gather\n"
               "in_fname = {}\n"
@@ -62,15 +62,17 @@ class GatherBase(object):
                                  data=dset["data"],
                                  dtype=dset["type"])
 
+            gname = "collection"
             # save metadata from original files
             for key, value in iter(self._metadata.items()):
-                gname = "collection"
-
                 name = "{}/{}".format(gname, key)
                 try:
                     f.create_dataset(name, data=value)
                 except:
                     print("Error in", name, value.dtype)
                     raise
+
+            name = "{}/{}".format(gname, "version")
+            f.create_dataset(name, data=__version__)
 
             f.flush()
