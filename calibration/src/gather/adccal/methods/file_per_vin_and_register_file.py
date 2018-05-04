@@ -8,14 +8,22 @@ try:
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-CALIBRATION_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
+CALIBRATION_DIR = os.path.dirname(
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.dirname(CURRENT_DIR)
+                        )
+                    )
+                  )
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
+GATHER_DIR = os.path.join(CALIBRATION_DIR, "src", "gather")
+ADCCAL_DIR = os.path.join(GATHER_DIR, "adccal")
 
-if CURRENT_DIR not in sys.path:
-    sys.path.insert(0, CURRENT_DIR)
+if ADCCAL_DIR not in sys.path:
+    sys.path.insert(0, ADCCAL_DIR)
 
-from gather_base import GatherBase  # noqa E402
+from gather_adccal_base import GatherAdcBase  # noqa E402
 
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
@@ -23,27 +31,7 @@ if SHARED_DIR not in sys.path:
 import utils  # noqa E402
 
 
-class Gather(GatherBase):
-    def __init__(self, n_rows, n_cols, part, **kwargs):
-        super().__init__(**kwargs)
-
-        self._metadata = None
-        self._register = None
-
-        self._n_adc = 7
-        self._n_rows = n_rows
-        self._n_cols = n_cols
-
-        self._part = part
-
-        self._n_rows_per_group = self._n_rows // self._n_adc
-
-        self._paths = {
-            "sample": "data",
-            "reset": "reset"
-        }
-
-        self.initiate()
+class Gather(GatherAdcBase):
 
     def initiate(self):
         self._read_register()

@@ -40,6 +40,8 @@ class GatherBase(object):
     def run(self):
         totalTime = time.time()
 
+        self.initiate()
+
         self._load_data()
 
         print("Start saving at {} ... ".format(self._out_fname), end="")

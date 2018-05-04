@@ -39,14 +39,14 @@ def check_file_exists(file_name, quit=True):
 
 
 def load_config(config_file, config={}):
-    """ Loads the config from a ini_file and overwrites already exsiting config.
+    """ Loads the config from a yaml file and overwrites already exsiting config.
 
     Overwriting an existing configuration dictionary enables multi-layered
     configs.
 
     Args:
-        config_file (str): Name of the ini file from which the config should be
-                        loaded.
+        config_file (str): Name of the yaml file from which the config should be
+                           loaded.
         config (optional, dict): Dictionary with already existing config to be
                                  overwritten.
 

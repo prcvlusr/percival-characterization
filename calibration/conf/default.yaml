@@ -13,7 +13,7 @@ all:
     output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
 
 gather:
-    method: null
+    method: file_per_vin_and_register_file
 
     input: *input
     output: *output

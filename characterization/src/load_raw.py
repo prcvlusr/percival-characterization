@@ -87,27 +87,31 @@ class LoadRaw():
         Return:
             The voltage as float.
         """
-        with open(self._metadata_fname, "r") as f:
-            file_content = f.read().splitlines()
+        if self._metadata_fname is None:
+            return None
+        else:
+            print("Opening metadata file {}".format(self._metadata_fname))
+            with open(self._metadata_fname, "r") as f:
+                file_content = f.read().splitlines()
 
-        # data looks like this: <V_in>  <file_prefix>
-        file_content = [s.split("\t") for s in file_content]
-        for i, s in enumerate(file_content):
-            try:
-                s[0] = float(s[0])
-            except:
-                if s == ['']:
-                    # remove empty lines
-                    del file_content[i]
-                else:
-                    raise
-#                print("file_content", file_content)
+            # data looks like this: <V_in>  <file_prefix>
+            file_content = [s.split("\t") for s in file_content]
+            for i, s in enumerate(file_content):
+                try:
+                    s[0] = float(s[0])
+                except:
+                    if s == ['']:
+                        # remove empty lines
+                        del file_content[i]
+                    else:
+                        raise
+    #                print("file_content", file_content)
 
-        filename = os.path.split(self._input_fname)[-1]
-        vin = [content for content in file_content if filename.startswith(content[1])]
+            filename = os.path.split(self._input_fname)[-1]
+            vin = [content for content in file_content if filename.startswith(content[1])]
 
-        if len(vin) != 1:
-            print("vin", vin)
-            raise Exception("More than one possible Vin found in metadata file.")
+            if len(vin) != 1:
+                print("vin", vin)
+                raise Exception("More than one possible Vin found in metadata file.")
 
-        return float(vin[0][0])
+            return float(vin[0][0])
