@@ -51,8 +51,7 @@ class Process(ProcessAdccalBase):
                                               adu_coarse > 1))
                 if np.any(idx):
                     fit_result = self._fit_linear(vin[idx], adu_coarse[idx])
-                    slope[adc, col] , offset[adc, col]= fit_result.solution
-                    #offset[adc, col] = fit_result.solution[1]
+                    slope[adc, col], offset[adc, col] = fit_result.solution
                 else:
                     slope[adc, col] = np.NaN
                     offset[adc, col] = np.NaN

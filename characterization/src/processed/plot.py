@@ -12,7 +12,8 @@ class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
         super().__init__(**kwargs)
 
-    def _generate_single_plot(self, x, data, constants, plot_title, label, out_fname):
+    def _generate_single_plot(self, x, data, constants,
+                              plot_title, label, out_fname):
 
         fig = plt.figure(figsize=None)
 
@@ -21,15 +22,15 @@ class Plot(PlotBase):
         m = constants["slope"]
         b = constants["offset"]
         plt.plot(x, m * x + b, "r", label="Fitting")
-        
+
         plt.legend()
 
         fig.suptitle(plot_title)
         plt.xlabel("V")
         plt.ylabel("ADU")
         fig.text(0.5, 0.78,
-                 "slope: {0} \noffset: {1}".format(m, b),
-                 fontsize = 12)
+                 "slope: {0:.2f} \noffset: {1:.2f}".format(m, b),
+                 fontsize=12)
 
         fig.savefig(out_fname)
 
