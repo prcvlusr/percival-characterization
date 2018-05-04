@@ -32,6 +32,27 @@ class PlotBase():
             self._x = loaded_data.x
             self._data = loaded_data.data
 
+        # to ease nameing plots
+        if self._adc == slice(None):
+            self._adc_title = None
+        else:
+            self._adc_title = self._adc
+
+        if self._frame == slice(None):
+            self._frame_title = None
+        else:
+            self._frame_title = self._frame
+
+        if self._row == slice(None):
+            self._row_title = None
+        else:
+            self._row_title = self._row
+
+        if self._col == slice(None):
+            self._col_title = None
+        else:
+            self._col_title = self._col
+
     def create_dir(self):
         if not os.path.exists(self._output_dir):
             print("Output directory {} does not exist. Create it."
@@ -64,9 +85,9 @@ class PlotBase():
     def plot_sample(self):
         self.create_dir()
 
-        pos = "ADC={}, Col={}".format(self._adc, self._col)
-        suffix = "_adc{}_col{}".format(self._adc, self._col)
-        out = self._output_dir+"/"
+        pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
+        suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
+        out = self._output_dir + "/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["s_coarse"],
@@ -87,9 +108,9 @@ class PlotBase():
     def plot_reset(self):
         self.create_dir()
 
-        pos = "ADC={}, Col={}".format(self._adc, self._col)
-        suffix = "_adc{}_col{}".format(self._adc, self._col)
-        out = self._output_dir+"/"
+        pos = "ADC={}, Col={}".format(self._adc_title, self._col_title)
+        suffix = "_adc{}_col{}".format(self._adc_title, self._col_title)
+        out = self._output_dir + "/"
 
         self._generate_single_plot(x=self._x,
                                    data=self._data["r_coarse"],

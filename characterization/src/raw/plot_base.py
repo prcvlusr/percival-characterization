@@ -32,6 +32,27 @@ class PlotBase():
 
         self._vin = loader.get_vin()
 
+        # to ease nameing plots
+        if self._adc == slice(None):
+            self._adc_title = None
+        else:
+            self._adc_title = self._adc
+
+        if self._frame == slice(None):
+            self._frame_title = None
+        else:
+            self._frame_title = self._frame
+
+        if self._row == slice(None):
+            self._row_title = None
+        else:
+            self._row_title = self._row
+
+        if self._col == slice(None):
+            self._col_title = None
+        else:
+            self._col_title = self._col
+
     def create_dir(self):
         if not os.path.exists(self._output_dir):
             print("Output directory {} does not exist. Create it."

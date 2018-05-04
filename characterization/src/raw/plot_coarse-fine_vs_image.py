@@ -22,10 +22,10 @@ class Plot(PlotBase):
         self.create_dir()
 
         title = ("Vin={}V, Sample: Row={}, Col={}"
-                 .format(self._vin, self._row, self._col))
+                 .format(self._vin, self._row_title, self._col_title))
         out = os.path.join(self._output_dir,
-                           "sample_coarse_vs_fine_row{}_col{}"
-                           .format(self._row, self._col))
+                           "sample_coarse-fine_vs_image_row{}_col{}"
+                           .format(self._row_title, self._col_title))
 
         self._generate_single_plot(x=range(self._data["s_coarse"].shape[0]),
                                    data_coarse=self._data["s_coarse"],
@@ -37,10 +37,10 @@ class Plot(PlotBase):
         self.create_dir()
 
         title = ("Vin={}V, Reset: Row={}, Col={}"
-                 .format(self._vin, self._row, self._col))
+                 .format(self._vin, self._row_title, self._col_title))
         out = os.path.join(self._output_dir,
-                           "reset_coarse_vs_fine_row{}_col{}"
-                           .format(self._row, self._col))
+                           "reset_coarse-fine_vs_image_row{}_col{}"
+                           .format(self._row_title, self._col_title))
 
         self._generate_single_plot(x=range(self._data["r_coarse"].shape[0]),
                                    data_coarse=self._data["r_coarse"],
