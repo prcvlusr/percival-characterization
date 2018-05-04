@@ -1,5 +1,5 @@
 general:
-    data_type: gathered
+    data_type: processed
     run: DLSraw
 
     plot_sample: True
@@ -7,7 +7,7 @@ general:
     plot_combined: True
 
 all:
-    output: &output /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/processed
+    output: &output /Users/ben/PostDoc/P2M_HDF5/
 
 raw:
     input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/PSVoltFromVin15000_DLSraw.h5
@@ -47,7 +47,7 @@ processed:
 
     adc: 0
     frame: null
-    col: 100
+    col: 10
     row: null
 
     method: [plot]

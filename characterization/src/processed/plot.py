@@ -21,12 +21,15 @@ class Plot(PlotBase):
         m = constants["slope"]
         b = constants["offset"]
         plt.plot(x, m * x + b, "r", label="Fitting")
-
+        
         plt.legend()
 
         fig.suptitle(plot_title)
         plt.xlabel("V")
         plt.ylabel("ADU")
+        fig.text(0.5, 0.78,
+                 "slope: {0} \noffset: {1}".format(m, b),
+                 fontsize = 12)
 
         fig.savefig(out_fname)
 
