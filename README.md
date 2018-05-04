@@ -16,9 +16,41 @@ System dependencies:
   * Matplotlib - 2D plotting library for Python
   * YAML -  human-readable data serialization language 
 
+N.B.: Testing procedures are underdevelopment.  
+
 ## Installation
 
 TODO 
 
 ## Execution
 
+### Config file
+
+
+```
+  general:
+    run_type: gather
+    n_cols: 32
+ 
+    measurement: adccal
+ 
+    run: DLSraw
+ 
+    n_processes: 1
+ 
+all:
+    input: &input /home/kuhnm/percival/raw/PSVoltFromVin
+    output: &output /home/kuhnm/percival/processed
+ 
+gather:
+    method: null
+ 
+    input: *input
+    output: *output
+ 
+process:
+    method: process_adccal_default
+ 
+    input: *output
+    output: *output
+```
