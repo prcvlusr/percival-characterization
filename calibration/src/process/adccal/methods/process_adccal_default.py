@@ -13,12 +13,12 @@ class Process(ProcessAdccalBase):
 
         self._result = {
             # must have entries for correction
-            "sample_coarse_offset": {
+            "s_coarse_offset": {
                 "data": np.empty(shapes["offset"]),
                 "path": "sample/coarse/offset",
                 "type": np.float16
             },
-            "sample_coarse_slope": {
+            "s_coarse_slope": {
                 "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/slope"
             },
@@ -41,6 +41,11 @@ class Process(ProcessAdccalBase):
 
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])  # noqa F841
+        sample_coarse = data["s_coarse"]
+        
+        offset = self._result["s_coarse_offset"]["data"]
+        slope = self._result["s_coarse_slope"]["data"]
+        
 
         # TODO
         for adc in range(self._n_adcs):

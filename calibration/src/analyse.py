@@ -16,17 +16,18 @@ SRC_DIR = os.path.join(CALIBRATION_DIR, "src")
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
 
+GATHER_DIR = os.path.join(SRC_DIR, "gather")
+ADCCAL_GATHER_METHOD_DIR = os.path.join(GATHER_DIR, "adccal", "methods")
+PTCCAL_GATHER_METHOD_DIR = os.path.join(GATHER_DIR, "ptccal", "methods")
+
 PROCESS_DIR = os.path.join(SRC_DIR, "process")
-ADCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
-PTCCAL_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
+ADCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "adccal", "methods")
+PTCCAL_PROCESS_METHOD_DIR = os.path.join(PROCESS_DIR, "ptccal", "methods")
 
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
-
-if ADCCAL_METHOD_DIR not in sys.path:
-    sys.path.insert(0, ADCCAL_METHOD_DIR)
 
 
 class Analyse(object):
@@ -158,14 +159,19 @@ class Analyse(object):
 
 
     def _call_gather(self, **kwargs):
+
         if self.measurement == "adccal":
-            from gather.gather_adccal import Gather
+            if ADCCAL_GATHER_METHOD_DIR not in sys.path:
+                sys.path.insert(0, ADCCAL_GATHER_METHOD_DIR)
         elif self.measurement == "ptccal":
-            from gather.gather_base import GatherBase as Gather
+            if PTCCAL_GATHER_METHOD_DIR not in sys.path:
+                sys.path.insert(0, PTCCAL_GATHER_METHOD_DIR)
         else:
             print("Unsupported type.")
 
-        obj = Gather(**kwargs)
+        self.gather_m = __import__(self.method).Gather
+
+        obj = self.gather_m(**kwargs)
         obj.run()
 
     def run_process(self):
@@ -209,6 +215,13 @@ class Analyse(object):
                 job.join()
 
     def _call_process(self, **kwargs):
+        if self.measurement == "adccal":
+            if ADCCAL_PROCESS_METHOD_DIR not in sys.path:
+                sys.path.insert(0, ADCCAL_PROCESS_METHOD_DIR)
+        elif self.measurement == "ptccal":
+            if PTCCAL_PROCESS_METHOD_DIR not in sys.path:
+                sys.path.insert(0, PTCCAL_PROCESS_METHOD_DIR)
+
         self.process_m = __import__(self.method).Process
 
         obj = self.process_m(**kwargs)
@@ -350,55 +363,7 @@ def insert_args_into_config(args, config):
         raise Exception("No method type specified. Abort.")
         sys.exit(1)
 
-<<<<<<< HEAD
-    run_id = "DLSraw"
-<<<<<<< HEAD
-#   in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
-    in_base_dir = "/Users/ben/PostDoc/P2M_HDF5"
-=======
-    in_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/P2M_ADCcor_crs_reduced"
-    n_cols = None
->>>>>>> fdc33051e5b5932dcc54651fd5fd91ece1b23dbe
 
-#    in_base_dir = "/nfs/fs/fsds/percival/P2MemulatedData/ADCcorrection/58_W08_01_TS1.2PIX_PB5V2_-40_N02_25MHz_1ofmany_all_coldFingerT-40/P2Mdata_coldFingerT-40"
-#    run_id = "raw_uint16"
-#    n_cols = 64
-
-   # g_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_gathered".format(run_id)
-    #p_out_base_dir = "/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/{}_processed".format(run_id)
-    g_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_gathered".format(run_id)
-    p_out_base_dir = "/Users/ben/PostDoc/P2M_HDF5/{}_processed".format(run_id)
-
-    run_type = "gather"
-    meas_type = "adccal"
-    method = None
-
-    # run gather
-    g_obj = Analyse(in_base_dir,
-                    g_out_base_dir,
-                    run_id,
-                    run_type,
-                    meas_type,
-                    n_cols,
-                    method)
-    g_obj.run()
-
-    del g_obj
-
-    run_type = "process"
-    meas_type = "adccal"
-    method = "process_adccal_default"
-
-    # run process
-#    p_obj = Analyse(g_out_base_dir,
-#                    p_out_base_dir,
-#                    run_id,
-#                    run_type,
-#                    meas_type,
-#                    n_cols,
-#                    method)
-#    p_obj.run()
-=======
 if __name__ == "__main__":
     args = get_arguments()
 
@@ -441,4 +406,3 @@ if __name__ == "__main__":
                   method=method,
                   n_processes = n_processes)
     obj.run()
->>>>>>> c53a16f51c239e8280926c9708c087b8e766e64a
