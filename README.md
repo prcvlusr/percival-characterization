@@ -27,7 +27,7 @@ Starting from scratch:
 
 To update the framework:
 ```
-% cd <percial characterization directory>
+% cd /path/to/percival-characterisation
 % git pull
 ```
 
@@ -158,7 +158,7 @@ processed:
 #### Run
 
 ```
-% cd <percial characterization directory>
+% cd /path/to/percival-characterisation
 % python3 characterization/src/run_characerization.py --help
 usage: run_characterization.py [-h] -i INPUT_DIR -o OUTPUT_DIR [--adc ADC]
                           [--col COL] [--row ROWS [ROWS ...]] [--plot_sample]
