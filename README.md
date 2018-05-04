@@ -1,7 +1,24 @@
 # PERCIVAL characterization software framework
 
-Software written in Python3
+The PERCIVAL characterization software framework
 
-## How to use the software
+This project allow users to calibrate and characterize the PERCIVAL detector.
 
-For the anaus...
+## Dependencies
+
+This package is developed with Python 3.6.
+
+System dependencies:
+  * Python (3.6)
+  * pip - Python package manager
+  * HDF5 libraries 
+  * Numpy - library for scientific computing with Python   
+  * Matplotlib - 2D plotting library for Python
+  * YAML -  human-readable data serialization language 
+
+## Installation
+
+TODO 
+
+## Execution
+
