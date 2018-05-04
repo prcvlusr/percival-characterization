@@ -20,7 +20,16 @@ N.B.: Testing procedures are underdevelopment.
 
 ## Installation
 
-TODO 
+Starting from scratch:
+```
+% git clone https://github.com/percival-desy/percival-characterization.git
+``` 
+
+To update the framework:
+```
+% cd <percial characterization directory>
+% git pull
+```
 
 ## Execution
 
@@ -183,3 +192,4 @@ To run the characterization:
 ```
 % python3 characterization/src/run_characterization.py --config_file my_config.yaml
 ```
+
