@@ -89,3 +89,97 @@ To run a analysis according to a configuration file:
  % python3 calibration/src/analyse.py --config_file my_config.yaml
 ```
 
+
+### Characterization
+
+#### Config file
+
+```
+general:
+    data_type: <data type>
+    run_id: <run Id>
+ 
+    plot_sample: <plotting option - True or False>
+    plot_reset: True
+    plot_combined: True
+ 
+ 
+raw:
+    input: /path/to/rawHDF5/files
+    metadata_file: /path/to/medataData.dat
+ 
+    output: path/to/output/directory
+     
+    measurement: <measurement type>
+ 
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+ 
+    method: [image, plot_coarse_vs_fine]
+ 
+gathered:
+    input: /path/to/input/gathered/data
+    output: /path/to/output/gathered/data
+ 
+    measurement: <measurement type>
+ 
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+ 
+    method: <method to use - plot, hist, hist_2d>
+ 
+processed:
+    input: /path/to/input/processed/data
+    output: /path/to/output/processed/data
+ 
+    measurement: <measurement type>
+ 
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+ 
+    method: <method to use - plot, hist, hist_2d>
+```
+
+#### Run
+
+```
+% cd <percial characterization directory>
+% python3 characterization/src/run_characerization.py --help
+usage: run_characterization.py [-h] -i INPUT_DIR -o OUTPUT_DIR [--adc ADC]
+                          [--col COL] [--row ROWS [ROWS ...]] [--plot_sample]
+                          [--plot_reset]
+ 
+Characterization tools of P2M
+ 
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT_DIR, --input INPUT_DIR
+                        Path of input directory containing HDF5 files to
+                        characterize. These have to be the ouput of 'gather'.
+  -o OUTPUT_DIR, --output OUTPUT_DIR
+                        Path of output directory to create plots in.
+  --adc ADC             The ADC to create plots for. (default: 0)
+  --col COL             The column of the data to create plots for. (default:
+                        100)
+  --row ROWS [ROWS ...]
+                        The row(s) of the ADC group to create plots for.
+                        Options: specify one value, e.g. --rows 0 means take
+                        only first row of ADC groupspecify start and stop
+                        value, e.g. --rows 0 5 means to take the first 5 rows
+                        of the ADC groupdo not set this paramater: meaning
+                        take everything
+  --plot_sample         Plot only the sample data
+  --plot_reset          Plot only the reset data
+```
+
+To run the characterization: 
+
+```
+% python3 characterization/src/run_characterization.py --config_file my_config.yaml
+```
