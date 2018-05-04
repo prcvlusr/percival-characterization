@@ -23,7 +23,7 @@ raw:
     row: 100
 
     #method: [viewer]
-    method: [image, plot_coarse_vs_fine]
+    method: [image, plot_coarse-fine_vs_image]
 
 gathered:
     input: *output
