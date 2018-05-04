@@ -24,8 +24,9 @@ TODO
 
 ## Execution
 
-### Config file
+### Calibration
 
+#### Config file
 
 ```
 general:
@@ -54,3 +55,37 @@ process:
     input: *output
     output: *output
 ```
+
+#### Run
+
+```
+% cd /path/to/percival-characterisation
+% python3 calibration/src/analyse.py -- help
+usage: analyse.py [-h] -i IN_BASE_DIR -o OUT_BASE_DIR -r RUN_ID -m METHOD -t
+                  RUN_TYPE
+ 
+Calibration tools for P2M
+ 
+optional arguments:
+  -h, --help            show this help message and exit
+  -i IN_BASE_DIR, --input IN_BASE_DIR
+                        Path of input directory containing HDF5 files to
+                        analyse
+  -o OUT_BASE_DIR, --output OUT_BASE_DIR
+                        Path of output directory for storing files
+  -r RUN_ID, --run RUN_ID
+                        Non-changing part of file name
+  -m METHOD, --method METHOD
+                        Method to use during the analysis:
+                        process_adccal_default, None
+  -t RUN_TYPE, --type RUN_TYPE
+                        Run type: gather, process
+
+```
+
+To run a analysis according to a configuration file:
+
+```
+ % python3 calibration/src/analyse.py --config_file my_config.yaml
+```
+
