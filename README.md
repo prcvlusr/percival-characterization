@@ -28,19 +28,19 @@ TODO
 
 
 ```
-  general:
-    run_type: gather
-    n_cols: 32
+general:
+    run_type: <runType>
+    n_cols: <numberOfColumns>
  
-    measurement: adccal
+    measurement: <measurementType>
  
     run: DLSraw
  
     n_processes: 1
  
 all:
-    input: &input /home/kuhnm/percival/raw/PSVoltFromVin
-    output: &output /home/kuhnm/percival/processed
+    input: &input /path/to/input/files
+    output: &output /path/to/output/files
  
 gather:
     method: null
@@ -49,7 +49,7 @@ gather:
     output: *output
  
 process:
-    method: process_adccal_default
+    method: <processMethod>
  
     input: *output
     output: *output
