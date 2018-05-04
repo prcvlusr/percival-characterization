@@ -21,25 +21,22 @@ class Process(ProcessAdccalBase):
                 "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/slope"
             },
-            # additional information
-            "stddev": {
-                "data": np.empty(shapes["offset"]),
-                "path": "stddev",
-                "type": np.int16
-            },
         }
 
     def _calculate(self):
+        ''' Perform a linear fit on sample ADC coarse and store the offset
+            and slope in a HDF5 file.
+        '''
         print("Start loading data from {} ...".format(self._in_fname), end="")
         data = self._load_data(self._in_fname)
-        print("Done.")
+        print("Data loaded, fitting coarse data...")
 
         # convert (n_adcs, n_cols, n_groups, n_frames)
         #      -> (n_adcs, n_cols, n_groups * n_frames)
         self._merge_groups_with_frames(data["s_coarse"])
 
         # create as many entries for each vin as there were original frames
-        vin = self._fill_up_vin(data["vin"])  # noqa F841
+        vin = self._fill_up_vin(data["vin"])
         sample_coarse = data["s_coarse"]
         offset = self._result["s_coarse_offset"]["data"]
         slope = self._result["s_coarse_slope"]["data"]
@@ -59,5 +56,4 @@ class Process(ProcessAdccalBase):
         self._result["s_coarse_slope"]["data"] = slope
         self._result["s_coarse_offset"]["data"] = offset
 
-        self._result["stddev"]["data"] = data["s_coarse"].std(axis=2)
-        print("Done.")
+        print("Coarse fitting is done.")
