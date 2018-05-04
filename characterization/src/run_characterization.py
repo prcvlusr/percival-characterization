@@ -244,13 +244,14 @@ class Analyse(object):
             metadata_fname = None
 
         kwargs = dict(
-            input_fname_templ=input_fname_templ,
+            input_fname=input_fname_templ,
             metadata_fname=self._metadata_file,
             output_dir=None,
             adc=self._adc,
             frame=self._frame,
             row=self._row,
-            col=self._col
+            col=self._col,
+            run=self._run_id
         )
 
         print("Configured: adc={}, frame={}, row={}, col={}"

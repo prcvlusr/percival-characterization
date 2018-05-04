@@ -11,27 +11,15 @@ class PlotBase():
     LoadedData = namedtuple("loaded_data", ["x",
                                             "data"])
 
-    def __init__(self,
-             input_fname_templ,
-             metadata_fname,
-             output_dir,
-             adc,
-             frame,
-             row,
-             col,
-             loaded_data=None,
-             dims_overwritten=False):
+    def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
 
-        self._input_fname_templ = input_fname_templ
-        self._metadata_fname = metadata_fname
-        self._output_dir = os.path.normpath(output_dir)
-        self._adc = adc
-        self._frame = frame
-        self._row = row
-        self._col = col
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
+
         self._dims_overwritten = dims_overwritten
 
-        loader = LoadGathered(input_fname_templ=self._input_fname_templ,
+        loader = LoadGathered(input_fname_templ=self._input_fname,
                               output_dir=self._output_dir,
                               adc=self._adc,
                               frame=self._frame,

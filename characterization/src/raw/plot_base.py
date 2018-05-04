@@ -10,24 +10,12 @@ from load_raw import LoadRaw
 class PlotBase():
     LoadedData = namedtuple("loaded_data", ["data"])
 
-    def __init__(self,
-             input_fname_templ,
-             metadata_fname,
-             output_dir,
-             adc,
-             frame,
-             col,
-             row,
-             loaded_data=None,
-             dims_overwritten=False):
+    def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
 
-        self._input_fname = input_fname_templ
-        self._metadata_fname = metadata_fname
-        self._output_dir = os.path.normpath(output_dir)
-        self._adc = adc
-        self._frame = frame
-        self._col = col
-        self._row = row
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
+
         self._dims_overwritten = dims_overwritten
 
         loader = LoadRaw(input_fname=self._input_fname,
