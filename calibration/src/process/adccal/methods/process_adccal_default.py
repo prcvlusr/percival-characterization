@@ -14,9 +14,8 @@ class Process(ProcessAdccalBase):
         self._result = {
             # must have entries for correction
             "s_coarse_offset": {
-                "data": np.empty(shapes["offset"]),
+                "data": np.zeros(shapes["offset"]),
                 "path": "sample/coarse/offset",
-                "type": np.float16
             },
             "s_coarse_slope": {
                 "data": np.zeros(shapes["offset"]),
@@ -42,30 +41,23 @@ class Process(ProcessAdccalBase):
         # create as many entries for each vin as there were original frames
         vin = self._fill_up_vin(data["vin"])  # noqa F841
         sample_coarse = data["s_coarse"]
-        
         offset = self._result["s_coarse_offset"]["data"]
         slope = self._result["s_coarse_slope"]["data"]
-        
 
-        # TODO
         for adc in range(self._n_adcs):
             for col in range(self._n_cols):
                 adu_coarse = sample_coarse[adc, col, :]
-                idx = np.where(np.logical_and(adu_coarse < 25, adu_coarse > 5))[0]
+                idx = np.where(np.logical_and(adu_coarse < 30,
+                                              adu_coarse > 1))
                 if np.any(idx):
                     fit_result = self._fit_linear(vin[idx], adu_coarse[idx])
-                    slope[adc, col] = fit_result.solution[0]
-                    offset[adc, col] = fit_result.solution[1]
+                    slope[adc, col] , offset[adc, col]= fit_result.solution
+                    #offset[adc, col] = fit_result.solution[1]
                 else:
                     slope[adc, col] = np.NaN
                     offset[adc, col] = np.NaN
 
         self._result["s_coarse_slope"]["data"] = slope
-        self._result["s_coarse_offset"]["data"] = offset
-
-
-        print("Start computing means and standard deviations ...", end="")
-        offset = np.mean(data["s_coarse"], axis=2).astype(np.int)
         self._result["s_coarse_offset"]["data"] = offset
 
         self._result["stddev"]["data"] = data["s_coarse"].std(axis=2)
