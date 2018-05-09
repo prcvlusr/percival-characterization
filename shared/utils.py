@@ -244,67 +244,87 @@ def split(raw_dset):
 
 
 class IndexTracker(object):
-    def __init__(self, fig, ax, data):
-        self.fig = fig
+    def __init__(self, data):
 
-        if len(ax) != 2 or len(ax[0]) != 3:
-            raise Exception("Figure has wrong layout. Need subplots(2,3)")
-        self.ax = ax
+        # if len(ax) != 2 or len(ax[0]) != 3:
+        #    raise Exception("Figure has wrong layout. Need subplots(2,3)")
 
-        self.data = data
+        self._data = data
+        self._slice = None
+        self._window_title = None
+        self._fig = None
 
-        self.slices, rows, cols = data["s_coarse"].shape
-        self.frame = 0
+        self.initiate()
 
-        self.im_s_coarse = ax[0][0].imshow(self.data["s_coarse"][self.frame])
-        self.im_s_fine = ax[0][1].imshow(self.data["s_fine"][self.frame])
-        self.im_s_gain = ax[0][2].imshow(self.data["s_gain"][self.frame])
+        self.set_data()
 
-        self.im_r_coarse = ax[1][0].imshow(self.data["r_coarse"][self.frame])
-        self.im_r_fine = ax[1][1].imshow(self.data["r_fine"][self.frame])
-        self.im_r_gain = ax[1][2].imshow(self.data["r_gain"][self.frame])
+        self._update()
 
-        self.ax[0][0].set_title("sample coarse")
-        self.ax[0][1].set_title("sample fine")
-        self.ax[0][2].set_title("sample gain")
-        self.ax[1][0].set_title("reset coarse")
-        self.ax[1][1].set_title("reset fine")
-        self.ax[1][2].set_title("reset gain")
+    def initiate(self):
+        """Initiate the canvas and all needed plot attributes.
+        """
 
-        self.update()
+        msg = "initiate is not implementated. Abort."
+        raise Exception(msg)
+
+    def set_data(self):
+        """Creates the plot and assign the data to it.
+        """
+
+        msg = "set_data is not implementated. Abort."
+        raise Exception(msg)
+
+    def update_plots(self):
+        """What plots should be updated on the events and how.
+        """
+        msg = "update_plots is not implemented. Abort."
+        raise Exception(msg)
+
+    def get_fig(self):
+        """Returns the self._fig figure on which the canvas was created.
+
+        Returns:
+            The matplotlib.figure.Figure object initiated in the initiate
+            method.
+        """
+
+        return self._fig
 
     def onscroll(self, event):
         """How to react if the mouse wheel is scrolled.
+
+        Args:
+            event: Event that you can connect to.
         """
 
 #        print("%s %s" % (event.button, event.step))
         if event.button == 'up':
-            self.frame = (self.frame + 1) % self.slices
+            self._frame = (self._frame + 1) % self._slices
         else:
-            self.frame = (self.frame - 1) % self.slices
-        self.update()
+            self._frame = (self._frame - 1) % self._slices
+
+        self._update()
 
     def on_key_press(self, event):
         """How to react if a key is pressed.
+
+        Args:
+            event: Event that you can connect to.
         """
 
         if event.key in ["right", "up"]:
-            self.frame = (self.frame + 1) % self.slices
+            self._frame = (self._frame + 1) % self._slices
         elif event.key in ["left", "down"]:
-            self.frame = (self.frame - 1) % self.slices
-        self.update()
+            self._frame = (self._frame - 1) % self._slices
 
-    def update(self):
+        self._update()
+
+    def _update(self):
         """Updates the plots.
         """
 
-        self.im_s_coarse.set_data(self.data["s_coarse"][self.frame])
-        self.im_s_fine.set_data(self.data["s_fine"][self.frame])
-        self.im_s_gain.set_data(self.data["s_gain"][self.frame])
-        self.im_r_coarse.set_data(self.data["r_coarse"][self.frame])
-        self.im_r_fine.set_data(self.data["r_fine"][self.frame])
-        self.im_r_gain.set_data(self.data["r_gain"][self.frame])
+        self.update_plots()
 
-        self.fig.suptitle("Frame {}".format(self.frame))
+        self._fig.suptitle(self._window_title)
 
-        self.fig.canvas.draw()
+        self._fig.canvas.draw()

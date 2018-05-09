@@ -4,70 +4,46 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from load_raw import LoadRaw
-import utils
+from utils import IndexTracker
+from viewer_base import ViewerBase
 
+class ViewTracker(IndexTracker):
+    def initiate(self):
+        self._fig, self._ax = plt.subplots(2, 3, sharex=True, sharey=True)
 
-class Plot():
-    LoadedData = namedtuple("loaded_data", ["data"])
+        self._slices, _, _ = self._data["s_coarse"].shape
+        self._frame = 0
 
-    def __init__(self, loaded_data=None, dims_overwritten=False, **kwargs):
+    def set_data(self):
+        self._im_s_coarse = self._ax[0][0].imshow(self._data["s_coarse"][self._frame])
+        self._im_s_fine = self._ax[0][1].imshow(self._data["s_fine"][self._frame])
+        self._im_s_gain = self._ax[0][2].imshow(self._data["s_gain"][self._frame])
 
-        # add all entries of the kwargs dictionary into the class namespace
-        for key, value in kwargs.items():
-            setattr(self, "_" + key, value)
+        self._im_r_coarse = self._ax[1][0].imshow(self._data["r_coarse"][self._frame])
+        self._im_r_fine = self._ax[1][1].imshow(self._data["r_fine"][self._frame])
+        self._im_r_gain = self._ax[1][2].imshow(self._data["r_gain"][self._frame])
 
-        self._dims_overwritten = dims_overwritten
+        self._ax[0][0].set_title("sample coarse")
+        self._ax[0][1].set_title("sample fine")
+        self._ax[0][2].set_title("sample gain")
+        self._ax[1][0].set_title("reset coarse")
+        self._ax[1][1].set_title("reset fine")
+        self._ax[1][2].set_title("reset gain")
 
-        if self._frame is not None:
-            self._frame = None
-            self._dims_overwritten = True
-
-        loader = LoadRaw(input_fname=self._input_fname,
-                         metadata_fname=self._metadata_fname,
-                         output_dir=self._output_dir,
-                         frame=self._frame)
-
-        if loaded_data is None or self._dims_overwritten:
-            self._data = loader.load_data()
-        else:
-            self._data = loaded_data.data
-
-    def get_dims_overwritten(self):
-        """If the dimension originally configures overwritten.
-
-        Return:
-            A boolean if the config war overwritten or not.
+    def update_plots(self):
+        """Updates the plots.
         """
-        return self._dims_overwritten
+        self._im_s_coarse.set_data(self._data["s_coarse"][self._frame])
+        self._im_s_fine.set_data(self._data["s_fine"][self._frame])
+        self._im_s_gain.set_data(self._data["s_gain"][self._frame])
+        self._im_r_coarse.set_data(self._data["r_coarse"][self._frame])
+        self._im_r_fine.set_data(self._data["r_fine"][self._frame])
+        self._im_r_gain.set_data(self._data["r_gain"][self._frame])
 
-    def get_data(self):
-        """Exposes data outside the class.
+        self._window_title = "Frame {}".format(self._frame)
 
-        Return:
-            A named tuble with the loaded data. Entries
-                x: filled up Vin read (to match the dimension of data)
-                data: sample and reset data
-        """
+class Plot(ViewerBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-        return Plot.LoadedData(data=self._data)
-
-    def plot_sample(self):
-        pass
-
-    def plot_reset(self):
-        pass
-
-    def plot_combined(self):
-
-        fig, ax = plt.subplots(2, 3, sharex=True, sharey=True)
-
-        tracker = utils.IndexTracker(fig, ax, self._data)
-
-        # connect to mouse wheel
-        fig.canvas.mpl_connect("scroll_event", tracker.onscroll)
-
-        # connect to arrow keys
-        fig.canvas.mpl_connect("key_press_event", tracker.on_key_press)
-
-        plt.show()
+        self._tracker = ViewTracker(data=self._data)
