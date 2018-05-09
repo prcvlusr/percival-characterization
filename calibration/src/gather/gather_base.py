@@ -16,7 +16,7 @@ if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 import utils  # noqa E402
-from _version import __version__
+from _version import __version__  # noqa E402
 
 
 class GatherBase(object):

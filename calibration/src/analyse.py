@@ -133,11 +133,13 @@ class Analyse(object):
                 col_start = p * self._n_cols
                 col_stop = (p+1) * self._n_cols - 1
 
-                out_f = out_fname.format(col_start=col_start, col_stop=col_stop)
+                out_f = out_fname.format(col_start=col_start,
+                                         col_stop=col_stop)
 
 #                if os.path.exists(out_f):
 #                    print("output filename = {}".format(out_f))
-#                    print("WARNING: output file already exist. Skipping gather.")
+#                    print("WARNING: output file already exist. "
+#                          "Skipping gather.")
 #                else:
                 utils.create_dir(out_dir)
 
@@ -150,13 +152,13 @@ class Analyse(object):
                     part=p
                 )
 
-                proc = multiprocessing.Process(target=self._call_gather, kwargs=kwargs)
+                proc = multiprocessing.Process(target=self._call_gather,
+                                               kwargs=kwargs)
                 jobs.append(proc)
                 proc.start()
 
             for job in jobs:
                 job.join()
-
 
     def _call_gather(self, **kwargs):
 
@@ -195,10 +197,11 @@ class Analyse(object):
                 out_f = out_fname.format(col_start=col_start,
                                          col_stop=col_stop)
 
-    #            if os.path.exists(out_f):
-    #                print("output filename = {}".format(out_f))
-    #                print("WARNING: output file already exist. Skipping process.")
-    #            else:
+#                if os.path.exists(out_f):
+#                    print("output filename = {}".format(out_f))
+#                    print("WARNING: output file already exist. "
+#                          "Skipping process.")
+#                else:
                 utils.create_dir(out_dir)
 
                 kwargs = dict(
@@ -207,7 +210,8 @@ class Analyse(object):
                     method=self.method
                 )
 
-                proc = multiprocessing.Process(target=self._call_process, kwargs=kwargs)
+                proc = multiprocessing.Process(target=self._call_process,
+                                               kwargs=kwargs)
                 jobs.append(proc)
                 proc.start()
 
@@ -404,5 +408,5 @@ if __name__ == "__main__":
                   measurement=measurement,
                   n_cols=n_cols,
                   method=method,
-                  n_processes = n_processes)
+                  n_processes=n_processes)
     obj.run()

@@ -121,7 +121,7 @@ class ProcessBase(object):
             offset = y_mean
 
             res = [
-                (slope, offset),  #solution
+                (slope, offset),  # solution
                 None,  # residuals
                 None,  # rang
                 None  # singular_values
@@ -176,7 +176,6 @@ class ProcessBase(object):
                 else:
                     f.create_dataset(self._result[key]['path'],
                                      data=self._result[key]['data'])
-
 
             # write metadata
 

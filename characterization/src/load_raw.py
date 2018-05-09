@@ -1,6 +1,4 @@
-import glob
 import h5py
-import numpy as np
 import os
 
 import utils
@@ -65,7 +63,7 @@ class LoadRaw():
 
         data = {}
         with h5py.File(self._input_fname, "r") as f:
-            #sample
+            # sample
             path = self._paths["sample"]
             coarse, fine, gain = utils.split(f[path][idx])
             data["s_coarse"] = coarse
@@ -108,10 +106,12 @@ class LoadRaw():
     #                print("file_content", file_content)
 
             filename = os.path.split(self._input_fname)[-1]
-            vin = [content for content in file_content if filename.startswith(content[1])]
+            vin = [content for content in file_content
+                   if filename.startswith(content[1])]
 
             if len(vin) != 1:
                 print("vin", vin)
-                raise Exception("More than one possible Vin found in metadata file.")
+                msg = "More than one possible Vin found in metadata file."
+                raise Exception(msg)
 
             return float(vin[0][0])

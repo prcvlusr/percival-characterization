@@ -8,18 +8,18 @@ except:
 
 CALIBRATION_DIR = os.path.dirname(
                     os.path.dirname(
-                        os.path.dirname(CURRENT_DIR)
+                        os.path.dirname(
+                            os.path.dirname(CURRENT_DIR)
+                        )
                     )
                   )
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
 GATHER_DIR = os.path.join(CALIBRATION_DIR, "src", "gather")
+ADCCAL_DIR = os.path.join(GATHER_DIR, "adccal")
 
-if GATHER_DIR not in sys.path:
-    sys.path.insert(0, GATHER_DIR)
+if ADCCAL_DIR not in sys.path:
+    sys.path.insert(0, ADCCAL_DIR)
 
-from gather_base import GatherBase  # noqa E402
-
-
-class GatherPtcBase(GatherBase):
-    pass
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)

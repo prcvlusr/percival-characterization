@@ -1,11 +1,8 @@
-from collections import namedtuple
-import h5py
 import matplotlib.pyplot as plt
-import numpy as np
-import os
 
 from utils import IndexTracker
 from viewer_base import ViewerBase
+
 
 class ViewTracker(IndexTracker):
     def initiate(self):
@@ -15,13 +12,17 @@ class ViewTracker(IndexTracker):
         self._frame = 0
 
     def set_data(self):
-        self._im_s_coarse = self._ax[0][0].imshow(self._data["s_coarse"][self._frame])
-        self._im_s_fine = self._ax[0][1].imshow(self._data["s_fine"][self._frame])
-        self._im_s_gain = self._ax[0][2].imshow(self._data["s_gain"][self._frame])
+        # for convenience
+        d = self._data
+        f = self._frame
 
-        self._im_r_coarse = self._ax[1][0].imshow(self._data["r_coarse"][self._frame])
-        self._im_r_fine = self._ax[1][1].imshow(self._data["r_fine"][self._frame])
-        self._im_r_gain = self._ax[1][2].imshow(self._data["r_gain"][self._frame])
+        self._im_s_coarse = self._ax[0][0].imshow(d["s_coarse"][f])
+        self._im_s_fine = self._ax[0][1].imshow(d["s_fine"][f])
+        self._im_s_gain = self._ax[0][2].imshow(d["s_gain"][f])
+
+        self._im_r_coarse = self._ax[1][0].imshow(d["r_coarse"][f])
+        self._im_r_fine = self._ax[1][1].imshow(d["r_fine"][f])
+        self._im_r_gain = self._ax[1][2].imshow(d["r_gain"][f])
 
         self._ax[0][0].set_title("sample coarse")
         self._ax[0][1].set_title("sample fine")
@@ -41,6 +42,7 @@ class ViewTracker(IndexTracker):
         self._im_r_gain.set_data(self._data["r_gain"][self._frame])
 
         self._window_title = "Frame {}".format(self._frame)
+
 
 class Plot(ViewerBase):
     def __init__(self, **kwargs):

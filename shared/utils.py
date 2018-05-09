@@ -45,8 +45,8 @@ def load_config(config_file, config={}):
     configs.
 
     Args:
-        config_file (str): Name of the yaml file from which the config should be
-                           loaded.
+        config_file (str): Name of the yaml file from which the config should
+                           be loaded.
         config (optional, dict): Dictionary with already existing config to be
                                  overwritten.
 

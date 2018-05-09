@@ -39,8 +39,9 @@ class Process(ProcessAdccalBase):
         offset = self._result["s_coarse_offset"]["data"]
         slope = self._result["s_coarse_slope"]["data"]
 
-        print("Start fitting ...", end="")
+        print("Start fitting ...")
         for adc in range(self._n_adcs):
+            print("adc", adc)
             for col in range(self._n_cols):
                 x = vin
                 y = data["s_coarse"][adc, col, :]
@@ -50,6 +51,7 @@ class Process(ProcessAdccalBase):
                 #          rank,
                 #          singular values
                 res = self._fit_linear(x, y)
+                # res = self._fit_linear(x, y, enable_r_squared=True)
 
                 slope[adc, col] = res.solution[0]
                 offset[adc, col] = res.solution[1]

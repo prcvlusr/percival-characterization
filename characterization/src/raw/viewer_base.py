@@ -1,10 +1,8 @@
 from collections import namedtuple
-import h5py
 import matplotlib.pyplot as plt
-import numpy as np
-import os
 
 from load_raw import LoadRaw
+
 
 class ViewerBase():
     LoadedData = namedtuple("loaded_data", ["data"])
@@ -50,7 +48,7 @@ class ViewerBase():
                 data: sample and reset data
         """
 
-        return Plot.LoadedData(data=self._data)
+        return ViewerBase.LoadedData(data=self._data)
 
     def plot_sample(self):
         pass

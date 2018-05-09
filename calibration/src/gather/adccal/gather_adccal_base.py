@@ -1,5 +1,3 @@
-import h5py
-import numpy as np
 import os
 import sys
 
@@ -8,7 +6,11 @@ try:
 except:
     CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
 
-CALIBRATION_DIR = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_DIR)))
+CALIBRATION_DIR = os.path.dirname(
+                    os.path.dirname(
+                        os.path.dirname(CURRENT_DIR)
+                    )
+                  )
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
 SHARED_DIR = os.path.join(BASE_DIR, "shared")
 GATHER_DIR = os.path.join(CALIBRATION_DIR, "src", "gather")
@@ -43,4 +45,3 @@ class GatherAdcBase(GatherBase):
             "sample": "data",
             "reset": "reset"
         }
-

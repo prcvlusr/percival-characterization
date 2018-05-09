@@ -1,7 +1,4 @@
 from collections import namedtuple
-import glob
-import h5py
-import numpy as np
 import os
 
 from load_gathered import LoadGathered

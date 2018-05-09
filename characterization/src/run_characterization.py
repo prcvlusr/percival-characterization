@@ -55,8 +55,8 @@ def get_arguments():
                         type=int,
                         nargs="+",
                         default=None,
-                        help="The row(s) of the ADC group to create plots for.\n"
-                             "Options:\n"
+                        help="The row(s) of the ADC group to create plots for."
+                             "\nOptions:\n"
                              "specify one value, e.g. --row 0 means take "
                              "only first row of ADC group"
                              "specify start and stop value, e.g. --row 0 5 "
@@ -119,7 +119,8 @@ def insert_args_into_config(args, config):
         sys.exit(1)
 
     try:
-        c_general["plot_combined"] = args.plot_combined or c_general["plot_combined"]
+        c_general["plot_combined"] = (args.plot_combined
+                                      or c_general["plot_combined"])
     except:
         raise Exception("No data type specified. Abort.")
         sys.exit(1)
@@ -152,7 +153,7 @@ def insert_args_into_config(args, config):
 
         try:
             c_data_type["metadata_file"] = (args.metadata_file
-                                             or c_data_type["metadata_file"])
+                                            or c_data_type["metadata_file"])
         except:
             raise Exception("No input specified. Abort.")
             sys.exit(1)
@@ -210,7 +211,6 @@ class Analyse(object):
         self._row = config[self._data_type]["row"]
         self._method_list = config[self._data_type]["method"]
 
-
         if self._row is None:
             self._row = slice(None)
         elif type(self._row) == int:
@@ -241,7 +241,7 @@ class Analyse(object):
             input_fname_templ = os.path.join(self._input_dir,
                                              self._run_id,
                                              file_name)
-            metadata_fname = None
+            self._metadata_file = None
 
         kwargs = dict(
             input_fname=input_fname_templ,
