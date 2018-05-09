@@ -1,23 +1,25 @@
 # Development guideline for the PERCIVAL characterization software framework
 
-Collaborators are highly welcomed to get involved in the PERCIVAL characterization software framework.
-This guide aims to explain how to contribute to the project.
+You are highly welcomed to get involved in the development of the PERCIVAL characterization software framework.
+This guide intends to explain how to effectively contribute to the project.
 
 ## Getting started
 
 For contributing, please:
 * Make sure that you have a [GitHub](http://www.github.com) account
 * 'Fork' the main project on GitHub [using the button on the page of the main repository](https://github.com/percival-desy/percival-characterization#fork-destination-box)
+* Follow our recommendations for sharing your code
 
 ## Coding style guide
 
-This software is developed with Python3.
-We try to follow as good as we can the PEP8 recommendations.
-Please, be part of the game and follow the PEP8 rules.
-You can find more information of [PEP8 -- syle guide for python code here](https://www.python.org/dev/peps/pep-0008/)
+The PERCIVAL characterization software framework is developed in Python 3.
+We try as much as we can to follow the PEP-8 recommendations. 
+Please, try as much as you can to follow these recommendations.
+A complete style guide for python can be found here: [PEP8 -- syle guide for python code here](https://www.python.org/dev/peps/pep-0008/).
+There are some tools developed which will check if your code is PEP-8 compatible and if not it will suggest some modifications.
+As an example, you can either [pycodestyle](https://pypi.org/project/pycodestyle/) use or [pylint](https://www.pylint.org).
 
-To check if your code is PEP8 compliant, you can use pycodestyle software.
-It will point to 
+N.B.: Pull Request not following the Python coding style guide might be rejected.
 
 ## General guidelines
 
@@ -26,4 +28,5 @@ It will point to
 * Use descriptive commits
 * Follow the style of the existing coding (see PEP8 recommendations)
 
- 
+
+
