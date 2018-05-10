@@ -253,7 +253,8 @@ class Analyse(object):
             frame=self._frame,
             row=self._row,
             col=self._col,
-            run=self._run_id
+            run=self._run_id,
+            method_properties=None
         )
 
         print("Configured: adc={}, frame={}, row={}, col={}"
@@ -263,6 +264,11 @@ class Analyse(object):
         for method in self._method_list:
             print("loading method: {}".format(method))
             method_m = __import__(method).Plot
+
+            # loading method properties
+            if method in self._config[self._data_type]:
+                prop =  self._config[self._data_type][method]
+                kwargs["method_properties"] = prop
 
             kwargs["output_dir"] = os.path.join(self._output_dir,
                                                 self._run_id,
