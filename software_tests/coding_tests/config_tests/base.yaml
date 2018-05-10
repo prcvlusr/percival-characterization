@@ -19,3 +19,10 @@ process:
     time_limit: 00:45:00
     test_dict: {"a": 2, "b": 5}
     test_list: ["mystr", 4]
+
+    test_none:
+        a_test: None
+        b_test: 5
+        c_test:
+            cc_test: None
+            cc_test2: 2

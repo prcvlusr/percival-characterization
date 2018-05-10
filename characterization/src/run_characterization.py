@@ -197,19 +197,21 @@ class Analyse(object):
         config = utils.load_config(args.config_file)
         insert_args_into_config(args, config)
 
-        self._data_type = config["general"]["data_type"]
-        self._run_id = config["general"]["run"]
-        self._plot_sample = config["general"]["plot_sample"]
-        self._plot_reset = config["general"]["plot_reset"]
-        self._plot_combined = config["general"]["plot_combined"]
-        self._input_dir = config[self._data_type]["input"]
-        self._metadata_file = config[self._data_type]["metadata_file"]
-        self._output_dir = config[self._data_type]["output"]
-        self._adc = config[self._data_type]["adc"]
-        self._frame = config[self._data_type]["frame"]
-        self._col = config[self._data_type]["col"]
-        self._row = config[self._data_type]["row"]
-        self._method_list = config[self._data_type]["method"]
+        self._config = config
+
+        self._data_type = self._config["general"]["data_type"]
+        self._run_id = self._config["general"]["run"]
+        self._plot_sample = self._config["general"]["plot_sample"]
+        self._plot_reset = self._config["general"]["plot_reset"]
+        self._plot_combined = self._config["general"]["plot_combined"]
+        self._input_dir = self._config[self._data_type]["input"]
+        self._metadata_file = self._config[self._data_type]["metadata_file"]
+        self._output_dir = self._config[self._data_type]["output"]
+        self._adc = self._config[self._data_type]["adc"]
+        self._frame = self._config[self._data_type]["frame"]
+        self._col = self._config[self._data_type]["col"]
+        self._row = self._config[self._data_type]["row"]
+        self._method_list = self._config[self._data_type]["method"]
 
         if self._row is None:
             self._row = slice(None)

@@ -2,7 +2,8 @@ import h5py
 import numpy as np
 import os
 import sys
-import yaml
+
+from reading_config import *
 
 
 def create_dir(directory_name):
@@ -36,31 +37,6 @@ def check_file_exists(file_name, quit=True):
             sys.exit(1)
     else:
         print("File: ok")
-
-
-def load_config(config_file, config={}):
-    """ Loads the config from a yaml file and overwrites already exsiting config.
-
-    Overwriting an existing configuration dictionary enables multi-layered
-    configs.
-
-    Args:
-        config_file (str): Name of the yaml file from which the config should
-                           be loaded.
-        config (optional, dict): Dictionary with already existing config to be
-                                 overwritten.
-
-    Return:
-        Configuration dictionary. Values in the config file onverwrite the ones
-        in the passed config dictionary.
-    """
-
-    with open(config_file) as f:
-        new_config = yaml.load(f)
-
-    config.update(new_config)
-
-    return config
 
 
 def load_file_content(fname, excluded=[]):
