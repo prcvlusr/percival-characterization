@@ -25,6 +25,9 @@ raw:
     #method: [viewer]
     method: [image, plot_coarse-fine_vs_image]
 
+    viewer:
+        err_below: -0.1
+
 gathered:
     input: *output
     output: *output

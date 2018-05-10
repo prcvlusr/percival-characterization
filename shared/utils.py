@@ -220,12 +220,10 @@ def split(raw_dset):
 
 
 class IndexTracker(object):
-    def __init__(self, data):
-
-        # if len(ax) != 2 or len(ax[0]) != 3:
-        #    raise Exception("Figure has wrong layout. Need subplots(2,3)")
+    def __init__(self, data, method_properties):
 
         self._data = data
+        self._method_properties = method_properties
         self._slice = None
         self._window_title = None
         self._fig = None
