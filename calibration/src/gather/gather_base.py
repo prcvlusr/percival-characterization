@@ -20,14 +20,11 @@ from _version import __version__  # noqa E402
 
 
 class GatherBase(object):
-    def __init__(self,
-                 in_fname,
-                 out_fname,
-                 meta_fname):
+    def __init__(self, **kwargs):
 
-        self._in_fname = in_fname
-        self._out_fname = out_fname
-        self._meta_fname = meta_fname
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
 
         self._data_to_write = {}
         self._metadata = {}

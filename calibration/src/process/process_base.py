@@ -29,11 +29,11 @@ class ProcessBase(object):
                                                        "singular_values",
                                                        "r_squared"])
 
-    def __init__(self, in_fname, out_fname, method):
+    def __init__(self, **kwargs):
 
-        self._in_fname = in_fname
-        self._out_fname = out_fname
-        self.method = method
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
 
         self._result = {}
 
@@ -189,6 +189,6 @@ class ProcessBase(object):
             f.create_dataset(name, data=__version__)
 
             name = "{}/{}".format(metadata_base_path, "method")
-            f.create_dataset(name, data=self.method)
+            f.create_dataset(name, data=self._method)
 
             f.flush()
