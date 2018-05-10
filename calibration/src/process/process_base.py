@@ -132,7 +132,7 @@ class ProcessBase(object):
             #                residuals,
             #                rank,
             #                singular values
-            res = np.linalg.lstsq(A, y_masked)
+            res = np.linalg.lstsq(A, y_masked, rcond=None)
 
         if enable_r_squared:
             if all_zero:
