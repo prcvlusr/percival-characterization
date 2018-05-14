@@ -149,6 +149,7 @@ class Analyse(object):
                     in_fname=in_fname,
                     out_fname=out_f,
                     meta_fname=meta_fname,
+                    run=self._run_id,
                     n_rows=self._n_rows,
                     n_cols=self._n_cols,
                     part=p,
@@ -210,6 +211,7 @@ class Analyse(object):
                 kwargs = dict(
                     in_fname=in_f,
                     out_fname=out_f,
+                    run=self._run_id,
                     method=self._method,
                     method_properties=self._method_properties
                 )
