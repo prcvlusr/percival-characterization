@@ -219,6 +219,85 @@ def split(raw_dset):
     return coarse_adc, fine_adc, gain_bits
 
 
+def convert_bitlist_to_int(bitlist):
+    """Converts a list of bits into int.
+    Args:
+        bitlist (list): A list of bites to convert.
+
+    Return:
+        The converted int.
+    """
+    out = 0
+    for bit in bitlist:
+        out = (out << 1) | bit
+    return out
+
+
+def convert_bytelist_to_int(bytelist, byteorder='big'):
+    """Converts a list of bytes into int.
+    Args:
+        bitlist (list): A list of bytes to convert.
+
+    Return:
+        The converted int.
+    """
+    value = int.from_bytes(bytes(bytelist), byteorder=byteorder)
+
+    return value
+
+
+def convert_intarray_to_bitarray(in_array, n_bits):
+    """Convert numpyarray of uint => array of n_bits bits
+
+    Args:
+        in_array: array to convert
+        n_bits: number of bits to convert to
+
+    Return:
+        Array where the entries where converted.
+    """
+    in_shape = in_array.shape
+    in_array_flat = in_array.flatten()
+    out = np.zeros((len(in_array_flat), n_bits))
+
+    for i in range(n_bits):
+        out[:, i]= (in_array_flat >> i) & 1
+
+    out = out.reshape(in_shape + (n_bits,))
+
+    return out
+
+
+def convert_bitarray_to_intarray(bitarray):
+    """Convert (numpyarray of [... , ... , n_bits] => array of [... , ... ](int)
+
+    Args:
+        bitarray: Bitarray to convert
+    """
+
+    shape = bitarray.shape
+    n_bits = shape[-1]
+
+    power_matr = np.ones(shape).astype(int)
+    power_matr *= (2**np.arange(n_bits)).astype(int)
+
+    out = np.sum(bitarray * power_matr, axis=len(shape)-1).astype(int)
+
+    return out
+
+
+def swap_bits(bitarray):
+    """Swaps bits: 0=>1 , 1=>0
+
+    Args:
+        bitarray: array or bit which should be swapped.
+
+    Return:
+        Array with swapped entries or swapped bit.
+    """
+    return 1 - bitarray
+
+
 class IndexTracker(object):
     def __init__(self, data, method_properties):
 
