@@ -1,28 +1,29 @@
-import copy
-from plot_base import PlotBase  # noqa E402
-import webbrowser # to show images
-#
-#
-#
-#%% useful imports & flags
 from colorama import init, Fore
+import numpy as np
+import os # to list files in a folder
 import sys # to play command line argument, print w/o newline, version
 import time # to have time
-import numpy as np
-import math
-import scipy
-import os # to list files in a folder
-import re # to sort naturally
-import h5py # deal with HDF5
+
 import APy3_GENfuns # general functions
 import APy3_P2Mfuns # P2M-specific functions
 
 CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-SHARED_DIR= os.path.dirname(
+BASE_DIR = os.path.dirname(
                 os.path.dirname(
-                    os.path.dirname(CURRENT_DIR)))+'/shared'
-sys.path.insert(0, SHARED_DIR)
+                    os.path.dirname(
+                        os.path.dirname(
+                            os.path.dirname(CURRENT_DIR)
+                        )
+                    )
+                )
+           )
+SHARED_DIR = os.path.join(BASE_DIR, "shared")
+
+if SHARED_DIR not in sys.path:
+    sys.path.insert(0, SHARED_DIR)
+
 import utils
+
 
 # - - -
 #
@@ -38,33 +39,16 @@ i_reset = 1
 # - - -
 
 
-class Plot(PlotBase):
+class Descramble():
     def __init__(self, **kwargs):  # noqa F401
-        # overwrite the configured col and row indices
-        new_kwargs = copy.deepcopy(kwargs)
-        new_kwargs["col"] = None
-        new_kwargs["row"] = None
-        new_kwargs["dims_overwritten"] = True
 
-        super().__init__(**new_kwargs)
+        # add all entries of the kwargs dictionary into the class namespace
+        for key, value in kwargs.items():
+            setattr(self, "_" + key, value)
 
-    def _check_dimension(self, data):
-        if data.shape[0] != 1:
-            raise("Plot method one image can only show one image at the time.")
+        print(vars(self))
 
-#    def _generate_single_plot(self, data, plot_title, label, out_fname):
-#        ''' 2D plot set <-0.1 as white'''
-#        fig= APy3_GENfuns.plot_2D(data,"cols","rows",plot_title,True,-0.1)
-#        fig.savefig(out_fname, dpi=(600))
-#        webbrowser.open(out_fname+'.png')
-
-    def plot_sample(self):
-        pass
-
-    def plot_reset(self):
-        pass
-
-    def plot_combined(self):
+    def run(self):
         '''
         descrambles tcpdump-binary files, save to h5 in DLSraw standard format
 
@@ -146,7 +130,7 @@ class Plot(PlotBase):
 
         input_fnames = self._method_properties["input"]
         save_file = self._method_properties["save_file"]
-        output_fname = os.path.join(self._output_dir,
+        output_fname = os.path.join(self._method_properties["output"],
                                     "p2018.03.15crdAD_h10_dscrmbld_{}.h5".format(self._run))
 
         clean_memory = self._method_properties["clean_memory"]
