@@ -9,6 +9,7 @@ import APy3_P2Mfuns # P2M-specific functions
 
 import __init__
 import utils
+from descramble_base import DescrambleBase
 
 
 # - - -
@@ -25,12 +26,10 @@ i_reset = 1
 # - - -
 
 
-class Descramble():
+class Descramble(DescrambleBase):
     def __init__(self, **kwargs):  # noqa F401
 
-        # add all entries of the kwargs dictionary into the class namespace
-        for key, value in kwargs.items():
-            setattr(self, "_" + key, value)
+        super().__init__(**kwargs)
 
         # in the method_properties section of the config the following
         # parameters have to be defined:
@@ -82,14 +81,6 @@ class Descramble():
         self._max_n_pack = 1695
 
         self._result_data = None
-
-    def set_input(self, input):
-        """To run the same descrambling for another set of input files.
-
-        Args:
-            input (list): List of input files (aboslute path)
-        """
-        self._input = input
 
     def run(self):
         """
@@ -581,46 +572,13 @@ class Descramble():
                    "[X, Gn,Gn, Fn,Fn,Fn,Fn,Fn,Fn,Fn,Fn, Crs,Crs,Crs,Crs,Crs])")
             print(Fore.GREEN + msg)
 
-        (dscrmbld_smpl_dlsraw,
-         dscrmbld_rst_dlsraw) = APy3_P2Mfuns.convert_GnCrsFn_2_DLSraw(
-                                self._result_data,
-                                ERRint16,
-                                ERRDLSraw)
+        (sample, reset) = APy3_P2Mfuns.convert_GnCrsFn_2_DLSraw(
+                self._result_data,
+                ERRint16,
+                ERRDLSraw)
 
-        # Save descrambled data to h5 file in the standard format.
-        APy3_GENfuns.write_2xh5(self._output_fname,
-                                dscrmbld_smpl_dlsraw, '/data/',
-                                dscrmbld_rst_dlsraw, '/reset/')
+        self._data_to_write["sample"]["data"] = sample
+        self._data_to_write["reset"]["data"] = reset
+
+        self._write_data()
         print(Fore.GREEN + "Data saved to: {}".format(self._output_fname))
-
-    def _show_saved_data(self):
-        """show saved data if debug-requested
-        """
-
-        (reread_smpl,
-         reread_rst)= APy3_GENfuns.read_2xh5(self._output_fname,
-                                             '/data/', '/reset/')
-
-        # DLSraw->Gn/Crs/Fn
-        (n_img, n_row, n_col) = reread_smpl.shape
-        shape_smplrst2 = (n_img,
-                          self._n_smpl_rst,
-                          n_row,
-                          n_col)
-        reread_smplrst = np.zeros(shape_smplrst2).astype('uint16')
-        reread_gn_crs_fn = np.zeros(shape_smplrst2
-                                    + (self._n_gn_crs_fn,)).astype('int16')
-        reread_smplrst[:, i_sample, :, :] = reread_smpl
-        reread_smplrst[:, i_reset, :, :] = reread_rst
-
-        (coarse, fine, gain) = utils.split(reread_smplrst)
-        reread_gn_crs_fn[Ellipsis, i_gain] = gain
-        reread_gn_crs_fn[Ellipsis, i_coarse] = coarse
-        reread_gn_crs_fn[Ellipsis, i_fine] = fine
-
-        # tracking missing-packet pixels by setting Gn/Crs/Fn to -256
-        errormap = reread_smplrst == ERRDLSraw
-        reread_gn_crs_fn[errormap,:] = ERRint16
-
-    def get_data(self):
-        return self._result_data

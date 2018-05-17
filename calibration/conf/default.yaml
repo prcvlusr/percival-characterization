@@ -18,7 +18,7 @@ gather:
     input: *input
     output: *output
 
-    descrample_tcpdump_and_register_file:
+    descrample_tcpdump:
         descramble_method: APy3_descramble_tcpdump_2018_03_15AD
 
         # path & name of tcpdump-files to descramble (ordered by link)

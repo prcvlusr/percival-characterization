@@ -4,11 +4,9 @@ general functions and fitting
 """
 #%% imports
 #
-import h5py # deal with HDF5
 import numpy
 import os # list files in a folder
 import re # to sort naturally
-import sys # command line argument, print w/o newline, version
 
 #%% constant
 VERYBIGNUMBER= 1e18
@@ -86,39 +84,6 @@ def convert_hex_byteSwap_Ar(data2convert_Ar):
     aux_byteinverted[...,8:16]= aux_bitted[...,0:8]
     data_ByteSwapped_Ar=convert_bits_2_int_Ar(aux_byteinverted)
     return (data_ByteSwapped_Ar)
-
-
-def printcol(string,colour):
-    ''' write in colour (red/green/orange/blue/purple) '''
-    white  = '\033[0m'  # white (normal)
-    if (colour=='black'): outColor  = '\033[30m' # black
-    elif (colour=='red'): outColor= '\033[31m' # red
-    elif (colour=='green'): outColor  = '\033[32m' # green
-    elif (colour=='orange'): outColor  = '\033[33m' # orange
-    elif (colour=='blue'): outColor  = '\033[34m' # blue
-    elif (colour=='purple'): outColor  = '\033[35m' # purple
-    else: outColor  = '\033[30m'
-    print(outColor+string+white)
-    sys.stdout.flush()
-
-#%% yes, no
-def isitYes(string):
-    ''' recognize a yes '''
-    YESarray=['y','Y','yes','YES','Yes','si','SI','Si','ja','JA','Ja','true','TRUE','True']
-    isitYes= False
-    if string in YESarray:
-        isitYes=True
-    return(isitYes)
-
-
-def isitNo(string):
-    ''' recognize a no '''
-    NOarray=['n','N','no','NO','No','over my dead body','forget about it','nope','nein','NEIN','Nein','false','FALSE','False']
-    isitNO= False
-    if string in NOarray:
-        isitNO=True
-    return(isitNO)
-
 
 #%% matlab-like function
 def matlabLike_range(matlabstring):
@@ -202,42 +167,6 @@ def read_bin_uint8(filenamepath):
     with open(filenamepath) as f:
         fileContent = numpy.fromfile(f, dtype = numpy.uint8)
     return fileContent
-
-
-def read_1xh5(filenamepath, path_2read):
-    ''' read h5 file: data in path_2read '''
-    my5hfile= h5py.File(filenamepath, 'r')
-    myh5dataset=my5hfile[path_2read]
-    my_data_2D= numpy.array(myh5dataset)
-    my5hfile.close()
-    return my_data_2D
-
-
-def write_1xh5(filenamepath, data2write, path_2write):
-    ''' write h5 file: data in path_2write '''
-    my5hfile= h5py.File(filenamepath, 'w')
-    my5hfile.create_dataset(path_2write, data=data2write)
-    my5hfile.close()
-
-
-def read_2xh5(filenamepath, path1_2read, path2_2read):
-    ''' read 2xXD h5 file (paths_2read: '/data/','/reset/' ) '''
-    with h5py.File(filenamepath, "r", libver='latest') as my5hfile:
-        my_data1_2D= numpy.array(my5hfile[path1_2read])
-        my_data2_2D= numpy.array(my5hfile[path2_2read])
-        my5hfile.close()
-    return (my_data1_2D,my_data2_2D)
-
-
-def write_2xh5(filenamepath,
-               data1_2write, path1_2write,
-               data2_2write, path2_2write):
-    ''' write 2xXD h5 file (paths_2write: '/data/','/reset/' ) '''
-    with h5py.File(filenamepath, "w", libver='latest') as my5hfile:
-        my5hfile.create_dataset(path1_2write, data=data1_2write) #
-        my5hfile.create_dataset(path2_2write, data=data2_2write) #
-        my5hfile.close()
-
 
 def list_files(folderpath, expectedPrefix, expectedSuffix):
     ''' look for files in directory having the expected prefix and suffix ('*' to have any) '''
