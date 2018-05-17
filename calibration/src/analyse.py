@@ -2,6 +2,7 @@
 
 import argparse
 import datetime
+import json
 import math
 import multiprocessing
 import os
@@ -146,7 +147,9 @@ class Analyse(object):
                 utils.create_dir(out_dir)
 
                 kwargs = dict(
+                    input=self._in_base_dir,
                     in_fname=in_fname,
+                    output=self._out_base_dir,
                     out_fname=out_f,
                     meta_fname=meta_fname,
                     run=self._run_id,
@@ -390,8 +393,8 @@ if __name__ == "__main__":
     else:
         config["general"]["n_cols"] = int(config["general"]["n_cols"])
 
-    for key, value in config.items():
-        print(key, value)
+    print("Configuration:")
+    print(json.dumps(config, sort_keys=True, indent=4))
 
     run_type = config["general"]["run_type"]
     run_id = config["general"]["run"]

@@ -31,20 +31,17 @@ class Descramble(DescrambleBase):
 
         super().__init__(**kwargs)
 
-        # in the method_properties section of the config the following
+        # in the method and the method section of the config file the following
         # parameters have to be defined:
         #   n_adc
         #   n_grp
         #   n_pad
         #   n_col_in_block
-        #   input
+        #   input_fnames
         #   save_file
-        #   output
-        #   output_prefix
+        #   output_fname
         #   clean_memory
         #   verbose
-        # additionally run is configured in the general section
-        print(vars(self))
 
         # general constants for a P2M system
         self._n_smpl_rst = APy3_P2Mfuns.NSmplRst # 2
@@ -54,11 +51,6 @@ class Descramble(DescrambleBase):
                                  * self._n_row_in_block) # 224
         self._n_bits_in_pix = 15
         self._n_gn_crs_fn = 3
-
-        self._output_fname = os.path.join(self._output,
-                                          "{}_dscrmbld_{}.h5"
-                                          .format(self._output_prefix,
-                                                  self._run))
 
         # tcpdump-related constants
         # excess Bytes at the beginning of tcpdump file
@@ -236,13 +228,13 @@ class Descramble(DescrambleBase):
 
     def _reading_file_content(self):
         file_missing = [not os.path.isfile(fname)
-                        for fname in self._input]
+                        for fname in self._input_fnames]
 
         # report the user-provided args
         if self._verbose:
             print(Fore.GREEN + "Will load tcpdump files:")
 
-            for i, fname in enumerate(self._input):
+            for i, fname in enumerate(self._input_fnames):
                 if file_missing[i]:
                     print(Fore.MAGENTA + fname + " does not exist")
                 else:
@@ -271,7 +263,7 @@ class Descramble(DescrambleBase):
             print(Fore.BLUE + "reading files")
 
         file_content = []
-        for i, fname in enumerate(self._input):
+        for i, fname in enumerate(self._input_fnames):
             if file_missing[i]:
                 content = np.array([]).astype('uint8')
 
@@ -316,7 +308,7 @@ class Descramble(DescrambleBase):
                 if pack_nmbr > self._max_n_pack: # fatal error in the data
                     msg = ("Inconsistent packet in {}\n"
                            "(packet {}-th in the file is identified as "
-                           "pack_nmbr={} > {})").format(self._input[i],
+                           "pack_nmbr={} > {})").format(self._input_fnames[i],
                                                         ipack,
                                                         pack_nmbr,
                                                         self._max_n_pack)
@@ -341,7 +333,7 @@ class Descramble(DescrambleBase):
             if self._verbose:
                 print(".", end="", flush=True)
 
-            for ifile, _ in enumerate(self._input):
+            for ifile, _ in enumerate(self._input_fnames):
                 n_packs = len(file_content[ifile]) // self._fullpack_size
 
                 for ipack in range(n_packs):
