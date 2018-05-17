@@ -9,6 +9,14 @@ import utils
 class Gather(GatherAdcBase):
 
     def initiate(self):
+
+        # mandatory variable to be set before any parent class function can
+        # me used are:
+        # self._n_runs
+        # self._n_frames_per_run
+        # self._n_frames
+        # self._n_runs
+
         self._read_register()
 
         self._n_runs = len(self._register)
@@ -17,9 +25,18 @@ class Gather(GatherAdcBase):
 
         self._n_frames = np.sum(self._n_frames_per_run)
 
-        self._raw_tmp_shape = (self._n_frames,
-                               self._n_rows,
-                               self._n_cols)
+        # self._data_to_write is predefined in GatherAdcBase to have one
+        # format to be used in processing
+        # it has the entries:
+        #    "s_coarse" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "s_fine" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "s_gain" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_coarse" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_fine" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "r_gain" - np.array of shape (n_frames, n_rows, n_cols)
+        #    "vin" - np.array of shape (n_runs)
+        self._set_data_to_write()
+
         self._raw_shape = (-1,
                            self._n_rows_per_group,
                            self._n_adc,
@@ -29,53 +46,6 @@ class Gather(GatherAdcBase):
         # is transposed to
         # (n_rows, n_cols, n_frames, n_groups)
         self._transpose_order = (2, 3, 0, 1)
-
-        self._metadata = {
-            "n_frames_per_run": self._n_frames_per_run,
-            "n_frames": self._n_frames,
-            "n_runs": self._n_runs,
-            "n_adc": self. _n_adc,
-            "colums_used": [self._part * self._n_cols,
-                            (self._part + 1) * self._n_cols]
-        }
-
-        self._data_to_write = {
-            "s_coarse": {
-                "path": "sample/coarse",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "s_fine": {
-                "path": "sample/fine",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "s_gain": {
-                "path": "sample/gain",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_coarse": {
-                "path": "reset/coarse",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_fine": {
-                "path": "reset/fine",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "r_gain": {
-                "path": "reset/gain",
-                "data": np.zeros(self._raw_tmp_shape, dtype=np.uint8),
-                "type": np.uint8
-            },
-            "vin": {
-                "path": "vin",
-                "data": np.zeros(self._n_runs, dtype=np.float16),
-                "type": np.float16
-            }
-        }
 
     def _read_register(self):
         print("meta_fname", self._meta_fname)

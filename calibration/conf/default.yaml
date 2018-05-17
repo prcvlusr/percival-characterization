@@ -4,7 +4,7 @@ general:
 
     measurement: adccal
 
-    run: DLSraw
+    run: &run DLSraw
 
     n_processes: 1
 
@@ -19,11 +19,16 @@ gather:
     output: *output
 
     descrample_tcpdump_and_register_file:
+        descramble_method: APy3_descramble_tcpdump_2018_03_15AD
+
         # path & name of tcpdump-files to descramble (ordered by link)
         input: [/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/h5_scrmbl_view/p2018.03.15crdAD_h10_lnk0.dmp,
                 /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/h5_scrmbl_view/p2018.03.15crdAD_h10_lnk1.dmp]
 
         output: *output
+        output_prefix: "p2018.03.15crdAD_h10"
+
+        run: *run
 
         save_file: True
         clean_memory: True

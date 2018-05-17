@@ -88,13 +88,6 @@ def convert_hex_byteSwap_Ar(data2convert_Ar):
     return (data_ByteSwapped_Ar)
 
 
-#%% print
-def dot():
-    '''print a dot '''
-    sys.stdout.write(".")
-    sys.stdout.flush() # print it now
-
-
 def printcol(string,colour):
     ''' write in colour (red/green/orange/blue/purple) '''
     white  = '\033[0m'  # white (normal)

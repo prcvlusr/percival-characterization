@@ -26,6 +26,8 @@ class GatherBase(object):
         for key, value in kwargs.items():
             setattr(self, "_" + key, value)
 
+#        print("attributes in  GatherBase", vars(self))
+
         self._data_to_write = {}
         self._metadata = {}
 
@@ -41,9 +43,7 @@ class GatherBase(object):
 
         self._load_data()
 
-        print("Start saving at {} ... ".format(self._out_fname), end="")
         self._write_data()
-        print("Done.")
 
         print("Gather took time:", time.time() - totalTime, "\n")
 
@@ -51,6 +51,8 @@ class GatherBase(object):
         pass
 
     def _write_data(self):
+        print("Start saving at {} ... ".format(self._out_fname), end="")
+
         if self._data_to_write == {}:
             raise Exception("Write data: No data found.")
 
@@ -75,3 +77,5 @@ class GatherBase(object):
             f.create_dataset(name, data=__version__)
 
             f.flush()
+
+        print("Done.")
