@@ -1,7 +1,6 @@
 import h5py
 
-import __init__
-import utils
+import __init__  # noqa F401
 from _version import __version__
 
 
@@ -27,7 +26,7 @@ class DescrambleBase():
         """To run the same descrambling for another set of input files.
 
         Args:
-            input (list): List of input files (aboslute path)
+            input (list): List of input files (absolute path)
         """
         self._input = input
 
@@ -65,4 +64,4 @@ class DescrambleBase():
             f.flush()
 
     def get_data(self):
-        return self_data_to_write
+        return self._data_to_write

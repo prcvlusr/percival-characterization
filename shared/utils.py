@@ -3,8 +3,8 @@ import numpy as np
 import os
 import sys
 
-from utils_config import *
-from utils_data import *
+from utils_config import *  # noqa F401
+from utils_data import *  # noqa F401
 
 
 def create_dir(directory_name):

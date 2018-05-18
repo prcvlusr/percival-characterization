@@ -1,13 +1,10 @@
 import copy
-import h5py
-import json
-import numpy as np
+# import json
 import os
 import sys
 
 from __init__ import DESCRAMBLE_DIR
 from gather_adccal_base import GatherAdcBase
-import utils
 
 if DESCRAMBLE_DIR not in sys.path:
     sys.path.insert(0, DESCRAMBLE_DIR)

@@ -19,7 +19,7 @@ gather:
     output: *output
 
     descrample_tcpdump:
-        descramble_method: APy3_descramble_tcpdump_2018_03_15AD
+        descramble_method: descramble_tcpdump_2018_03_15ad
 
         # path & name of tcpdump-files to descramble (ordered by link)
         input: [p2018.03.15crdAD_h10_lnk0.dmp, p2018.03.15crdAD_h10_lnk1.dmp]

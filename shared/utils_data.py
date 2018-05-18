@@ -1,7 +1,5 @@
-import h5py
 import numpy as np
-import os
-import sys
+
 
 def decode_dataset_8bit(arr_in, bit_mask, bit_shift):
     """Masks out bits and shifts.
@@ -74,7 +72,7 @@ def convert_intarray_to_bitarray(in_array, n_bits):
     out = np.zeros((len(in_array_flat), n_bits))
 
     for i in range(n_bits):
-        out[:, i]= (in_array_flat >> i) & 1
+        out[:, i] = (in_array_flat >> i) & 1
 
     out = out.reshape(in_shape + (n_bits,))
 
@@ -224,26 +222,28 @@ def split(raw_dset):
 
     return coarse_adc, fine_adc, gain_bits
 
+
 def get_adc_col_array(n_adc=7, n_xcols=4, n_ncols=8):
-    """Generate a
-    """
     cols = np.arange(n_xcols * n_ncols)
     cols = cols.reshape((n_xcols, n_ncols))
     cols = cols.transpose()
-    cols = np.fliplr(cols) # in the end it is cols[ix,in]
+    cols = np.fliplr(cols)  # in the end it is cols[ix,in]
 
     # this gives the (i_adc, i_col) indices of a pixel in a Rowblk, given
     # its sequence in the streamout
-    adc_cols=[]
+    adc_cols = []
     for i_n in range(n_ncols):
         for i_adc in range(n_adc)[::-1]:
             for i_x in range(n_xcols):
-                adc_cols += [(i_adc, cols[i_n,i_x])]
+                adc_cols += [(i_adc, cols[i_n, i_x])]
 
-    # to use this:  for ipix in range(32*7): (ord_adc, ord_col) = adc_cols[ipix]
+    # to use this:
+    # for ipix in range(32*7):
+    #     (ord_adc, ord_col) = adc_cols[ipix]
     adc_cols = np.array(adc_cols)
 
     return adc_cols
+
 
 def get_col_grp():
     i_g = np.array(0)
@@ -284,7 +284,10 @@ def reorder_pixels_gncrsfn(in_data, n_adc, n_col_in_row_blk):
     return out_data
 
 
-def convert_gncrsfn_to_dlsraw(in_data, in_err, out_err, indices=(0,1,0,1,2)):
+def convert_gncrsfn_to_dlsraw(in_data,
+                              in_err,
+                              out_err,
+                              indices=(0, 1, 0, 1, 2)):
     """ Converts gain, coarse and fine data sets.
 
     (Nimg, Smpl/Rst, NRow, NCol, Gn/Crs/Fn), int16(err=in_err)

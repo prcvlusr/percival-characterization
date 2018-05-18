@@ -1,14 +1,23 @@
-from colorama import init, Fore
-import numpy as np
+"""
+Descrample tcpdump output from the mezzanine to a data format
+readable in gather.
+"""
 import os  # to list files in a directory
 import time  # to have time
 
-import __init__
+import __init__  # noqa F401
 import utils
+
+import numpy as np
+from colorama import init, Fore
+
 from descramble_base import DescrambleBase
 
 
 class Descramble(DescrambleBase):
+    """ Descample tcpdump data
+    """
+
     def __init__(self, **kwargs):  # noqa F401
 
         super().__init__(**kwargs)
@@ -39,22 +48,22 @@ class Descramble(DescrambleBase):
 
         # general constants for a P2M system
         self._n_smpl_rst = 2
-        self._n_data_pads = self._n_pad - 1 # 44
-        self._n_row_in_blk = self._n_adc # 7
-        self._n_pixs_in_blk = (self._n_col_in_blk * self._n_row_in_blk) # 224
+        self._n_data_pads = self._n_pad - 1  # 44
+        self._n_row_in_blk = self._n_adc  # 7
+        self._n_pixs_in_blk = (self._n_col_in_blk * self._n_row_in_blk)  # 224
         self._n_bits_in_pix = 15
         self._n_gn_crs_fn = 3
 
         # tcpdump-related constants
         # excess Bytes at the beginning of tcpdump file
-        self._excess_bytesinfront = 24 #
+        self._excess_bytesinfront = 24
         # UDPacket content in Byte (excluding header)
         self._gooddata_size = 4928
         # UDPacket content in Byte (including header)
         self._fullpack_size = 5040
-        self._header_size = self._fullpack_size - self._gooddata_size # 112
-        self._img_counter = 88 - self._excess_bytesinfront # also+1
-        self._pack_counter = 90 - self._excess_bytesinfront # also+1
+        self._header_size = self._fullpack_size - self._gooddata_size  # 112
+        self._img_counter = 88 - self._excess_bytesinfront  # also+1
+        self._pack_counter = 90 - self._excess_bytesinfront  # also+1
 
         # 1 RowGrp (7x32x44pixel) in in 4 UDPacket
         self._n_packs_in_rowgrp = 4
@@ -124,9 +133,9 @@ class Descramble(DescrambleBase):
                      for content in file_content]
 
         if self._verbose:
-            print(Fore.GREEN
-                  + "data read from files ({} packets)"
-                    .format("+".join(map(str, n_packets))))
+            print(Fore.GREEN +
+                  ("data read from files ({} packets)"
+                   .format("+".join([str(n) for n in n_packets]))))
 
         # search for 1st & last image: this is needed to resort the data from
         # the file in a proper array of (n_img, n_pack)
@@ -142,9 +151,10 @@ class Descramble(DescrambleBase):
         imgs_tcpdump = np.arange(first_img, last_img + 1)
         n_img = len(imgs_tcpdump)
 
-        msg = (("The lowest-numbered Img of the sequence is: tcpdump-Image {}\n"
-                "The highest-numbered Img of the sequence is: tcpdump-Image {}")
-                .format(first_img, last_img))
+        msg = (("The lowest-numbered Img of the sequence is: "
+                "tcpdump-Image {}\n"
+                "The highest-numbered Img of the sequence is: "
+                "tcpdump-Image {}").format(first_img, last_img))
         print(Fore.GREEN + msg)
 
         # solving the 2c-part of scrambling
@@ -168,12 +178,12 @@ class Descramble(DescrambleBase):
                 missing_packages = np.sum(np.logical_not(pack_check[i, :]))
 
                 if missing_packages < 1:
-                    print(Fore.GREEN
-                          + "All packets for image {} are there".format(img))
+                    print(Fore.GREEN +
+                          "All packets for image {} are there".format(img))
                 else:
-                    print(Fore.MAGENTA
-                          + "{} packets missing from image {}"
-                            .format(missing_packages, img))
+                    print(Fore.MAGENTA +
+                          ("{} packets missing from image {}"
+                           .format(missing_packages, img)))
 
         # at this point the dsata from the 2 files is ordered in a array of
         # dinesion (n_img, n_pack)
@@ -181,18 +191,18 @@ class Descramble(DescrambleBase):
         # 1 rowgrp = 4 packets
         # when a packet is missing, the whole rowgrp is compromised
         # if so, flag the 4-tuple of packets (i.e. the rowgrp), as bad
-        rowgrp_check = (pack_check[:,0::4]
-                        & pack_check[:,1::4]
-                        & pack_check[:,2::4]
-                        & pack_check[:,3::4])
+        rowgrp_check = (pack_check[:, 0::4]
+                        & pack_check[:, 1::4]
+                        & pack_check[:, 2::4]
+                        & pack_check[:, 3::4])
         # - - -
 
         if self._verbose:
             print(Fore.BLUE + "descrambling images")
 
-        multiImg_aggr_withRef = self._descrambling_images(n_img,
-                                                          imgs_tcpdump,
-                                                          data)
+        descrambled_data = self._descrambling_images(n_img,
+                                                     imgs_tcpdump,
+                                                     data)
 
         if self._verbose:
             print(Fore.BLUE + " ")
@@ -204,7 +214,7 @@ class Descramble(DescrambleBase):
 
         self._result_data = self._reordering_pixels(n_img,
                                                     imgs_tcpdump,
-                                                    multiImg_aggr_withRef,
+                                                    descrambled_data,
                                                     rowgrp_check)
 
         if self._save_file:
@@ -216,7 +226,6 @@ class Descramble(DescrambleBase):
         stop_time = time.strftime("%Y_%m_%d__%H:%M:%S")
         print(Fore.BLUE + "script ended at {}".format(stop_time))
         print("------------------------\n" * 3)
-
 
     def _reading_file_content(self):
         file_missing = [not os.path.isfile(fname)
@@ -233,9 +242,9 @@ class Descramble(DescrambleBase):
                     print(Fore.GREEN + fname)
 
             if self._save_file:
-                print(Fore.GREEN
-                      + "Will save descrambled file: {}"
-                         .format(self._output_fname))
+                print(Fore.GREEN +
+                      ("Will save descrambled file: {}"
+                       .format(self._output_fname)))
 
             if self._clean_memory:
                 print(Fore.GREEN + "Will clean memory when possible")
@@ -297,7 +306,7 @@ class Descramble(DescrambleBase):
                 bitlist = file_data[self._pack_counter:self._pack_counter+2]
                 pack_nmbr = utils.convert_bitlist_to_int(bitlist=bitlist)
 
-                if pack_nmbr > self._max_n_pack: # fatal error in the data
+                if pack_nmbr > self._max_n_pack:  # fatal error in the data
                     msg = ("Inconsistent packet in {}\n"
                            "(packet {}-th in the file is identified as "
                            "pack_nmbr={} > {})").format(self._input_fnames[i],
@@ -321,7 +330,7 @@ class Descramble(DescrambleBase):
         data = np.zeros(shape_data).astype('uint8')
         header = np.zeros(shape_header).astype('uint8')
 
-        for iimg, img_dump in enumerate(imgs_tcpdump):
+        for i, img_dump in enumerate(imgs_tcpdump):
             if self._verbose:
                 print(".", end="", flush=True)
 
@@ -344,13 +353,12 @@ class Descramble(DescrambleBase):
                         pack_id = utils.convert_bytelist_to_int(bytelist=bytel)
 
                         # then save it in the appropriate position
-                        data[iimg, pack_id, :] = file_data[self._header_size:]
-                        header[iimg, pack_id, :] = file_data[:self._header_size]
+                        data[i, pack_id, :] = file_data[self._header_size:]
+                        header[i, pack_id, :] = file_data[:self._header_size]
                         # and flag that (pack,Img) as good
-                        pack_check[iimg, pack_id] = True
+                        pack_check[i, pack_id] = True
 
         return data, header, pack_check
-
 
     def _descrambling_images(self, n_img, imgs_tcpdump, data):
 
@@ -362,7 +370,7 @@ class Descramble(DescrambleBase):
                                self._n_pad,
                                self._n_pixs_in_blk,
                                self._n_gn_crs_fn)
-        multiImg_aggr_withRef = np.ones(shape_aggr_with_ref).astype('uint8')
+        descrambled_data = np.ones(shape_aggr_with_ref).astype('uint8')
 
         for i, _ in enumerate(imgs_tcpdump):
             if self._verbose:
@@ -409,7 +417,7 @@ class Descramble(DescrambleBase):
                            data_size // (self._n_data_pads * 2),
                            16)
             # combine 2x8bit to 16bit
-            img_16bitted= np.zeros(shape_16bit).astype('uint8')
+            img_16bitted = np.zeros(shape_16bit).astype('uint8')
             img_16bitted[Ellipsis, 0:8] = img_8bitted[:, :, 0::2, :]
             img_16bitted[Ellipsis, 8:16] = img_8bitted[:, :, 1::2, :]
 
@@ -455,7 +463,7 @@ class Descramble(DescrambleBase):
                               self._n_data_pads,
                               self._n_pixs_in_blk,
                               self._n_gn_crs_fn)
-            img_aggr= np.zeros(shape_img_aggr).astype('uint8')
+            img_aggr = np.zeros(shape_img_aggr).astype('uint8')
 
             # solving the 1c-part if scrambling:
             # binary aggregate to gain/coarse/fine
@@ -481,9 +489,9 @@ class Descramble(DescrambleBase):
             if self._clean_memory:
                 del img_aggr
 
-            multiImg_aggr_withRef[i, Ellipsis] = img_aggr_withref
+            descrambled_data[i, Ellipsis] = img_aggr_withref
 
-        return multiImg_aggr_withRef
+        return descrambled_data
 
     def _reordering_pixels(self, n_img, imgs_tcpdump, data, rowgrp_check):
 
@@ -496,16 +504,15 @@ class Descramble(DescrambleBase):
         img = np.zeros(shape_descrambled).astype('uint8')
 
         for i, _ in enumerate(imgs_tcpdump):
-            img[i, Ellipsis] = utils.reorder_pixels_gncrsfn(
-                    data[i, Ellipsis],
-                    self._n_adc,
-                    self._n_col_in_blk)
+            img[i, Ellipsis] = utils.reorder_pixels_gncrsfn(data[i, Ellipsis],
+                                                            self._n_adc,
+                                                            self._n_col_in_blk)
 
         # add error tracking for data coming from missing packets
-        img = img.astype('int16') # -256upto255
+        img = img.astype('int16')  # -256upto255
         for i, _ in enumerate(imgs_tcpdump):
             for igrp in range(self._n_smpl_rst * self._n_grp):
-                if (rowgrp_check[i, igrp] == False):
+                if rowgrp_check[i, igrp] is False:
                     img[i, igrp, Ellipsis] = self._err_int16
 
         # error tracking for refCol
@@ -513,13 +520,13 @@ class Descramble(DescrambleBase):
 
         # solving the 1a-part of scrambling:
         # reorder by Smpl,Rst
-        shape_smplrst= (n_img,
-                        self._n_smpl_rst,
-                        self._n_grp,
-                        self._n_pad,
-                        self._n_row_in_blk,
-                        self._n_col_in_blk,
-                        self._n_gn_crs_fn)
+        shape_smplrst = (n_img,
+                         self._n_smpl_rst,
+                         self._n_grp,
+                         self._n_pad,
+                         self._n_row_in_blk,
+                         self._n_col_in_blk,
+                         self._n_gn_crs_fn)
         img_smplrst = np.zeros(shape_smplrst).astype('int16')
 
         img_smplrst[:, self._i_smp, 1:, ...] = img[:, 1:(212*2)-1:2, ...]
