@@ -1,29 +1,11 @@
 from colorama import init, Fore
 import numpy as np
-import os # to list files in a folder
-import sys # to play command line argument, print w/o newline, version
-import time # to have time
-
-import APy3_GENfuns # general functions
-import APy3_P2Mfuns # P2M-specific functions
+import os  # to list files in a directory
+import time  # to have time
 
 import __init__
 import utils
 from descramble_base import DescrambleBase
-
-
-# - - -
-#
-#%% useful constants
-ERRint16 = -256 # negative value usable to track Gn/Crs/Fn from missing pack
-ERRBlw = -0.1
-ERRDLSraw = 65535 # forbidden uint16, usable to track "pixel" from missing pack
-i_gain = 0
-i_coarse = 1
-i_fine = 2
-i_sample = 0
-i_reset = 1
-# - - -
 
 
 class Descramble(DescrambleBase):
@@ -36,19 +18,30 @@ class Descramble(DescrambleBase):
         #   n_adc
         #   n_grp
         #   n_pad
-        #   n_col_in_block
+        #   n_col_in_blk
         #   input_fnames
         #   save_file
         #   output_fname
         #   clean_memory
         #   verbose
 
+        # useful constants
+        # negative value usable to track Gn/Crs/Fn from missing pack
+        self._err_int16 = -256
+#        self._err_blw = -0.1
+        # forbidden uint16, usable to track "pixel" from missing pack
+        self._err_dlsraw = 65535
+        self._i_smp = 0
+        self._i_rst = 1
+        self._i_gn = 0
+        self._i_crs = 1
+        self._i_fn = 2
+
         # general constants for a P2M system
-        self._n_smpl_rst = APy3_P2Mfuns.NSmplRst # 2
+        self._n_smpl_rst = 2
         self._n_data_pads = self._n_pad - 1 # 44
-        self._n_row_in_block = self._n_adc # 7
-        self._n_pixs_in_block = (self._n_col_in_block
-                                 * self._n_row_in_block) # 224
+        self._n_row_in_blk = self._n_adc # 7
+        self._n_pixs_in_blk = (self._n_col_in_blk * self._n_row_in_blk) # 224
         self._n_bits_in_pix = 15
         self._n_gn_crs_fn = 3
 
@@ -84,8 +77,7 @@ class Descramble(DescrambleBase):
             (7row x (32 Col x 45 pads) ) from Sample/Reset, as:
             Smpl, Smpl,   Smpl, Rst, Smpl, Rst, ... , Smpl, Rst,   Rst, Rst
         1b) the position of pixels (pix0/1/2 in the next point) is mapped to
-            the (7row x 32 Col) block according to:
-            (ADC,Col)= APy3_P2Mfuns.ADCcolArray_1DA[pix_i]
+            the (7row x 32 Col) block according to the adc_cols lost
         1c) inside a (7row x 32 Col) block, the data are streamed out as:
             bit0-of-pix0, bit0-of-pix1, bit0-of-pix2, ... , bit0-of-pix1, ...
         1d) all the data coming from the sensor are bit-inverted: 0->1; 1->0
@@ -368,7 +360,7 @@ class Descramble(DescrambleBase):
         shape_aggr_with_ref = (n_img,
                                n_smpl_rst_x_n_grp,
                                self._n_pad,
-                               self._n_pixs_in_block,
+                               self._n_pixs_in_blk,
                                self._n_gn_crs_fn)
         multiImg_aggr_withRef = np.ones(shape_aggr_with_ref).astype('uint8')
 
@@ -441,7 +433,7 @@ class Descramble(DescrambleBase):
             shape_as_from_chip = (n_smpl_rst_x_n_grp,
                                   self._n_data_pads,
                                   self._n_bits_in_pix,
-                                  self._n_pixs_in_block)
+                                  self._n_pixs_in_blk)
             img_as_from_chip = img_as_from_chip.reshape(shape_as_from_chip)
 
             if self._clean_memory:
@@ -461,7 +453,7 @@ class Descramble(DescrambleBase):
 
             shape_img_aggr = (n_smpl_rst_x_n_grp,
                               self._n_data_pads,
-                              self._n_pixs_in_block,
+                              self._n_pixs_in_blk,
                               self._n_gn_crs_fn)
             img_aggr= np.zeros(shape_img_aggr).astype('uint8')
 
@@ -471,16 +463,16 @@ class Descramble(DescrambleBase):
             img_int = utils.convert_bitarray_to_intarray(bitarray)
 
             (coarse, fine, gain) = utils.split(img_int)
-            img_aggr[Ellipsis, i_coarse] = coarse
-            img_aggr[Ellipsis, i_fine] = fine
-            img_aggr[Ellipsis, i_gain] = gain
+            img_aggr[Ellipsis, self._i_crs] = coarse
+            img_aggr[Ellipsis, self._i_fn] = fine
+            img_aggr[Ellipsis, self._i_gn] = gain
 
             if self._clean_memory:
                 del img_as_from_chip
 
             shape_ref = (n_smpl_rst_x_n_grp,
                          self._n_pad,
-                         self._n_pixs_in_block,
+                         self._n_pixs_in_blk,
                          self._n_gn_crs_fn)
             # add RefCols (that had been ignored by mezzanine in 2a-scramblig)
             img_aggr_withref = np.zeros(shape_ref).astype('uint8')
@@ -498,26 +490,26 @@ class Descramble(DescrambleBase):
         shape_descrambled = (n_img,
                              self._n_smpl_rst * self._n_grp,
                              self._n_pad,
-                             self._n_row_in_block,
-                             self._n_col_in_block,
+                             self._n_row_in_blk,
+                             self._n_col_in_blk,
                              self._n_gn_crs_fn)
         img = np.zeros(shape_descrambled).astype('uint8')
 
         for i, _ in enumerate(imgs_tcpdump):
-            img[i, Ellipsis] = APy3_P2Mfuns.reorder_pixels_GnCrsFn(
+            img[i, Ellipsis] = utils.reorder_pixels_gncrsfn(
                     data[i, Ellipsis],
                     self._n_adc,
-                    self._n_col_in_block)
+                    self._n_col_in_blk)
 
         # add error tracking for data coming from missing packets
         img = img.astype('int16') # -256upto255
         for i, _ in enumerate(imgs_tcpdump):
             for igrp in range(self._n_smpl_rst * self._n_grp):
                 if (rowgrp_check[i, igrp] == False):
-                    img[i, igrp, Ellipsis] = ERRint16
+                    img[i, igrp, Ellipsis] = self._err_int16
 
         # error tracking for refCol
-        img[:, :, 0, :, :, :] = ERRint16
+        img[:, :, 0, :, :, :] = self._err_int16
 
         # solving the 1a-part of scrambling:
         # reorder by Smpl,Rst
@@ -525,15 +517,15 @@ class Descramble(DescrambleBase):
                         self._n_smpl_rst,
                         self._n_grp,
                         self._n_pad,
-                        self._n_row_in_block,
-                        self._n_col_in_block,
+                        self._n_row_in_blk,
+                        self._n_col_in_blk,
                         self._n_gn_crs_fn)
         img_smplrst = np.zeros(shape_smplrst).astype('int16')
 
-        img_smplrst[:, i_sample, 1:, ...] = img[:, 1:(212*2)-1:2, ...]
-        img_smplrst[:, i_reset, :(-1), ...] = img[:, 2:212*2:2, ...]
-        img_smplrst[:, i_sample, 0, ...] = img[:, 0, ...]
-        img_smplrst[:, i_reset, -1, ...] = img[:, -1, ...]
+        img_smplrst[:, self._i_smp, 1:, ...] = img[:, 1:(212*2)-1:2, ...]
+        img_smplrst[:, self._i_rst, :(-1), ...] = img[:, 2:212*2:2, ...]
+        img_smplrst[:, self._i_smp, 0, ...] = img[:, 0, ...]
+        img_smplrst[:, self._i_rst, -1, ...] = img[:, -1, ...]
 
         transpose_order = (0, 1, 2, 4, 3, 5, 6)
         img_smplrst = np.transpose(img_smplrst, transpose_order)
@@ -541,15 +533,15 @@ class Descramble(DescrambleBase):
         # (n_img,
         #  Smpl/Rst,
         #  self._n_grp,
-        #  self._n_row_in_block,
+        #  self._n_row_in_blk,
         #  self._n_pad,
-        #  self._n_col_in_block,
+        #  self._n_col_in_blk,
         #  Gn/Crs/Fn)
 
         shape_smplrst_split = (n_img,
                                self._n_smpl_rst,
                                self._n_grp * self._n_adc,
-                               self._n_pad * self._n_col_in_block,
+                               self._n_pad * self._n_col_in_blk,
                                self._n_gn_crs_fn)
         img_smplrst_split = img_smplrst.reshape(shape_smplrst_split)
 
@@ -564,10 +556,9 @@ class Descramble(DescrambleBase):
                    "[X, Gn,Gn, Fn,Fn,Fn,Fn,Fn,Fn,Fn,Fn, Crs,Crs,Crs,Crs,Crs])")
             print(Fore.GREEN + msg)
 
-        (sample, reset) = APy3_P2Mfuns.convert_GnCrsFn_2_DLSraw(
-                self._result_data,
-                ERRint16,
-                ERRDLSraw)
+        (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                          self._err_int16,
+                                                          self._err_dlsraw)
 
         self._data_to_write["sample"]["data"] = sample
         self._data_to_write["reset"]["data"] = reset

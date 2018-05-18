@@ -34,7 +34,7 @@ gather:
         n_grp: 212
         n_pad: 45
 
-        n_col_in_block: 32
+        n_col_in_blk: 32
 
 process:
     method: process_adccal_default
