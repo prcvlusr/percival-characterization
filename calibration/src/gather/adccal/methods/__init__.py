@@ -18,6 +18,8 @@ SHARED_DIR = os.path.join(BASE_DIR, "shared")
 GATHER_DIR = os.path.join(CALIBRATION_DIR, "src", "gather")
 ADCCAL_DIR = os.path.join(GATHER_DIR, "adccal")
 
+DESCRAMBLE_DIR = os.path.join(CURRENT_DIR, "descramble_methods")
+
 if ADCCAL_DIR not in sys.path:
     sys.path.insert(0, ADCCAL_DIR)
 

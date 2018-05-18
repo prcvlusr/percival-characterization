@@ -4,7 +4,7 @@ general:
 
     measurement: adccal
 
-    run: DLSraw
+    run: &run DLSraw
 
     n_processes: 1
 
@@ -17,6 +17,24 @@ gather:
 
     input: *input
     output: *output
+
+    descrample_tcpdump:
+        descramble_method: descramble_tcpdump_2018_03_15ad
+
+        # path & name of tcpdump-files to descramble (ordered by link)
+        input: [p2018.03.15crdAD_h10_lnk0.dmp, p2018.03.15crdAD_h10_lnk1.dmp]
+
+        output_prefix: "p2018.03.15crdAD_h10"
+
+        save_file: True
+        clean_memory: True
+        verbose: True
+
+        n_adc: 7
+        n_grp: 212
+        n_pad: 45
+
+        n_col_in_blk: 32
 
 process:
     method: process_adccal_default

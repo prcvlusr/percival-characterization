@@ -5,8 +5,8 @@ def load_config(config_file):
     """ Loads the config from a yaml file.
 
     Args:
-        config_file (str): Name of the yaml file from which the config should be
-                           loaded.
+        config_file (str): Name of the yaml file from which the config should
+                           be loaded.
 
     Return:
         Configuration dictionary.
