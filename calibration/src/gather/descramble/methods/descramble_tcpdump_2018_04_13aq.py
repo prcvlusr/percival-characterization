@@ -6,16 +6,14 @@ meas of independent counters for Smpl/Rst & subFrame)
 """
 import os  # to list files in a directory
 import time  # to have time
+import h5py
+import numpy as np
+from colorama import init, Fore
 
 import __init__  # noqa F401
 import utils
 
-import numpy as np
-from colorama import init, Fore
-
 from descramble_base import DescrambleBase
-
-import h5py
 
 
 class Descramble(DescrambleBase):
@@ -174,9 +172,9 @@ class Descramble(DescrambleBase):
         if self._verbose:
             print(Fore.BLUE + "resorting packages")
 
-        data, header, pack_check = self._resorting_data(n_img,
-                                                        imgs_tcpdump,
-                                                        file_content)
+        data, _, pack_check = self._resorting_data(n_img,
+                                                   imgs_tcpdump,
+                                                   file_content)
 
         if self._verbose:
             print(Fore.BLUE + " ")
@@ -258,25 +256,26 @@ class Descramble(DescrambleBase):
         (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
                                                           self._err_int16,
                                                           self._err_dlsraw)
-        (aux_NImg, aux_NRow, aux_NCol) = sample.shape
+        (_, aux_nrow, aux_ncol) = sample.shape
         shape_datamultfiles = (aux_n_of_files,
                                self._multiple_imgperfile,
-                               aux_NRow,
-                               aux_NCol)
+                               aux_nrow,
+                               aux_ncol)
         sample = sample.reshape(shape_datamultfiles).astype('uint16')
         reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
-        for iFile, thisFilePrefix in enumerate(fileprefix_list):
-            filenamepath = os.path.dirname(self._output_fname)
-            filenamepath = filenamepath+"/"+thisFilePrefix+".h5"
-            with h5py.File(filenamepath, "w", libver='latest') as my5hfile:
-                my5hfile.create_dataset('/data/', data=sample[iFile, :, :, :])
-                my5hfile.create_dataset('/reset/', data=reset[iFile, :, :, :])
-                my5hfile.close()
+        for i, prefix in enumerate(fileprefix_list):
+
+            filepath = os.path.dirname(self._output_fname,
+                                       prefix + ".h5")
+
+            with h5py.File(filepath, "w", libver='latest') as my5hfile:
+                my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
+                my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
 
             if self._verbose:
                 print(Fore.GREEN + "{0} Img saved to file {1}".format(
-                    self._multiple_imgperfile, filenamepath))
+                    self._multiple_imgperfile, filepath))
 
         # that's all folks
         print("------------------------")
@@ -289,7 +288,7 @@ class Descramble(DescrambleBase):
         """ report arguments form conf file """
         if self._verbose:
             print(Fore.GREEN + "Will try to load tcpdump files:")
-            for i, fname in enumerate(self._input_fnames):
+            for fname in self._input_fnames:
                 print(Fore.GREEN + fname)
 
             if self._save_file:
@@ -395,9 +394,12 @@ class Descramble(DescrambleBase):
         according to (img, datatype, subframe, packetnumber)
         """
 
-        shape_img_pack = (
-            n_img, self._n_smpl_rst, self._n_subframe,
-            self._n_grp * self._n_packs_in_rowgrp // self._n_subframe)
+        shape_img_pack = (n_img,
+                          self._n_smpl_rst,
+                          self._n_subframe,
+                          (self._n_grp *
+                           self._n_packs_in_rowgrp //
+                           self._n_subframe))
 
         shape_data = shape_img_pack + (self._gooddata_size,)
         shape_header = shape_img_pack + (self._header_size,)
@@ -453,7 +455,7 @@ class Descramble(DescrambleBase):
         shape_data_out = (n_img,
                           self._n_smpl_rst,
                           self._n_grp,
-                          2*self._n_subframe*self._gooddata_size)
+                          2 * self._n_subframe * self._gooddata_size)
         data_out = np.zeros(shape_data_out).astype('uint8')
         shape_rowgrpdata = (self._n_subframe, 2, self._gooddata_size)
         rowgrpdata = np.zeros(shape_rowgrpdata).astype('uint8')
@@ -466,19 +468,21 @@ class Descramble(DescrambleBase):
         for i, _ in enumerate(imgs_tcpdump):
             if self._verbose:
                 print(".", end="", flush=True)
-            for iRowGrp in range(self._n_grp):
-                for iSmplRst in range(self._n_smpl_rst):
+
+            for i_rowgrp in range(self._n_grp):
+                for i_smplrst in range(self._n_smpl_rst):
                     rowgrpdata = data[i,
-                                      iSmplRst,
+                                      i_smplrst,
                                       :,
-                                      iRowGrp*2:(iRowGrp*2)+1+1,
+                                      i_rowgrp*2:(i_rowgrp*2)+1+1,
                                       :]
                     # (subFrame0&1,packN0&1,goodDataSize)
                     rowgrpdata = np.transpose(rowgrpdata, (1, 0, 2))
                     # (packN0&1,subFrame0&1,goodDataSize)
                     rowgrpdata = rowgrpdata.reshape(
-                        2*self._n_subframe*self._gooddata_size)
-                    data_out[i, iSmplRst, iRowGrp, :] = rowgrpdata
+                        2 * self._n_subframe * self._gooddata_size)
+                    data_out[i, i_smplrst, i_rowgrp, :] = rowgrpdata
+
         if self._verbose:
             print(Fore.BLUE + " ")
         return data_out
@@ -500,51 +504,59 @@ class Descramble(DescrambleBase):
         if self._verbose:
             print(Fore.BLUE + "descrambling images")
 
-        for iImg, _ in enumerate(imgs_tcpdump):
+        for i_img, _ in enumerate(imgs_tcpdump):
             if self._verbose:
                 print(".", end="", flush=True)
 
-            auxil_img = data[iImg, :, :, :]
+            auxil_img = data[i_img, :, :, :]
             # (NSmplRst,NRowGrpInShot,NpacksInRowgrp*goodData_Size)
 
             # solving the 2b-part of the scrambing (mezzanine interleaving
             # 32bit-sequences from each pad)
-            img_shape_pad = (
-                self._n_smpl_rst, self._n_grp,
-                (self._n_packs_in_rowgrp *
-                 self._gooddata_size //
-                 (self._n_data_pads*32//8)),
-                self._n_data_pads, 32//8)
+            img_shape_pad = (self._n_smpl_rst,
+                             self._n_grp,
+                             (self._n_packs_in_rowgrp *
+                              self._gooddata_size //
+                              (self._n_data_pads * 32 // 8)),
+                             self._n_data_pads,
+                             32//8)
             auxil_img = auxil_img.reshape(img_shape_pad)
             auxil_img = auxil_img.transpose((0, 1, 3, 2, 4))
             # dimensions of img at this point:
             # (NSmplRst, NRowGrpInShot, NDataPads,
             # NpacksInRowgrp*goodData_Size/(NDataPads*32/8), 32/8)
 
-            img_shape_pad2 = (
-                self._n_smpl_rst, self._n_grp, self._n_data_pads,
-                self._n_packs_in_rowgrp*self._gooddata_size//self._n_data_pads)
+            img_shape_pad2 = (self._n_smpl_rst,
+                              self._n_grp,
+                              self._n_data_pads,
+                              (self._n_packs_in_rowgrp *
+                               self._gooddata_size //
+                               self._n_data_pads))
             auxil_img = auxil_img.reshape(img_shape_pad2)
 
             # array of uint8 => array of [x,x,x,x, x,x,x,x] bits
             bitarray = utils.convert_intarray_to_bitarray(auxil_img, 8)
             auxil_img_8bitted = bitarray[Ellipsis, ::-1].astype('uint8')
-            shape_8bit = (
-                self._n_smpl_rst, self._n_grp, self._n_data_pads,
-                self._n_packs_in_rowgrp*self._gooddata_size//self._n_data_pads,
-                8)
+            shape_8bit = (self._n_smpl_rst,
+                          self._n_grp,
+                          self._n_data_pads,
+                          (self._n_packs_in_rowgrp *
+                           self._gooddata_size //
+                           self._n_data_pads),
+                          8)
             auxil_img_8bitted = auxil_img_8bitted.reshape(shape_8bit)
 
             if self._clean_memory:
                 del auxil_img
 
             # combine 2x8bit to 16bit
-            shape_16bit = (
-                self._n_smpl_rst, self._n_grp, self._n_data_pads,
-                (self._n_packs_in_rowgrp *
-                 self._gooddata_size //
-                 (self._n_data_pads*2)),
-                16)
+            shape_16bit = (self._n_smpl_rst,
+                           self._n_grp,
+                           self._n_data_pads,
+                           (self._n_packs_in_rowgrp *
+                            self._gooddata_size //
+                            (self._n_data_pads * 2)),
+                           16)
             auxil_img_16bitted = np.zeros(shape_16bit).astype('uint8')
             auxil_img_16bitted[..., 0:8] = auxil_img_8bitted[:, :, :, 0::2, :]
             auxil_img_16bitted[..., 8:16] = auxil_img_8bitted[:, :, :, 1::2, :]
@@ -561,11 +573,12 @@ class Descramble(DescrambleBase):
             if self._clean_memory:
                 del auxil_img_16bitted
 
-            shape_15bit = (
-                self._n_smpl_rst, self._n_grp, self._n_data_pads,
-                (self._n_packs_in_rowgrp *
-                 self._gooddata_size *
-                 15//(self._n_data_pads*2)))
+            shape_15bit = (self._n_smpl_rst,
+                           self._n_grp,
+                           self._n_data_pads,
+                           (self._n_packs_in_rowgrp *
+                            self._gooddata_size *
+                            15 // (self._n_data_pads * 2)))
             img_as_from_chip = auxil_img_15bitted.reshape(shape_15bit)
 
             shape_as_from_chip = (self._n_smpl_rst,
@@ -623,7 +636,7 @@ class Descramble(DescrambleBase):
             if self._clean_memory:
                 del img_aggr
 
-            descrambled_data[iImg, Ellipsis] = img_aggr_withref
+            descrambled_data[i_img, Ellipsis] = img_aggr_withref
 
         if self._verbose:
             print(Fore.BLUE + " ")
@@ -644,19 +657,19 @@ class Descramble(DescrambleBase):
                              self._n_gn_crs_fn)
         img = np.zeros(shape_descrambled).astype('uint8')
 
-        for iImg, _ in enumerate(imgs_tcpdump):
-            for iSmplRst in range(self._n_smpl_rst):
-                img[iImg, iSmplRst, Ellipsis] = utils.reorder_pixels_gncrsfn(
-                    data[iImg, iSmplRst, Ellipsis],
+        for i_img, _ in enumerate(imgs_tcpdump):
+            for i_smplrst in range(self._n_smpl_rst):
+                img[i_img, i_smplrst, Ellipsis] = utils.reorder_pixels_gncrsfn(
+                    data[i_img, i_smplrst, Ellipsis],
                     self._n_adc, self._n_col_in_blk)
 
         # add error tracking for data coming from missing packets
         img = img.astype('int16')  # -256upto255
         for i, _ in enumerate(imgs_tcpdump):
             for igrp in range(self._n_grp):
-                for iSmplRst in range(self._n_smpl_rst):
-                    if rowgrp_check[i, iSmplRst, igrp] is False:
-                        img[i, iSmplRst, igrp, Ellipsis] = self._err_int16
+                for i_smplrst in range(self._n_smpl_rst):
+                    if rowgrp_check[i, i_smplrst, igrp] is False:
+                        img[i, i_smplrst, igrp, Ellipsis] = self._err_int16
 
         # error tracking for refCol
         img[:, :, :, 0, :, :, :] = self._err_int16
@@ -700,4 +713,3 @@ class Descramble(DescrambleBase):
 
         self._write_data()
         print(Fore.GREEN + "Data saved to: {}".format(self._output_fname))
-
