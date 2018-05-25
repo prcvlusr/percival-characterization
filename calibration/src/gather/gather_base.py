@@ -1,12 +1,11 @@
-import h5py
+"""Base class for all gather methods
+"""
 import os
 import sys
 import time
+import h5py
 
-try:
-    CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-except:
-    CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CALIBRATION_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
@@ -15,12 +14,16 @@ SHARED_DIR = os.path.join(BASE_DIR, "shared")
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
-import utils  # noqa E402
-from _version import __version__  # noqa E402
+from _version import __version__
 
 
 class GatherBase(object):
+    """Base class for all gather methods
+    """
     def __init__(self, **kwargs):
+
+        self._in_fname = None
+        self._out_fname = None
 
         # add all entries of the kwargs dictionary into the class namespace
         for key, value in kwargs.items():
@@ -37,7 +40,9 @@ class GatherBase(object):
               .format(self._in_fname, self._out_fname))
 
     def run(self):
-        totalTime = time.time()
+        """Run the gather method
+        """
+        total_time = time.time()
 
         self.initiate()
 
@@ -45,7 +50,12 @@ class GatherBase(object):
 
         self._write_data()
 
-        print("Gather took time:", time.time() - totalTime, "\n")
+        print("Gather took time:", time.time() - total_time, "\n")
+
+    def initiate(self):
+        """Sets all required parameters
+        """
+        pass
 
     def _load_data(self):
         pass
@@ -56,26 +66,26 @@ class GatherBase(object):
         if self._data_to_write == {}:
             raise Exception("Write data: No data found.")
 
-        with h5py.File(self._out_fname, "w", libver='latest') as f:
+        with h5py.File(self._out_fname, "w", libver='latest') as out_f:
 
             for key, dset in self._data_to_write.items():
-                f.create_dataset(dset["path"],
-                                 data=dset["data"],
-                                 dtype=dset["type"])
+                out_f.create_dataset(dset["path"],
+                                     data=dset["data"],
+                                     dtype=dset["type"])
 
             gname = "collection"
             # save metadata from original files
             for key, value in iter(self._metadata.items()):
                 name = "{}/{}".format(gname, key)
                 try:
-                    f.create_dataset(name, data=value)
+                    out_f.create_dataset(name, data=value)
                 except:
                     print("Error in", name, value.dtype)
                     raise
 
             name = "{}/{}".format(gname, "version")
-            f.create_dataset(name, data=__version__)
+            out_f.create_dataset(name, data=__version__)
 
-            f.flush()
+            out_f.flush()
 
         print("Done.")

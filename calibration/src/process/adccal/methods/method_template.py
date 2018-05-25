@@ -1,10 +1,12 @@
-import numpy as np
-
+"""A template to be used as reference for method development.
+"""
 import __init__  # noqa F401
 from process_adccal_base import ProcessAdccalBase
 
 
 class Process(ProcessAdccalBase):
+    """A template class to be used as reference for method development.
+    """
 
     def _initiate(self):
         # what should be calculated and

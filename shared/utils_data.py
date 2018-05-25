@@ -1,3 +1,5 @@
+"""Utilities for data handling.
+"""
 import numpy as np
 
 
@@ -109,7 +111,7 @@ def swap_bits(bitarray):
     return 1 - bitarray
 
 
-def split_Alessandro(raw_dset):
+def split_alessandro(raw_dset):
     """Extracts the coarse, fine and gain bits.
 
     Readout bit number
@@ -147,7 +149,7 @@ def split_Alessandro(raw_dset):
     return coarse_adc, fine_adc, gain_bits
 
 
-def split_Ulrik(raw_dset):
+def split_ulrik(raw_dset):
     """Extracts the coarse, fine and gain bits.
 
     Readout bit number
@@ -224,6 +226,8 @@ def split(raw_dset):
 
 
 def get_adc_col_array(n_adc=7, n_xcols=4, n_ncols=8):
+    """Get the ADC column array.
+    """
     cols = np.arange(n_xcols * n_ncols)
     cols = cols.reshape((n_xcols, n_ncols))
     cols = cols.transpose()
@@ -246,6 +250,8 @@ def get_adc_col_array(n_adc=7, n_xcols=4, n_ncols=8):
 
 
 def get_col_grp():
+    """Get column groups
+    """
     i_g = np.array(0)
     i_h0 = np.arange(21+1, 0+1-1, -1)
     i_h1 = np.arange(22+21+1, 22+0+1-1, -1)
@@ -264,7 +270,7 @@ def reorder_pixels_gncrsfn(in_data, n_adc, n_col_in_row_blk):
 
     """
 
-    (n_grp, n_pads, pix_in_blk, n_gncrsfn) = in_data.shape
+    (n_grp, n_pads, _, n_gncrsfn) = in_data.shape
     adc_cols = get_adc_col_array()
     col_grp = get_col_grp()
 
@@ -315,8 +321,6 @@ def convert_gncrsfn_to_dlsraw(in_data,
     data = data.astype('uint16')
 
     # convert to DLSraw format
-    (n_img, n_smpl_rst, n_row, n_col, n_gn_crs_fn) = in_data.shape
-
     sample = ((2**13) * data[:, i_smpl, :, :, i_gn]
               + (2**5) * data[:, i_smpl, :, :, i_fn]
               + data[:, i_smpl, :, :, i_crs])
@@ -327,11 +331,10 @@ def convert_gncrsfn_to_dlsraw(in_data,
 
     # track errors in DLSraw mode with the ERRDLSraw (max of uint16) value
     # (usually this in not reached because pixel= 15 bit)
-    errMask = in_data[:, i_smpl, :, :, i_gn] == in_err
-    sample[errMask] = out_err
+    err_mask = in_data[:, i_smpl, :, :, i_gn] == in_err
+    sample[err_mask] = out_err
 
-    errMask = in_data[:, i_rst, :, :, i_gn] == in_err
-    reset[errMask] = out_err
+    err_mask = in_data[:, i_rst, :, :, i_gn] == in_err
+    reset[err_mask] = out_err
 
     return sample, reset
-

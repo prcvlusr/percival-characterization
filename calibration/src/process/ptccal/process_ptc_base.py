@@ -1,3 +1,5 @@
+"""Base class for PTC calibration processing
+"""
 import h5py
 import time
 

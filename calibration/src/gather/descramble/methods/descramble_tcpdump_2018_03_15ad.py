@@ -4,12 +4,11 @@ readable in gather.
 """
 import os  # to list files in a directory
 import time  # to have time
-
-import __init__  # noqa F401
-import utils
-
 import numpy as np
 from colorama import init, Fore
+
+import __init__
+import utils
 
 from descramble_base import DescrambleBase
 
@@ -18,7 +17,7 @@ class Descramble(DescrambleBase):
     """ Descample tcpdump data
     """
 
-    def __init__(self, **kwargs):  # noqa F401
+    def __init__(self, **kwargs):
 
         super().__init__(**kwargs)
 
@@ -164,9 +163,9 @@ class Descramble(DescrambleBase):
         if self._verbose:
             print(Fore.BLUE + "resorting packages")
 
-        data, header, pack_check = self._resorting_data(n_img,
-                                                        imgs_tcpdump,
-                                                        file_content)
+        data, _, pack_check = self._resorting_data(n_img,
+                                                   imgs_tcpdump,
+                                                   file_content)
 
         if self._verbose:
             print(Fore.BLUE + " ")
@@ -272,8 +271,8 @@ class Descramble(DescrambleBase):
 
             else:
                 # read uint8 data from binary file
-                with open(fname) as f:
-                    content = np.fromfile(f, dtype=np.uint8)
+                with open(fname) as bin_file:
+                    content = np.fromfile(bin_file, dtype=np.uint8)
 
                 # cut off the excess bytes at the beginning
                 content = content[self._excess_bytesinfront:]
