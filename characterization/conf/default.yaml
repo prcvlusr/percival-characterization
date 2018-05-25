@@ -28,6 +28,23 @@ raw:
     #method: [viewer]
     method: [image, plot_coarse-fine_vs_image]
 
+#    viewer:
+#        err_below: -0.1
+#
+#    APy3_descramble_tcpdump_2018_03_15AD:
+#        # path & name of tcpdump-files to descramble (ordered by link)
+#        input: [/gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/h5_scrmbl_view/p2018.03.15crdAD_h10_lnk0.dmp,
+#                /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/h5_scrmbl_view/p2018.03.15crdAD_h10_lnk1.dmp]
+#        save_file: True
+#        clean_memory: True
+#        verbose: True
+#
+#        n_adc: 7
+#        n_grp: 212
+#        n_pad: 45
+#
+#        n_col_in_block: 32
+
 gathered:
     input: *output
     output: *output
