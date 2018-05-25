@@ -22,15 +22,17 @@ class Descramble(DescrambleBase):
 
         super().__init__(**kwargs)
 
-        # in the method and the method section of the config file the following
-        # parameters have to be defined:
+        # the gather method sets the following parameters
+        #   input_fnames
+        #   output_fname
+
+        # in the method section of the config file the following parameters
+        # have to be defined:
         #   n_adc
         #   n_grp
         #   n_pad
         #   n_col_in_blk
-        #   input_fnames
         #   save_file
-        #   output_fname
         #   clean_memory
         #   verbose
 

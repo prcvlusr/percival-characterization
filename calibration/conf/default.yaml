@@ -26,15 +26,16 @@ gather:
 
         output_prefix: "p2018.03.15crdAD_h10"
 
-        save_file: True
-        clean_memory: True
-        verbose: True
+        descramble_tcpdump_2018_03_15ad: &descramble_tcpdump_2018_03_15ad
+            save_file: True
+            clean_memory: True
+            verbose: True
 
-        n_adc: 7
-        n_grp: 212
-        n_pad: 45
+            n_adc: 7
+            n_grp: 212
+            n_pad: 45
 
-        n_col_in_blk: 32
+            n_col_in_blk: 32
 
 process:
     method: process_adccal_default
