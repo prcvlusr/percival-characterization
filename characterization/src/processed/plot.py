@@ -12,8 +12,13 @@ class Plot(PlotBase):
     def __init__(self, **kwargs):  # noqa F401
         super().__init__(**kwargs)
 
-    def _generate_single_plot(self, x, data, constants,
-                              plot_title, label, out_fname):
+    def _generate_single_plot(self,
+                              x,
+                              data,
+                              constants,
+                              plot_title,
+                              label,
+                              out_fname):
 
         fig = plt.figure(figsize=None)
 

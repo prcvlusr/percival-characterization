@@ -74,11 +74,17 @@ class PlotBase():
 
         """
 
-        return PlotBase.LoadedData(x=self._vin,
+        return PlotBase.LoadedData(vin=self._vin,
                                    gathered_data=self._data,
                                    constants=self._constants)
 
-    def _generate_single_plot(self, x, data, plot_title, label, out_fname):
+    def _generate_single_plot(self,
+                              x,
+                              data,
+                              constants,
+                              plot_title,
+                              label,
+                              out_fname):
         print("_generate_single_plot method is not implemented.")
 
     def plot_sample(self):
