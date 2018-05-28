@@ -63,7 +63,7 @@ class GatherBase(object):
     def _write_data(self):
         print("Start saving at {} ... ".format(self._out_fname), end="")
 
-        if self._data_to_write == {}:
+        if self._data_to_write == {} or self._data_to_write is None:
             raise Exception("Write data: No data found.")
 
         with h5py.File(self._out_fname, "w", libver='latest') as out_f:

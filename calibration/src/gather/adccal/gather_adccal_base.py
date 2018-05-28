@@ -44,7 +44,7 @@ class GatherAdcBase(GatherBase):
         }
 
         self._raw_tmp_shape = None
-        self._data_to_write = None
+        self._data_to_write = {}
 
     def _set_data_to_write(self):
         """Define which data should be written into file.

@@ -11,7 +11,7 @@ all:
 
 raw:
     input: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/PSVoltFromVin15000_DLSraw.h5
-    metadata_file: /gpfs/cfel/fsds/labs/agipd/calibration/scratch/user/kuhnm/percival_tests/raw/PSVoltFromVin_fn_reduced_iFbiasN5000/file.dat
+    metadata_fname: null
 
     output: *output
 
