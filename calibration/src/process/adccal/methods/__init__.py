@@ -3,7 +3,7 @@
 import os
 import sys
 
-CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CALIBRATION_DIR = os.path.dirname(
     os.path.dirname(
