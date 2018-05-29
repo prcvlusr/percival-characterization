@@ -1,0 +1,56 @@
+general:
+    data_type: gathered
+    run: DLSraw
+
+    plot_sample: True
+    plot_reset: True
+    plot_combined: True
+
+all:
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab 
+
+raw:
+    input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.h5
+    metadata_file: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.VRST
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+
+    #method: [viewer]
+    method: [image, plot_coarse-fine_vs_image]
+
+    viewer:
+        err_below: -0.1
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+    #method: [plot_sample_vs_reset]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 10
+    row: null
+
+    method: [plot]
