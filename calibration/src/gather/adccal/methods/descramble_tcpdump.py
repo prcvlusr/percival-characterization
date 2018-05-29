@@ -1,17 +1,19 @@
+"""
+Descramble tcpdump input files into files suitable for the
+file_per_vin_and_register_file gather method.
+"""
 import copy
 # import json
 import os
-import sys
 
-from __init__ import DESCRAMBLE_DIR
+import __init__
 from gather_adccal_base import GatherAdcBase
 
-if DESCRAMBLE_DIR not in sys.path:
-    sys.path.insert(0, DESCRAMBLE_DIR)
-
-
 class Gather(GatherAdcBase):
-    def __init__(self, **kwargs):  # noqa F401
+    """Calls the descrambling method.
+    """
+
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         dmethod = self._method_properties["descramble_method"]
@@ -35,6 +37,8 @@ class Gather(GatherAdcBase):
         self._descramble = self._descramble_m(**descr_kwargs)
 
     def initiate(self):
+        """Initiate all parameters and performs presteps before the gather.
+        """
         self._descramble.run()
 
     def _load_data(self):

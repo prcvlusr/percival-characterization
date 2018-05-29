@@ -1,10 +1,25 @@
-import h5py
-import numpy as np
+"""Collection of utilities
+"""
+
 import os
 import sys
+import h5py
+import numpy as np
 
-from utils_config import *  # noqa F401
-from utils_data import *  # noqa F401
+from utils_config import load_config, update_dict
+from utils_data import (decode_dataset_8bit,
+                        convert_bitlist_to_int,
+                        convert_bytelist_to_int,
+                        convert_intarray_to_bitarray,
+                        convert_bitarray_to_intarray,
+                        swap_bits,
+                        split_alessandro,
+                        split_ulrik,
+                        split,
+                        get_adc_col_array,
+                        get_col_grp,
+                        reorder_pixels_gncrsfn,
+                        convert_gncrsfn_to_dlsraw)
 
 
 def create_dir(directory_name):
@@ -23,24 +38,24 @@ def create_dir(directory_name):
                 pass
 
 
-def check_file_exists(file_name, quit=True):
+def check_file_exists(file_name, exit_program=True):
     """Checks if a file already exists.
 
     Args:
         file_name: The file to check for existence
-        quit (optional): Quit the program if the file exists or not.
+        exit_program (optional): Exit the program if the file exists or not.
     """
 
     print("file_name = {}".format(file_name))
     if os.path.exists(file_name):
         print("File already exists")
-        if quit:
+        if exit_program:
             sys.exit(1)
     else:
         print("File: ok")
 
 
-def load_file_content(fname, excluded=[]):
+def load_file_content(fname, excluded=None):
     """Load the HDF5 file into a dictionary.
 
     Args:
@@ -59,12 +74,21 @@ def load_file_content(fname, excluded=[]):
         dictionary:
             "mygroup/mydataset": numpy array
     """
+    if excluded is None:
+        excluded = []
 
     file_content = {}
 
     def get_file_content(name, obj):
+        """Callable to be used to read the file content into a dictionary.
+        Args:
+            name: The name of the object relative to the current group
+            obj: A reference to the data
+        """
         if isinstance(obj, h5py.Dataset) and name not in excluded:
+
             file_content[name] = obj[()]
+
             # if object types are not converted writing gives the error
             # TypeError: Object dtype dtype('O') has no native HDF5 equivalent
             if (isinstance(file_content[name], np.ndarray) and
@@ -78,6 +102,9 @@ def load_file_content(fname, excluded=[]):
 
 
 class IndexTracker(object):
+    """Interactively generate plots.
+    """
+
     def __init__(self, data, method_properties):
 
         self._data = data
@@ -85,6 +112,9 @@ class IndexTracker(object):
         self._slice = None
         self._window_title = None
         self._fig = None
+
+        self._frame = None
+        self._slices = None
 
         self.initiate()
 

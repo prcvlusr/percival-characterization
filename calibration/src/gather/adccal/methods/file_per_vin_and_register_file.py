@@ -1,14 +1,31 @@
+"""
+Takes one file per Vin plus an additional register file as input and gathers
+in into the default format.
+"""
 import h5py
 import numpy as np
 
-import __init__  # noqa F401
+import __init__
 from gather_adccal_base import GatherAdcBase
 import utils
 
 
 class Gather(GatherAdcBase):
+    """Converts the input file(s) into the standard gathered format.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        self._n_runs = None
+        self._n_frames = None
+        self._raw_shape = None
+        self._transpose_order = None
+        self._register = None
+        self._n_frames_per_run = None
 
     def initiate(self):
+        """Sets up the method attributes.
+        """
 
         # mandatory variable to be set before any parent class function can
         # me used are:
@@ -50,16 +67,16 @@ class Gather(GatherAdcBase):
     def _read_register(self):
         print("meta_fname", self._meta_fname)
 
-        with open(self._meta_fname, "r") as f:
-            file_content = f.read().splitlines()
+        with open(self._meta_fname, "r") as metafile:
+            file_content = metafile.read().splitlines()
 
         # data looks like this: <V_in>  <file_prefix>
         file_content = [s.split("\t") for s in file_content]
-        for i, s in enumerate(file_content):
+        for i, string in enumerate(file_content):
             try:
-                s[0] = float(s[0])
-            except:
-                if s == ['']:
+                string[0] = float(string[0])
+            except ValueError:
+                if string == ['']:
                     # remove empty lines
                     del file_content[i]
                 else:
@@ -75,8 +92,8 @@ class Gather(GatherAdcBase):
             in_fname = self._in_fname.format(run=i[1])
 
             try:
-                with h5py.File(in_fname, "r") as f:
-                    n_frames = f[self._paths["sample"]].shape[0]
+                with h5py.File(in_fname, "r") as infile:
+                    n_frames = infile[self._paths["sample"]].shape[0]
                     self._n_frames_per_run.append(n_frames)
             except OSError:
                 print("in_fname", in_fname)
@@ -100,14 +117,14 @@ class Gather(GatherAdcBase):
                               (self._part + 1) * self._n_cols)
         idx = (Ellipsis, load_idx_rows, load_idx_cols)
 
-        for i, (v, prefix) in enumerate(self._register):
+        for i, (vin_value, prefix) in enumerate(self._register):
             in_fname = self._in_fname.format(run=prefix)
 
             # read in data for this slice
             print("in_fname", in_fname)
-            with h5py.File(in_fname, "r") as f:
-                in_sample = f[self._paths["sample"]][idx]
-                in_reset = f[self._paths["reset"]][idx]
+            with h5py.File(in_fname, "r") as in_f:
+                in_sample = in_f[self._paths["sample"]][idx]
+                in_reset = in_f[self._paths["reset"]][idx]
 
             # determine where this data block should go in the result
             # matrix
@@ -129,7 +146,7 @@ class Gather(GatherAdcBase):
             r_fine[t_idx, Ellipsis] = fine
             r_gain[t_idx, Ellipsis] = gain
 
-            vin[i] = v
+            vin[i] = vin_value
 
         # split the rows into ADC groups
         print(s_coarse.shape)

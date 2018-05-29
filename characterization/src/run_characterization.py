@@ -213,16 +213,31 @@ class Analyse(object):
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
 
-        if self._row is None:
-            self._row = slice(None)
-        elif type(self._row) == int:
-            self._row
-        elif len(self._row) == 1:
-            self.row = self._row[0]
-        else:
-            self._row = slice(*self._row)
+        print("row", self._row)
+        self.set_indices()
 
         self.load_methods()
+
+    def set_indices(self):
+        """Interprete which indices are chosen.
+        """
+
+        def determine_slice(indices):
+            if indices is None:
+                indices = slice(None)
+            elif type(indices) == int:
+                pass
+            elif len(indices) == 1:
+                indices = indices[0]
+            else:
+                indices = slice(*indices)
+
+            return indices
+
+        self._row = determine_slice(self._row)
+        self._col = determine_slice(self._col)
+        self._frame = determine_slice(self._frame)
+        self._adc = determine_slice(self._adc)
 
     def load_methods(self):
         """Load data type specific methods.

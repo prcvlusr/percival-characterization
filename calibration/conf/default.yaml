@@ -37,6 +37,21 @@ gather:
 
             n_col_in_blk: 32
 
+        descramble_tcpdump_2018_04_13aq:
+            save_file: True
+            clean_memory: True
+            verbose: True
+
+            multiple_save_files: True
+            multiple_metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/compare_p2018.04.13crdAQ_h14.dat
+            multiple_imgperfile: 1
+
+            n_adc: 7
+            n_grp: 212
+            n_pad: 45
+
+            n_col_in_blk: 32
+
 process:
     method: process_adccal_default
 

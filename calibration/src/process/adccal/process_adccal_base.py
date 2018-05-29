@@ -1,12 +1,16 @@
+"""Base class for ADC calibration processing
+"""
 import h5py
 import numpy as np
 
-import __init__  # noqa F401
+import __init__
 from process_base import ProcessBase
 
 
 class ProcessAdccalBase(ProcessBase):
-    def __init__(self, **kwargs):  # noqa F811
+    """Base class for ADC calibration processing
+    """
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
         self._paths = {

@@ -1,3 +1,5 @@
+"""Utilities to handle config files.
+"""
 import yaml
 
 
@@ -46,6 +48,6 @@ def update_dict(d, d_to_update):
 
     for k, v in d.items():
         if isinstance(v, dict):
-            update_dict(v)
+            update_dict(v, d_to_update[k])
         else:
             d_to_update[k] = v

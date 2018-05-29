@@ -1,15 +1,14 @@
+"""Base class for all processing methods
+"""
 from collections import namedtuple
-import h5py
-import sys
-import numpy as np
-import time
 import os
+import sys
+import time
 from datetime import date
+import h5py
+import numpy as np
 
-try:
-    CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
-except:
-    CURRENT_DIR = os.path.dirname(os.path.realpath('__file__'))
+CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
 
 CALIBRATION_DIR = os.path.dirname(os.path.dirname(CURRENT_DIR))
 BASE_DIR = os.path.dirname(CALIBRATION_DIR)
@@ -18,11 +17,12 @@ SHARED_DIR = os.path.join(BASE_DIR, "shared")
 if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
-import utils  # noqa E402
-from _version import __version__  # noqa E402
+from _version import __version__
 
 
 class ProcessBase(object):
+    """Base class for all processing methods
+    """
     LinearFitResult = namedtuple("linear_fit_result", ["solution",
                                                        "residuals",
                                                        "rank",
@@ -30,6 +30,10 @@ class ProcessBase(object):
                                                        "r_squared"])
 
     def __init__(self, **kwargs):
+
+        self._in_fname = None
+        self._out_fname = None
+        self._method = None
 
         # add all entries of the kwargs dictionary into the class namespace
         for key, value in kwargs.items():
@@ -46,6 +50,8 @@ class ProcessBase(object):
         pass
 
     def run(self):
+        """Run the processing
+        """
         total_time = time.time()
 
         self._initiate()
@@ -67,7 +73,7 @@ class ProcessBase(object):
 
     def _get_mask(self, data):
         # find out if the col was effected by frame loss
-        return (data == 0)
+        return data == 0
 
     def _mask_out_problems(self, data, mask=None):
         if mask is None:
@@ -164,31 +170,31 @@ class ProcessBase(object):
         """Writes the result dictionary and additional metadata into a file.
         """
 
-        with h5py.File(self._out_fname, "w", libver='latest') as f:
+        with h5py.File(self._out_fname, "w", libver='latest') as out_f:
 
             # write data
 
             for key in self._result:
                 if "type" in self._result[key]:
-                    f.create_dataset(self._result[key]['path'],
-                                     data=self._result[key]['data'],
-                                     dtype=self._result[key]['type'])
+                    out_f.create_dataset(self._result[key]['path'],
+                                         data=self._result[key]['data'],
+                                         dtype=self._result[key]['type'])
                 else:
-                    f.create_dataset(self._result[key]['path'],
-                                     data=self._result[key]['data'])
+                    out_f.create_dataset(self._result[key]['path'],
+                                         data=self._result[key]['data'])
 
             # write metadata
 
             metadata_base_path = "collection"
 
             today = str(date.today())
-            f.create_dataset("{}/creation_date".format(metadata_base_path),
-                             data=today)
+            out_f.create_dataset("{}/creation_date".format(metadata_base_path),
+                                 data=today)
 
             name = "{}/{}".format(metadata_base_path, "version")
-            f.create_dataset(name, data=__version__)
+            out_f.create_dataset(name, data=__version__)
 
             name = "{}/{}".format(metadata_base_path, "method")
-            f.create_dataset(name, data=self._method)
+            out_f.create_dataset(name, data=self._method)
 
-            f.flush()
+            out_f.flush()

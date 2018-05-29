@@ -1,13 +1,16 @@
 """
-Descrample tcpdump output from the mezzanine to a data format
+Descramble tcpdump output from the mezzanine to a data format
 readable in gather.
+mezzanine Firmware >= 2018.04.13_AQ (packets are counted by
+meas of independent counters for Smpl/Rst & subFrame)
 """
 import os  # to list files in a directory
 import time  # to have time
+import h5py
 import numpy as np
 from colorama import init, Fore
 
-import __init__
+import __init__  # noqa F401
 import utils
 
 from descramble_base import DescrambleBase
@@ -17,28 +20,26 @@ class Descramble(DescrambleBase):
     """ Descample tcpdump data
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs):  # noqa F401
 
         super().__init__(**kwargs)
 
-        # the gather method sets the following parameters
-        #   input_fnames
-        #   output_fname
-
-        # in the method section of the config file the following parameters
-        # have to be defined:
+        # in the method and the method section of the config file the following
+        # parameters have to be defined:
         #   n_adc
         #   n_grp
         #   n_pad
         #   n_col_in_blk
+        #   input_fnames
         #   save_file
+        #   output_fname
         #   clean_memory
         #   verbose
 
         # useful constants
         # negative value usable to track Gn/Crs/Fn from missing pack
         self._err_int16 = -256
-#        self._err_blw = -0.1
+        # self._err_blw = -0.1
         # forbidden uint16, usable to track "pixel" from missing pack
         self._err_dlsraw = 65535
         self._i_smp = 0
@@ -48,7 +49,8 @@ class Descramble(DescrambleBase):
         self._i_fn = 2
 
         # general constants for a P2M system
-        self._n_smpl_rst = 2
+        self._n_smpl_rst = 2  # 0=Rst, 1=Smpl
+        self._n_subframe = 2  # 0 or 1
         self._n_data_pads = self._n_pad - 1  # 44
         self._n_row_in_blk = self._n_adc  # 7
         self._n_pixs_in_blk = (self._n_col_in_blk * self._n_row_in_blk)  # 224
@@ -65,15 +67,17 @@ class Descramble(DescrambleBase):
         self._header_size = self._fullpack_size - self._gooddata_size  # 112
         self._img_counter = 88 - self._excess_bytesinfront  # also+1
         self._pack_counter = 90 - self._excess_bytesinfront  # also+1
+        #
+        self._datatype_counter = self._img_counter - 4
+        self._subframe_counter = self._img_counter - 3
 
         # 1 RowGrp (7x32x44pixel) in in 4 UDPacket
         self._n_packs_in_rowgrp = 4
-        # 1Img (Smpl+Rst)= 1696 UDPacket
-        self.n_packs_in_img = (self._n_packs_in_rowgrp
-                               * self._n_grp
-                               * self._n_smpl_rst)
-        # thus packet count is never > 1695
-        self._max_n_pack = 1695
+        # 1Img (Smpl+Rst)= 1696 UDPacket, id by (datatype,subframe,n_pack)
+        self.n_packs_in_img = (self._n_packs_in_rowgrp *
+                               self._n_grp * self._n_smpl_rst)
+        # thus packet count is never > 423
+        self._max_n_pack = 423
 
         self._result_data = None
 
@@ -104,10 +108,13 @@ class Descramble(DescrambleBase):
             A complete image (Smpl+Rst) = 1696 UDPackets
             each UDPack has 4928Byte of information, and 112Byte of header.
             each UDPack is univocally identified by the header:
-            - whether it is part of a Smpl/Rst
             - which Img (frame) the packet belongs to
-            - its own packet number (0:1696), which determines the RowGrp the
+            - datatype: whether it is part of a Smpl/Rst (respect. 1 or 0)
+            - subframenumber (0 or 1)
+            - packetnumber (0:423), which determines the RowGrp the
             packet's data goes into
+            there are 1696 packets in an image; a packet is identified by the
+            triplet (datatype,subframenumber,packetnumber)
         3a) the packets are sent from 2 mezzanine links (some on one link, some
             on the other), and are saved a 2 binary files by tcpdump
             24Bytes are added at the start of each file
@@ -127,6 +134,7 @@ class Descramble(DescrambleBase):
 
         start_time = time.strftime("%Y_%m_%d__%H:%M:%S")
         print(Fore.BLUE + "Script beginning at {}".format(start_time))
+        self._report_arguments()
 
         file_content = self._reading_file_content()
 
@@ -140,8 +148,9 @@ class Descramble(DescrambleBase):
 
         # search for 1st & last image: this is needed to resort the data from
         # the file in a proper array of (n_img, n_pack)
-        # also scan for fatal packet error: if a packet has a number > 1695
+        # also scan for fatal packet error: if a packet has a number > 423
         # then the data is corrupted
+
         if self._verbose:
             print(Fore.BLUE + "scanning files for obvious packet errors")
 
@@ -173,10 +182,12 @@ class Descramble(DescrambleBase):
         if self._clean_memory:
             del file_content
 
-        # missing package detail: (pack,Img) not flagged as good, are missing
+        # missing package detail:
+        # if (Img,datatype,subframe,pack_id) not flagged as good => is missing
         for i, img in enumerate(imgs_tcpdump):
             if self._verbose:
-                missing_packages = np.sum(np.logical_not(pack_check[i, :]))
+                missing_packages = np.sum(
+                    np.logical_not(pack_check[i, :, :, :]))
 
                 if missing_packages < 1:
                     print(Fore.GREEN +
@@ -186,27 +197,25 @@ class Descramble(DescrambleBase):
                           ("{} packets missing from image {}"
                            .format(missing_packages, img)))
 
-        # at this point the dsata from the 2 files is ordered in a array of
-        # dinesion (n_img, n_pack)
+        # at this point the data from the 2 files is ordered in a array of
+        # dimension (n_img, n_smpl_rst, n_subframe, n_pack=424)
 
         # 1 rowgrp = 4 packets
         # when a packet is missing, the whole rowgrp is compromised
         # if so, flag the 4-tuple of packets (i.e. the rowgrp), as bad
-        rowgrp_check = (pack_check[:, 0::4]
-                        & pack_check[:, 1::4]
-                        & pack_check[:, 2::4]
-                        & pack_check[:, 3::4])
+        rowgrp_check = np.logical_and(pack_check[:, :, 0, 0::2],
+                                      pack_check[:, :, 0, 1::2])
+        rowgrp_check = np.logical_and(rowgrp_check, pack_check[:, :, 1, 0::2])
+        rowgrp_check = np.logical_and(rowgrp_check, pack_check[:, :, 1, 1::2])
         # - - -
 
-        if self._verbose:
-            print(Fore.BLUE + "descrambling images")
+        data_xrowgrp = self._aggregating_rowgroups(n_img, imgs_tcpdump, data)
+        if self._clean_memory:
+            del data
 
         descrambled_data = self._descrambling_images(n_img,
                                                      imgs_tcpdump,
-                                                     data)
-
-        if self._verbose:
-            print(Fore.BLUE + " ")
+                                                     data_xrowgrp)
 
         # solving the 1b-part of scrambling:
         # reorder pixels and pads
@@ -218,8 +227,55 @@ class Descramble(DescrambleBase):
                                                     descrambled_data,
                                                     rowgrp_check)
 
+        # save data to single file
         if self._save_file:
+            if self._verbose:
+                print(Fore.BLUE + "saving to single file")
             self._save_data()
+
+        # save data to multiple file
+        if self._multiple_save_files:
+            if self._verbose:
+                print(Fore.BLUE + "saving to multiple files")
+
+            if os.path.isfile(self._multiple_metadata_file) is False:
+                msg = "metafile file does not exist"
+                print(Fore.RED + msg)
+                raise Exception(msg)
+            meta_data = np.genfromtxt(self._multiple_metadata_file,
+                                      delimiter='\t',
+                                      dtype=str)
+            fileprefix_list = meta_data[:, 1]
+
+            aux_n_of_files = len(fileprefix_list)
+            if (aux_n_of_files*self._multiple_imgperfile) != n_img:
+                msg = ("n of images != metafile enties x Img/file ")
+                print(Fore.RED + msg)
+                raise Exception(msg)
+
+        (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                          self._err_int16,
+                                                          self._err_dlsraw)
+        (_, aux_nrow, aux_ncol) = sample.shape
+        shape_datamultfiles = (aux_n_of_files,
+                               self._multiple_imgperfile,
+                               aux_nrow,
+                               aux_ncol)
+        sample = sample.reshape(shape_datamultfiles).astype('uint16')
+        reset = reset.reshape(shape_datamultfiles).astype('uint16')
+
+        for i, prefix in enumerate(fileprefix_list):
+
+            filepath = os.path.dirname(self._output_fname,
+                                       prefix + ".h5")
+
+            with h5py.File(filepath, "w", libver='latest') as my5hfile:
+                my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
+                my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
+
+            if self._verbose:
+                print(Fore.GREEN + "{0} Img saved to file {1}".format(
+                    self._multiple_imgperfile, filepath))
 
         # that's all folks
         print("------------------------")
@@ -228,13 +284,37 @@ class Descramble(DescrambleBase):
         print(Fore.BLUE + "script ended at {}".format(stop_time))
         print("------------------------\n" * 3)
 
+    def _report_arguments(self):
+        """ report arguments form conf file """
+        if self._verbose:
+            print(Fore.GREEN + "Will try to load tcpdump files:")
+            for fname in self._input_fnames:
+                print(Fore.GREEN + fname)
+
+            if self._save_file:
+                print(Fore.GREEN +
+                      ("Will save single descrambled file: {}"
+                       .format(self._output_fname)))
+
+            if self._multiple_save_files:
+                print(Fore.GREEN + "will save to multiple files, using "
+                      "file names in {0}".format(self._multiple_metadata_file))
+                print(Fore.GREEN + "assuming each file has "
+                      "{0} images".format(self._multiple_imgperfile))
+
+            if self._clean_memory:
+                print(Fore.GREEN + "Will clean memory when possible")
+
+            print(Fore.GREEN + "verbose")
+            print(Fore.GREEN + "--  --  --")
+
     def _reading_file_content(self):
         file_missing = [not os.path.isfile(fname)
                         for fname in self._input_fnames]
 
-        # report the user-provided args
+        # checks is least one of the input files exists
         if self._verbose:
-            print(Fore.GREEN + "Will load tcpdump files:")
+            print(Fore.GREEN + "loaded tcpdump files:")
 
             for i, fname in enumerate(self._input_fnames):
                 if file_missing[i]:
@@ -242,20 +322,9 @@ class Descramble(DescrambleBase):
                 else:
                     print(Fore.GREEN + fname)
 
-            if self._save_file:
-                print(Fore.GREEN +
-                      ("Will save descrambled file: {}"
-                       .format(self._output_fname)))
-
-            if self._clean_memory:
-                print(Fore.GREEN + "Will clean memory when possible")
-
-            print(Fore.GREEN + "verbose")
-        # - - -
-
-        # checks that at least one of the input files exists
+        # at least one of the input files must exist
         if all(file_missing):
-            msg = "Non of the input files exists"
+            msg = "None of the input files exists"
             print(Fore.RED + msg)
             raise Exception(msg)
 
@@ -271,8 +340,8 @@ class Descramble(DescrambleBase):
 
             else:
                 # read uint8 data from binary file
-                with open(fname) as bin_file:
-                    content = np.fromfile(bin_file, dtype=np.uint8)
+                with open(fname) as f:
+                    content = np.fromfile(f, dtype=np.uint8)
 
                 # cut off the excess bytes at the beginning
                 content = content[self._excess_bytesinfront:]
@@ -321,9 +390,17 @@ class Descramble(DescrambleBase):
 
     def _resorting_data(self, n_img, imgs_tcpdump, file_content):
         """
+        orders packets coming from tcpdump files
+        according to (img, datatype, subframe, packetnumber)
         """
 
-        shape_img_pack = (n_img, 2 * self._n_grp * self._n_packs_in_rowgrp)
+        shape_img_pack = (n_img,
+                          self._n_smpl_rst,
+                          self._n_subframe,
+                          (self._n_grp *
+                           self._n_packs_in_rowgrp //
+                           self._n_subframe))
+
         shape_data = shape_img_pack + (self._gooddata_size,)
         shape_header = shape_img_pack + (self._header_size,)
 
@@ -352,107 +429,174 @@ class Descramble(DescrambleBase):
                         idx = slice(self._pack_counter, self._pack_counter+2)
                         bytel = file_data[idx]
                         pack_id = utils.convert_bytelist_to_int(bytelist=bytel)
+                        datatype_id = file_data[self._datatype_counter]
+                        subframe_id = file_data[self._subframe_counter]
 
                         # then save it in the appropriate position
-                        data[i, pack_id, :] = file_data[self._header_size:]
-                        header[i, pack_id, :] = file_data[:self._header_size]
-                        # and flag that (pack,Img) as good
-                        pack_check[i, pack_id] = True
+                        data[i,
+                             datatype_id,
+                             subframe_id,
+                             pack_id,
+                             :] = file_data[self._header_size:]
+                        header[i,
+                               datatype_id,
+                               subframe_id,
+                               pack_id,
+                               :] = file_data[:self._header_size]
+                        # and flag that (Img,datatype,subframe,pack_id) as good
+                        pack_check[i, datatype_id, subframe_id, pack_id] = True
 
         return data, header, pack_check
 
-    def _descrambling_images(self, n_img, imgs_tcpdump, data):
+    def _aggregating_rowgroups(self, n_img, imgs_tcpdump, data):
+        """
+        aggregate packets to rowgroups
+        """
+        shape_data_out = (n_img,
+                          self._n_smpl_rst,
+                          self._n_grp,
+                          2 * self._n_subframe * self._gooddata_size)
+        data_out = np.zeros(shape_data_out).astype('uint8')
+        shape_rowgrpdata = (self._n_subframe, 2, self._gooddata_size)
+        rowgrpdata = np.zeros(shape_rowgrpdata).astype('uint8')
+        # (2subframe, 2packetN, goodDataSize)
 
-        n_smpl_rst_x_n_grp = self._n_smpl_rst * self._n_grp
-        data_size = self._n_packs_in_rowgrp * self._gooddata_size
-
-        shape_aggr_with_ref = (n_img,
-                               n_smpl_rst_x_n_grp,
-                               self._n_pad,
-                               self._n_pixs_in_blk,
-                               self._n_gn_crs_fn)
-        descrambled_data = np.ones(shape_aggr_with_ref).astype('uint8')
-
+        if self._verbose:
+            print(Fore.BLUE + "preparing to descramble")
+        # this also solves the 1a-part of scrambling:
+        # reorder by Smpl,Rst
         for i, _ in enumerate(imgs_tcpdump):
             if self._verbose:
                 print(".", end="", flush=True)
 
-            # 4UDP=> 1RowGrp
-            img = data[i, ...].reshape((n_smpl_rst_x_n_grp, data_size))
+            for i_rowgrp in range(self._n_grp):
+                for i_smplrst in range(self._n_smpl_rst):
+                    rowgrpdata = data[i,
+                                      i_smplrst,
+                                      :,
+                                      i_rowgrp*2:(i_rowgrp*2)+1+1,
+                                      :]
+                    # (subFrame0&1,packN0&1,goodDataSize)
+                    rowgrpdata = np.transpose(rowgrpdata, (1, 0, 2))
+                    # (packN0&1,subFrame0&1,goodDataSize)
+                    rowgrpdata = rowgrpdata.reshape(
+                        2 * self._n_subframe * self._gooddata_size)
+                    data_out[i, i_smplrst, i_rowgrp, :] = rowgrpdata
+
+        if self._verbose:
+            print(Fore.BLUE + " ")
+        return data_out
+
+    def _descrambling_images(self, n_img, imgs_tcpdump, data):
+        """
+        bit-descramble data from chip
+        (including mezzanine reorder & bit inversion)
+        """
+
+        size_descrambled_data = (n_img,
+                                 self._n_smpl_rst,
+                                 self._n_grp,
+                                 self._n_pad,
+                                 self._n_col_in_blk * self._n_row_in_blk,
+                                 self._n_gn_crs_fn)
+        descrambled_data = np.zeros(size_descrambled_data).astype('uint8')
+
+        if self._verbose:
+            print(Fore.BLUE + "descrambling images")
+
+        for i_img, _ in enumerate(imgs_tcpdump):
+            if self._verbose:
+                print(".", end="", flush=True)
+
+            auxil_img = data[i_img, :, :, :]
+            # (NSmplRst,NRowGrpInShot,NpacksInRowgrp*goodData_Size)
 
             # solving the 2b-part of the scrambing (mezzanine interleaving
             # 32bit-sequences from each pad)
-            img_shape_pad = (n_smpl_rst_x_n_grp,
-                             data_size // (self._n_data_pads * 32//8),
+            img_shape_pad = (self._n_smpl_rst,
+                             self._n_grp,
+                             (self._n_packs_in_rowgrp *
+                              self._gooddata_size //
+                              (self._n_data_pads * 32 // 8)),
                              self._n_data_pads,
                              32//8)
-            img = img.reshape(img_shape_pad)
-            img = img.transpose((0, 2, 1, 3))
+            auxil_img = auxil_img.reshape(img_shape_pad)
+            auxil_img = auxil_img.transpose((0, 1, 3, 2, 4))
             # dimensions of img at this point:
-            # (self._n_smpl_rst * self._n_grp,
-            #  self._n_data_pads,
-            #  self._n_packs_in_rowgrp * self._gooddata_size
-            #       // (self._n_data_pads * 32//8),
-            #  32//8)
+            # (NSmplRst, NRowGrpInShot, NDataPads,
+            # NpacksInRowgrp*goodData_Size/(NDataPads*32/8), 32/8)
 
-            new_shape2 = (n_smpl_rst_x_n_grp,
-                          self._n_data_pads,
-                          data_size // self._n_data_pads)
-            img = img.reshape(new_shape2)
+            img_shape_pad2 = (self._n_smpl_rst,
+                              self._n_grp,
+                              self._n_data_pads,
+                              (self._n_packs_in_rowgrp *
+                               self._gooddata_size //
+                               self._n_data_pads))
+            auxil_img = auxil_img.reshape(img_shape_pad2)
 
             # array of uint8 => array of [x,x,x,x, x,x,x,x] bits
-            bitarray = utils.convert_intarray_to_bitarray(img, 8)
-            img_8bitted = bitarray[Ellipsis, ::-1].astype('uint8')
-
-            shape_8bit = (n_smpl_rst_x_n_grp,
+            bitarray = utils.convert_intarray_to_bitarray(auxil_img, 8)
+            auxil_img_8bitted = bitarray[Ellipsis, ::-1].astype('uint8')
+            shape_8bit = (self._n_smpl_rst,
+                          self._n_grp,
                           self._n_data_pads,
-                          data_size // self._n_data_pads,
+                          (self._n_packs_in_rowgrp *
+                           self._gooddata_size //
+                           self._n_data_pads),
                           8)
-            img_8bitted = img_8bitted.reshape(shape_8bit)
+            auxil_img_8bitted = auxil_img_8bitted.reshape(shape_8bit)
 
             if self._clean_memory:
-                del img
+                del auxil_img
 
-            shape_16bit = (n_smpl_rst_x_n_grp,
-                           self._n_data_pads,
-                           data_size // (self._n_data_pads * 2),
-                           16)
             # combine 2x8bit to 16bit
-            img_16bitted = np.zeros(shape_16bit).astype('uint8')
-            img_16bitted[Ellipsis, 0:8] = img_8bitted[:, :, 0::2, :]
-            img_16bitted[Ellipsis, 8:16] = img_8bitted[:, :, 1::2, :]
+            shape_16bit = (self._n_smpl_rst,
+                           self._n_grp,
+                           self._n_data_pads,
+                           (self._n_packs_in_rowgrp *
+                            self._gooddata_size //
+                            (self._n_data_pads * 2)),
+                           16)
+            auxil_img_16bitted = np.zeros(shape_16bit).astype('uint8')
+            auxil_img_16bitted[..., 0:8] = auxil_img_8bitted[:, :, :, 0::2, :]
+            auxil_img_16bitted[..., 8:16] = auxil_img_8bitted[:, :, :, 1::2, :]
 
             if self._clean_memory:
-                del img_8bitted
+                del auxil_img_8bitted
 
             # solving the 2a-part of scrambling:
             # remove head 0, concatenate and reorder
             # we can remove head 0 because the grps//missing packets are
             # already identified by rowgrp_check
-            img_15bitted = img_16bitted[Ellipsis, 1:]
+            auxil_img_15bitted = auxil_img_16bitted[Ellipsis, 1:]
 
             if self._clean_memory:
-                del img_16bitted
+                del auxil_img_16bitted
 
-            shape_15bit = (n_smpl_rst_x_n_grp,
+            shape_15bit = (self._n_smpl_rst,
+                           self._n_grp,
                            self._n_data_pads,
-                           data_size * 15 // (self._n_data_pads * 2))
-            img_as_from_chip = img_15bitted.reshape(shape_15bit)
+                           (self._n_packs_in_rowgrp *
+                            self._gooddata_size *
+                            15 // (self._n_data_pads * 2)))
+            img_as_from_chip = auxil_img_15bitted.reshape(shape_15bit)
 
-            shape_as_from_chip = (n_smpl_rst_x_n_grp,
+            shape_as_from_chip = (self._n_smpl_rst,
+                                  self._n_grp,
                                   self._n_data_pads,
                                   self._n_bits_in_pix,
                                   self._n_pixs_in_blk)
             img_as_from_chip = img_as_from_chip.reshape(shape_as_from_chip)
 
             if self._clean_memory:
-                del img_15bitted
+                del auxil_img_15bitted
 
             # solving the 1d-part if scrambling
             # British Bit translation: 0->1, 1->0
-            img_as_from_chip = np.transpose(img_as_from_chip, (0, 1, 3, 2))
+            img_as_from_chip = np.transpose(img_as_from_chip, (0, 1, 2, 4, 3))
             # img_as_from_chip dimension are now
-            # (self._n_smpl_rst * self._n_grp,
+            # (self._n_smpl_rst,
+            #  self._n_grp,
             #  self._n_data_pads,
             #  n_pixs_in_rowblk,
             #  self._n_bits_in_pix)
@@ -460,7 +604,8 @@ class Descramble(DescrambleBase):
             # 0=>1, 1=>0
             img_as_from_chip = utils.swap_bits(bitarray=img_as_from_chip)
 
-            shape_img_aggr = (n_smpl_rst_x_n_grp,
+            shape_img_aggr = (self._n_smpl_rst,
+                              self._n_grp,
                               self._n_data_pads,
                               self._n_pixs_in_blk,
                               self._n_gn_crs_fn)
@@ -479,64 +624,59 @@ class Descramble(DescrambleBase):
             if self._clean_memory:
                 del img_as_from_chip
 
-            shape_ref = (n_smpl_rst_x_n_grp,
+            shape_ref = (self._n_smpl_rst,
+                         self._n_grp,
                          self._n_pad,
                          self._n_pixs_in_blk,
                          self._n_gn_crs_fn)
             # add RefCols (that had been ignored by mezzanine in 2a-scramblig)
             img_aggr_withref = np.zeros(shape_ref).astype('uint8')
-            img_aggr_withref[:, 1:, :, :] = img_aggr
+            img_aggr_withref[:, :, 1:, :, :] = img_aggr
 
             if self._clean_memory:
                 del img_aggr
 
-            descrambled_data[i, Ellipsis] = img_aggr_withref
+            descrambled_data[i_img, Ellipsis] = img_aggr_withref
+
+        if self._verbose:
+            print(Fore.BLUE + " ")
 
         return descrambled_data
 
     def _reordering_pixels(self, n_img, imgs_tcpdump, data, rowgrp_check):
+        """
+        pixel-reorder data from chip
+        """
 
         shape_descrambled = (n_img,
-                             self._n_smpl_rst * self._n_grp,
+                             self._n_smpl_rst,
+                             self._n_grp,
                              self._n_pad,
                              self._n_row_in_blk,
                              self._n_col_in_blk,
                              self._n_gn_crs_fn)
         img = np.zeros(shape_descrambled).astype('uint8')
 
-        for i, _ in enumerate(imgs_tcpdump):
-            img[i, Ellipsis] = utils.reorder_pixels_gncrsfn(data[i, Ellipsis],
-                                                            self._n_adc,
-                                                            self._n_col_in_blk)
+        for i_img, _ in enumerate(imgs_tcpdump):
+            for i_smplrst in range(self._n_smpl_rst):
+                img[i_img, i_smplrst, Ellipsis] = utils.reorder_pixels_gncrsfn(
+                    data[i_img, i_smplrst, Ellipsis],
+                    self._n_adc, self._n_col_in_blk)
 
         # add error tracking for data coming from missing packets
         img = img.astype('int16')  # -256upto255
         for i, _ in enumerate(imgs_tcpdump):
-            for igrp in range(self._n_smpl_rst * self._n_grp):
-                if rowgrp_check[i, igrp] is False:
-                    img[i, igrp, Ellipsis] = self._err_int16
+            for igrp in range(self._n_grp):
+                for i_smplrst in range(self._n_smpl_rst):
+                    if rowgrp_check[i, i_smplrst, igrp] is False:
+                        img[i, i_smplrst, igrp, Ellipsis] = self._err_int16
 
         # error tracking for refCol
-        img[:, :, 0, :, :, :] = self._err_int16
+        img[:, :, :, 0, :, :, :] = self._err_int16
 
-        # solving the 1a-part of scrambling:
-        # reorder by Smpl,Rst
-        shape_smplrst = (n_img,
-                         self._n_smpl_rst,
-                         self._n_grp,
-                         self._n_pad,
-                         self._n_row_in_blk,
-                         self._n_col_in_blk,
-                         self._n_gn_crs_fn)
-        img_smplrst = np.zeros(shape_smplrst).astype('int16')
-
-        img_smplrst[:, self._i_smp, 1:, ...] = img[:, 1:(212*2)-1:2, ...]
-        img_smplrst[:, self._i_rst, :(-1), ...] = img[:, 2:212*2:2, ...]
-        img_smplrst[:, self._i_smp, 0, ...] = img[:, 0, ...]
-        img_smplrst[:, self._i_rst, -1, ...] = img[:, -1, ...]
-
+        # consolidate rows and cols
         transpose_order = (0, 1, 2, 4, 3, 5, 6)
-        img_smplrst = np.transpose(img_smplrst, transpose_order)
+        img = np.transpose(img, transpose_order)
         # new order:
         # (n_img,
         #  Smpl/Rst,
@@ -551,7 +691,7 @@ class Descramble(DescrambleBase):
                                self._n_grp * self._n_adc,
                                self._n_pad * self._n_col_in_blk,
                                self._n_gn_crs_fn)
-        img_smplrst_split = img_smplrst.reshape(shape_smplrst_split)
+        img_smplrst_split = img.reshape(shape_smplrst_split)
 
         return img_smplrst_split
 
