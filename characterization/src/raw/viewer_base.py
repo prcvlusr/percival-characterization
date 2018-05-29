@@ -16,10 +16,6 @@ class ViewerBase(PlotBase):
 
         super().__init__(**new_kwargs)
 
-        print("Overwritten configuration " +
-              "(adc={}, frame={}, row={}, col={})"
-              .format(self._adc, self._frame, self._row, self._col))
-
         self._tracker = None
 
     def plot_sample(self):

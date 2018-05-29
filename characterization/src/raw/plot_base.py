@@ -28,6 +28,11 @@ class PlotBase():
         else:
             self._data = loaded_data.data
 
+        if self._dims_overwritten:
+            print("Overwritten configuration " +
+                  "(adc={}, frame={}, row={}, col={})"
+                  .format(self._adc, self._frame, self._row, self._col))
+
         self._vin = loader.get_vin()
 
         # to ease nameing plots
