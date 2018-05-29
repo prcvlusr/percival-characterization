@@ -93,7 +93,7 @@ class Analyse(object):
 
     def generate_raw_path(self, base_dir):
         dirname = base_dir
-        filename = "{run}_" + "{}.h5".format(self._run_id)
+        filename = "{prefix}_" + "{}.h5".format(self._run_id)
 
         return dirname, filename
 

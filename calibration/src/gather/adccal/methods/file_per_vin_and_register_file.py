@@ -89,7 +89,7 @@ class Gather(GatherAdcBase):
         self._n_frames_per_run = []
 
         for i in self._register:
-            in_fname = self._in_fname.format(run=i[1])
+            in_fname = self._in_fname.format(prefix=i[1])
 
             try:
                 with h5py.File(in_fname, "r") as infile:
@@ -118,7 +118,7 @@ class Gather(GatherAdcBase):
         idx = (Ellipsis, load_idx_rows, load_idx_cols)
 
         for i, (vin_value, prefix) in enumerate(self._register):
-            in_fname = self._in_fname.format(run=prefix)
+            in_fname = self._in_fname.format(prefix=prefix)
 
             # read in data for this slice
             print("in_fname", in_fname)
