@@ -266,8 +266,7 @@ class Descramble(DescrambleBase):
 
         for i, prefix in enumerate(fileprefix_list):
 
-            filepath = os.path.dirname(self._output_fname,
-                                       prefix + ".h5")
+            filepath = os.path.dirname(self._output_fname) + '/'+ prefix + ".h5"
 
             with h5py.File(filepath, "w", libver='latest') as my5hfile:
                 my5hfile.create_dataset('/data/', data=sample[i, :, :, :])

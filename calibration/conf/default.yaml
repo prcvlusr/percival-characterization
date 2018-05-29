@@ -26,10 +26,15 @@ gather:
 
         output_prefix: "p2018.03.15crdAD_h10"
 
-        descramble_tcpdump_2018_03_15ad: &descramble_tcpdump_2018_03_15ad
+        # older Firmware, using (pack_number) to id a packet
+        descramble_tcpdump_2018_03_15ad: 
             save_file: True
             clean_memory: True
             verbose: True
+            multiple_save_files: True
+            # multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/VRST=10k_AD_10frames_meta.dat
+            multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/p2018.03.15crdAD_h20_meta.dat
+            multiple_imgperfile: 1
 
             n_adc: 7
             n_grp: 212
@@ -37,6 +42,7 @@ gather:
 
             n_col_in_blk: 32
 
+        # more up-to-date Firmware, using (datatype,subframe,pack) triplet to id a packet
         descramble_tcpdump_2018_04_13aq:
             save_file: True
             clean_memory: True
