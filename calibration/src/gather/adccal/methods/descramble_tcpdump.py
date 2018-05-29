@@ -32,7 +32,10 @@ class Gather(GatherAdcBase):
 
         output_prefix = self._method_properties["output_prefix"]
         fname = "{}_dscrmbld_{}.h5".format(output_prefix, self._run)
-        descr_kwargs["output_fname"] = os.path.join(self._output, fname)
+
+        descramble_output = self._get_output_dir(run_dir="descrambled")
+
+        descr_kwargs["output_fname"] = os.path.join(descramble_output, fname)
 
 #        print(json.dumps(descr_kwargs, sort_keys=True, indent=4))
 

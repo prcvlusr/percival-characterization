@@ -44,6 +44,11 @@ class PlotBase():
             self._data = loaded_data.gathered_data
             self._constants = loaded_data.constants
 
+        if self._dims_overwritten:
+            print("Overwritten configuration " +
+                  "(adc={}, frame={}, row={}, col={})"
+                  .format(self._adc, self._frame, self._row, self._col))
+
         # to ease nameing plots
         self._adc_title = utils.convert_slice_to_tuple(self._adc)
         self._frame_title = utils.convert_slice_to_tuple(self._frame)

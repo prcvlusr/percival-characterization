@@ -16,6 +16,9 @@ class Gather(GatherAdcBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # if this is not set to "gathererd" later processing will not work
+        self._output = self._get_output_dir(run_dir="gathered")
+
         self._n_runs = None
         self._n_frames = None
         self._raw_shape = None

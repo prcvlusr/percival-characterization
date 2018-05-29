@@ -15,6 +15,7 @@ if SHARED_DIR not in sys.path:
     sys.path.insert(0, SHARED_DIR)
 
 from _version import __version__
+import utils
 
 
 class GatherBase(object):
@@ -38,6 +39,21 @@ class GatherBase(object):
               "in_fname = {}\n"
               "out_fname ={}\n"
               .format(self._in_fname, self._out_fname))
+
+    def _get_output_dir(self, run_dir):
+        """Fills up output template and creates output directory.
+
+        Args:
+            run_dir (string): String to insert in the output directory
+                              template.
+
+        Return:
+            The output directory.
+        """
+        output = self._output.format(run_dir=run_dir)
+        utils.create_dir(output)
+
+        return output
 
     def run(self):
         """Run the gather method
