@@ -19,7 +19,10 @@ class Gather(GatherAdcBase):
         dmethod = self._method_properties["descramble_method"]
         print("Using descramble method {}".format(dmethod))
 
-        descr_kwargs = copy.deepcopy(self._method_properties[dmethod])
+        try:
+            descr_kwargs = copy.deepcopy(self._method_properties[dmethod])
+        except KeyError:
+            descr_kwargs = {}
 
         # convert file names to absolute paths
         descr_kwargs["input_fnames"] = [

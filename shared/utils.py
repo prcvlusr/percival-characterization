@@ -1,6 +1,7 @@
 """Collection of utilities
 """
 
+import json
 import os
 import sys
 import h5py
@@ -12,6 +13,7 @@ from utils_data import (decode_dataset_8bit,
                         convert_bytelist_to_int,
                         convert_intarray_to_bitarray,
                         convert_bitarray_to_intarray,
+                        convert_slice_to_tuple,
                         swap_bits,
                         split_alessandro,
                         split_ulrik,
@@ -99,6 +101,20 @@ def load_file_content(fname, excluded=None):
         f.visititems(get_file_content)
 
     return file_content
+
+
+class PythonObjectEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, slice):
+            return str(obj)
+        elif type(obj).__module__ == np.__name__:
+            return str(type(obj))
+
+        try:
+            return json.JSONEncoder.default(self, obj)
+        except TypeError:
+            print("could not serialize object: {}".format(type(obj)))
+            raise
 
 
 class IndexTracker(object):

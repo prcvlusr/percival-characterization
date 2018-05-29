@@ -26,7 +26,7 @@ def get_arguments():
                         help="Path of input directory containing HDF5 files "
                              "or in the case of data_type raw to the input "
                              "file to characterize")
-    parser.add_argument("--metadata_file",
+    parser.add_argument("--metadata_fname",
                         type=str,
                         help="File name containing the metadata information.")
 
@@ -152,14 +152,14 @@ def insert_args_into_config(args, config):
     if data_type == "raw":
 
         try:
-            c_data_type["metadata_file"] = (args.metadata_file
-                                            or c_data_type["metadata_file"])
+            c_data_type["metadata_fname"] = (args.metadata_fname
+                                            or c_data_type["metadata_fname"])
         except:
             raise Exception("No input specified. Abort.")
             sys.exit(1)
 
     else:
-        c_data_type["metadata_file"] = None
+        c_data_type["metadata_fname"] = None
 
     # for adc equals 0 ".. or .." does not work
     if args.adc is not None:
@@ -204,16 +204,15 @@ class Analyse(object):
         self._plot_sample = self._config["general"]["plot_sample"]
         self._plot_reset = self._config["general"]["plot_reset"]
         self._plot_combined = self._config["general"]["plot_combined"]
-        self._input_dir = self._config[self._data_type]["input"]
-        self._metadata_file = self._config[self._data_type]["metadata_file"]
-        self._output_dir = self._config[self._data_type]["output"]
+        self._input = self._config[self._data_type]["input"]
+        self._metadata_fname = self._config[self._data_type]["metadata_fname"]
+        self._output = self._config[self._data_type]["output"]
         self._adc = self._config[self._data_type]["adc"]
         self._frame = self._config[self._data_type]["frame"]
         self._col = self._config[self._data_type]["col"]
         self._row = self._config[self._data_type]["row"]
         self._method_list = self._config[self._data_type]["method"]
 
-        print("row", self._row)
         self.set_indices()
 
         self.load_methods()
@@ -251,18 +250,20 @@ class Analyse(object):
     def run(self):
 
         if self._data_type == "raw":
-            input_fname_templ = self._input_dir
+            input_fname_templ = self._input
         else:
             file_name = "col{col_start}-{col_stop}_{data_type}.h5"
             file_name = os.path.join("{data_type}", file_name)
-            input_fname_templ = os.path.join(self._input_dir,
+            input_fname_templ = os.path.join(self._input,
                                              self._run_id,
                                              file_name)
-            self._metadata_file = None
+            self._metadata_fname = None
 
         kwargs = dict(
+            input=self._input,
             input_fname=input_fname_templ,
-            metadata_fname=self._metadata_file,
+            metadata_fname=self._metadata_fname,
+            output=self._output,
             output_dir=None,
             adc=self._adc,
             frame=self._frame,
@@ -285,7 +286,7 @@ class Analyse(object):
                 prop =  self._config[self._data_type][method]
                 kwargs["method_properties"] = prop
 
-            kwargs["output_dir"] = os.path.join(self._output_dir,
+            kwargs["output_dir"] = os.path.join(self._output,
                                                 self._run_id,
                                                 "characterization",
                                                 self._data_type,
