@@ -1,0 +1,27 @@
+general:
+    run_type: gather
+    n_cols: 32
+    #n_cols: null
+
+    measurement: adccal
+
+    run: DLSraw
+
+    n_processes: 1
+
+all:
+    input: &input /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/VRSTScan_try0_stdVRST/VRSTfromVin_iCbP11000_iFbN5000/
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.04.24/
+
+gather:
+    method: null
+
+    input: *input
+    output: *output
+
+process:
+    method: process_adccal_default
+
+    input: *output
+    output: *output
+

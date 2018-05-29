@@ -1,0 +1,53 @@
+general:
+    data_type: raw
+    run: DLSraw
+
+    plot_sample: True
+    plot_reset: True
+    plot_combined: True
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testhighnoframes/20180426/
+
+raw:
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testhighnoframes/20180426/20180426_100frames_test03_DLSraw.h5
+    metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testhighnoframes/20180426/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+
+    #method: [viewer]
+    #method: [image, plot_coarse_vs_fine]
+    method: [image]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]

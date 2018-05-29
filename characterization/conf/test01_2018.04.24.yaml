@@ -1,0 +1,52 @@
+general:
+    data_type: gathered
+    run: DLSraw
+
+    plot_sample: True
+    plot_reset: True
+    plot_combined: True
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.04.24/
+
+raw:
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/VRSTScan_try0_stdVRST/VRSTfromVin_iCbP11000_iFbN5000/VRSTFromVinVin29000_DLSraw.h5
+    metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/VRSTScan_try0_stdVRST/VRSTfromVin_iCbP11000_iFbN5000/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 2
+    col: 100
+    row: 100
+
+    #method: [viewer]
+    method: [image, plot_coarse_vs_fine]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]

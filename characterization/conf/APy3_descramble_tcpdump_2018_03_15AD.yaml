@@ -1,0 +1,53 @@
+general:
+    data_type: raw
+    #run: DLSraw
+    run: Iain2018.05.03_VRSTfromVin_Scan_VrefADC_1p8V_34frames
+
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/
+
+raw:
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/Iain2018.05.03_VRSTfromVin_Scan_VrefADC_1p8V_34frames_DLSraw.h5
+    #input: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/p2018.03.15crdAD_h10
+    metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/file.dat
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 0
+    col: 100
+    row: 100
+
+    method: [APy3_descramble_tcpdump_2018_03_15AD]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]

@@ -1,0 +1,55 @@
+general:
+    data_type: raw
+    #run: DLSraw
+    run: Iain2018.05.03_VRSTfromVin_Scan_VrefADC_1p8V_34frames
+
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/
+
+raw:
+    #VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV#
+    # DO NOT TOUCH INPUT AND METADATA LINES IN THE YAML FILE
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/ForFrameworkToWork_DLSraw.h5
+    metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/ForFrameworkToWork_meta.dat
+    #AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA#
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: 0
+    col: 100
+    row: 100
+
+    method: [APy3_descramble_tcpdump_2018_03_15AD_v2]
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]

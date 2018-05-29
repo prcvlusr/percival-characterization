@@ -1,0 +1,59 @@
+general:
+    data_type: raw
+    run: DLSraw
+
+    #plot_sample: True
+    #plot_reset: False
+    #plot_combined: False
+    plot_sample: False
+    plot_reset: False
+    plot_combined: True
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/
+
+raw:
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/Iain2018.05.03_VRSTfromVin_Scan_VrefADC_1p8V_34frames_DLSraw.h5
+    #metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/Iain2018.05.03_VRSTfromVin_Scan_VrefADC_1p8V_34frames_DLSraw.VRST
+    metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180514/file.dat
+
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: null
+    #col: 906
+    col: 100
+    #row: 1165
+    row: null
+    
+    method: [APy3_viewer_1ScanFile]
+    #method: [image]
+    #method: [hist_2d_crsVSfine]
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot]
