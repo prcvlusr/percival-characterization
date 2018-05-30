@@ -127,6 +127,7 @@ class Descramble(DescrambleBase):
 
         start_time = time.strftime("%Y_%m_%d__%H:%M:%S")
         print(Fore.BLUE + "Script beginning at {}".format(start_time))
+        self._report_arguments()
 
         file_content = self._reading_file_content()
 
@@ -218,8 +219,63 @@ class Descramble(DescrambleBase):
                                                     descrambled_data,
                                                     rowgrp_check)
 
+        # save data to single file
         if self._save_file:
             self._save_data()
+
+        # save data to multiple file
+        if self._multiple_save_files:
+            if self._verbose:
+                print(Fore.BLUE + "saving to multiple files")
+
+            if os.path.isfile(self._multiple_metadata_file) is False:
+                msg = "metafile file does not exist"
+                print(Fore.RED + msg)
+                raise Exception(msg)
+
+            meta_data = np.genfromtxt(self._multiple_metadata_file,
+                                      delimiter='\t',
+                                      dtype=str)
+            fileprefix_list = meta_data[:, 1]
+
+            aux_n_of_files = len(fileprefix_list)
+
+            if (aux_n_of_files * self._multiple_imgperfile) != n_img:
+                msg = ("{} != {} x {} ".format(n_img,
+                                               aux_n_of_files,
+                                               self._multiple_imgperfile))
+                print(Fore.RED + msg)
+
+                msg = ("n of images != metafile enties x Img/file ")
+                print(Fore.RED + msg)
+                raise Exception(msg)
+            # ...
+
+            (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                              self._err_int16,
+                                                              self._err_dlsraw)
+            (aux_nimg, aux_nrow, aux_ncol) = sample.shape
+            shape_datamultfiles = (aux_n_of_files,
+                                   self._multiple_imgperfile,
+                                   aux_nrow,
+                                   aux_ncol)
+            sample = sample.reshape(shape_datamultfiles).astype('uint16')
+            reset = reset.reshape(shape_datamultfiles).astype('uint16')
+
+            for i, prefix in enumerate(fileprefix_list):
+                output_dir = os.path.dirname(self._output_fname)
+                filepath = os.path.join(output_dir,
+                                        prefix + ".h5")
+
+                self._data_to_write["sample"]["data"] = sample[i, ...]
+                self._data_to_write["reset"]["data"] = reset[i, ...]
+
+                self._write_data(filepath)
+
+                if self._verbose:
+                    msg = ("{} Img saved to file {}"
+                           .format(self._multiple_imgperfile, filepath))
+                    print(Fore.GREEN + msg)
 
         # that's all folks
         print("------------------------")
@@ -228,19 +284,49 @@ class Descramble(DescrambleBase):
         print(Fore.BLUE + "script ended at {}".format(stop_time))
         print("------------------------\n" * 3)
 
+    def _report_arguments(self):
+        """ report arguments from conf file """
+        if self._verbose:
+            print(Fore.GREEN + "Will try to load tcpdump files:")
+            for fname in self._input_fnames:
+                print(Fore.GREEN + fname)
+
+            if self._save_file:
+                print(Fore.GREEN +
+                      ("Will save single descrambled file: {}"
+                       .format(self._output_fname)))
+
+            if self._multiple_save_files:
+                print(Fore.GREEN + "will save to multiple files, using "
+                      "file names in {0}".format(self._multiple_metadata_file))
+                print(Fore.GREEN + "assuming each file has "
+                      "{0} images".format(self._multiple_imgperfile))
+
+            if self._clean_memory:
+                print(Fore.GREEN + "Will clean memory when possible")
+
+            print(Fore.GREEN + "verbose")
+            print(Fore.GREEN + "--  --  --")
+
     def _reading_file_content(self):
         file_missing = [not os.path.isfile(fname)
                         for fname in self._input_fnames]
 
-        # report the user-provided args
+        # checks is least one of the input files exists
         if self._verbose:
-            print(Fore.GREEN + "Will load tcpdump files:")
+            print(Fore.GREEN + "loaded tcpdump files:")
 
             for i, fname in enumerate(self._input_fnames):
                 if file_missing[i]:
                     print(Fore.MAGENTA + fname + " does not exist")
                 else:
                     print(Fore.GREEN + fname)
+
+        # at least one of the input files must exist
+        if all(file_missing):
+            msg = "None of the input files exists"
+            print(Fore.RED + msg)
+            raise Exception(msg)
 
             if self._save_file:
                 print(Fore.GREEN +
