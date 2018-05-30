@@ -4,7 +4,6 @@ readable in gather.
 """
 import os  # to list files in a directory
 import time  # to have time
-import h5py
 import numpy as np
 from colorama import init, Fore
 
@@ -233,41 +232,50 @@ class Descramble(DescrambleBase):
                 msg = "metafile file does not exist"
                 print(Fore.RED + msg)
                 raise Exception(msg)
+
             meta_data = np.genfromtxt(self._multiple_metadata_file,
                                       delimiter='\t',
                                       dtype=str)
             fileprefix_list = meta_data[:, 1]
 
             aux_n_of_files = len(fileprefix_list)
-            if (aux_n_of_files*self._multiple_imgperfile) != n_img:
-                msg = ("{0} != {1} x {2} ".format(n_img,aux_n_of_files,self._multiple_imgperfile))
+
+            if (aux_n_of_files * self._multiple_imgperfile) != n_img:
+                msg = ("{} != {} x {} ".format(n_img,
+                                               aux_n_of_files,
+                                               self._multiple_imgperfile))
                 print(Fore.RED + msg)
+
                 msg = ("n of images != metafile enties x Img/file ")
                 print(Fore.RED + msg)
                 raise Exception(msg)
             # ...
-        (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
-                                                          self._err_int16,
-                                                          self._err_dlsraw)
-        (aux_nimg, aux_nrow, aux_ncol) = sample.shape
-        shape_datamultfiles = (aux_n_of_files,
-                               self._multiple_imgperfile,
-                               aux_nrow,
-                               aux_ncol)
-        sample = sample.reshape(shape_datamultfiles).astype('uint16')
-        reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
-        for i, prefix in enumerate(fileprefix_list):
-            
-            filepath = os.path.dirname(self._output_fname)+'/'+prefix + ".h5"
+            (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                              self._err_int16,
+                                                              self._err_dlsraw)
+            (aux_nimg, aux_nrow, aux_ncol) = sample.shape
+            shape_datamultfiles = (aux_n_of_files,
+                                   self._multiple_imgperfile,
+                                   aux_nrow,
+                                   aux_ncol)
+            sample = sample.reshape(shape_datamultfiles).astype('uint16')
+            reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
-            with h5py.File(filepath, "w", libver='latest') as my5hfile:
-                my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
-                my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
+            for i, prefix in enumerate(fileprefix_list):
+                output_dir = os.path.dirname(self._output_fname)
+                filepath = os.path.join(output_dir,
+                                        prefix + ".h5")
 
-            if self._verbose:
-                print(Fore.GREEN + "{0} Img saved to file {1}".format(
-                    self._multiple_imgperfile, filepath))
+                self._data_to_write["sample"]["data"] = sample[i, ...]
+                self._data_to_write["reset"]["data"] = reset[i, ...]
+
+                self._write_data(filepath)
+
+                if self._verbose:
+                    msg = ("{} Img saved to file {}"
+                           .format(self._multiple_imgperfile, filepath))
+                    print(Fore.GREEN + msg)
 
         # that's all folks
         print("------------------------")

@@ -41,12 +41,20 @@ class DescrambleBase():
         """
         pass
 
-    def _write_data(self):
+    def _write_data(self, output_fname=None):
         """Writes the data into a file.
+
+        Args:
+            output_fname (optional): File (absolute path) where the data should
+                                     be written to.
+                                     default: self._output_fname
         """
 
-        with h5py.File(self._output_fname, "w", libver='latest') as out_f:
+        # set default output file name
+        if output_fname is None:
+            output_fname = self._output_fname
 
+        with h5py.File(output_fname, "w", libver='latest') as out_f:
             for key, dset in self._data_to_write.items():
                 try:
                     if "type" in dset:
