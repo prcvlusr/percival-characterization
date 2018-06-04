@@ -58,7 +58,7 @@ If you have cloned the main project repository on your computer, please add the 
 ```
 
 * When your fix or enhancement is done, go on your GitHub repository and clik on the '''compare & pull request''' button
-* Summarize your changes and click on 'send' (see [Pull requests](#pull-requests) section)
+* Summarize your changes and click on 'send' (see [Pull requests](#submitting-a-pull-requests) section)
 * Your modification will be reviewed and a discussion might be opened
 
 ### Git commit
@@ -73,9 +73,13 @@ This is an advice for writing your commits and make it clear for everyone:
 6. Wrap the body at 72 characters
 7. Use the body to explain *what* and *why* instead of *how*
 
-### Pull requests
+### Submitting a pull request
 
-* Do not include issue numbers in the PR title
+* Retrieve the latest changes from the 'upstrem' repository as explained [above](#making-changes)
+* Format the code to the Python style
+* Go to '''compare & pull request''' button
+* Follow the instructions. If your code is only partially readyn please use the 'WIP:' prefix. Then submit the merge request
 * Include screenshots and animated GIFs in your pull request whenever possible
-* Follow the [Python](https://www.python.org/dev/peps/pep-0008/) styleguid
-
+* The maintainers will look at your proposed changes and likely provide some feedback
+* Please continue to update your code with the received comments until every reviewer is happy :)
+* Your merge request can now be merged in. 
