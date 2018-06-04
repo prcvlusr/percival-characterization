@@ -246,28 +246,28 @@ class Descramble(DescrambleBase):
                 print(Fore.RED + msg)
                 raise Exception(msg)
             # ...
-        (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
-                                                          self._err_int16,
-                                                          self._err_dlsraw)
-        (aux_nimg, aux_nrow, aux_ncol) = sample.shape
-        shape_datamultfiles = (aux_n_of_files,
-                               self._multiple_imgperfile,
-                               aux_nrow,
-                               aux_ncol)
-        sample = sample.reshape(shape_datamultfiles).astype('uint16')
-        reset = reset.reshape(shape_datamultfiles).astype('uint16')
+            (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                              self._err_int16,
+                                                              self._err_dlsraw)
+            (aux_nimg, aux_nrow, aux_ncol) = sample.shape
+            shape_datamultfiles = (aux_n_of_files,
+                                   self._multiple_imgperfile,
+                                   aux_nrow,
+                                   aux_ncol)
+            sample = sample.reshape(shape_datamultfiles).astype('uint16')
+            reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
-        for i, prefix in enumerate(fileprefix_list):
+            for i, prefix in enumerate(fileprefix_list):
             
-            filepath = os.path.dirname(self._output_fname)+'/'+prefix + ".h5"
+                filepath = os.path.dirname(self._output_fname)+'/'+prefix + ".h5"
 
-            with h5py.File(filepath, "w", libver='latest') as my5hfile:
-                my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
-                my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
+                with h5py.File(filepath, "w", libver='latest') as my5hfile:
+                    my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
+                    my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
 
-            if self._verbose:
-                print(Fore.GREEN + "{0} Img saved to file {1}".format(
-                    self._multiple_imgperfile, filepath))
+                if self._verbose:
+                    print(Fore.GREEN + "{0} Img saved to file {1}".format(
+                        self._multiple_imgperfile, filepath))
 
         # that's all folks
         print("------------------------")
