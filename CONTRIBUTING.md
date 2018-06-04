@@ -7,32 +7,34 @@ This guide intends to explain how to effectively contribute to the project.
 
 For contributing, please:
 * Make sure that you have a [GitHub](http://www.github.com) account
-* 'Fork' the main project on GitHub [using the button on the page of the main repository](https://github.com/percival-desy/percival-characterization#fork-destination-box)
-* Follow our recommendations for sharing your code
+* 'Fork' the main project on your GitHub repository [using the button on the page of the main repository](https://github.com/percival-desy/percival-characterization#fork-destination-box)
+* Follow our recommendations for [making changes](#making-changes) and sharing your code
 
 ## Coding style guide
 
-The PERCIVAL characterization software framework is developed in Python 3.
-We try as much as we can to follow the PEP-8 recommendations. 
-Please, try as much as you can to follow these recommendations.
+The PERCIVAL characterization software framework is developed in Python-3.
+We try as much as possible to follow the PEP-8 recommendations.
+We kindly invite you to do so. 
 A complete style guide for python can be found here: [PEP8 -- syle guide for python code here](https://www.python.org/dev/peps/pep-0008/).
 There are some tools developed which will check if your code is PEP-8 compatible and if not it will suggest some modifications.
 As an example, you can either [pycodestyle](https://pypi.org/project/pycodestyle/) use or [pylint](https://www.pylint.org).
+We would like to remind you to use docstrings for useful comments of your methods/functions.
 
 N.B.: Pull Request not following the Python coding style guide might be rejected.
 
 ## General guidelines
 
 * Please commit as often as possible
-* To make any modification (fixing a bug, developing a new method) please do not work on the master branch, but create a feature branch
-* Use descriptive commits
-* Follow the style of the existing coding (see PEP8 recommendations)
+* Do not work on the master branch for fixing a bug or developing a new methods: **create a feature branch** 
+* Use descriptive commits explaining what you have done (see commit section for more details)
+* Follow the style of the existing coding (see [PEP8 recommendations]((https://www.python.org/dev/peps/pep-0008/)))
 
 ## Making changes
 
 Would you like to enhance the framework or to fix a bug? Please follow these instructions:
 
-* 'Fork' the main project on GitHubt [using the button on the page of the main repository](https://github.com/percival-desy/percival-characterization#fork-destination-box). If you have cloned the main project repository on your computer, please add the newly forked repository and renamed the main project repository to 'upstream':
+* 'Fork' the main project on GitHub [using the button on the page of the main repository](https://github.com/percival-desy/percival-characterization#fork-destination-box).
+If you have cloned the main project repository on your computer, please add the newly forked repository and renamed the main project repository to 'upstream':
 
 ```
   git remote rename origin usptream
@@ -50,12 +52,42 @@ Would you like to enhance the framework or to fix a bug? Please follow these ins
   git pull upstream master
 ```
 
-* Commit often using a descriptive message. If you are working on an issue, please specify the issue number in your commit
-* When your fix or enhancement is done, go on your GitHub repository and clik on the 'compare & pull request' button
-* Summarize your changes and click on 'send'
+* Commit often using a descriptive message (see [commit](#git-commit) section). If you are working on an issue, please specify the issue number in your commit.
+```
+  git commit
+```
+
+* When your fix or enhancement is done, go on your GitHub repository and clik on the '''compare & pull request''' button
+* Summarize your changes and click on 'send' (see [Pull requests](#pull-requests) section)
 * Your modification will be reviewed and a discussion might be opened
 
+### Git commit
+
+This an advice for writting your commits and make it understable for everyone:
+
+1. Separate subject from body with a blank line
+2. Limit the subject to 50 characters
+3. Capitalize the subject line
+4. Do not end the subject with a period
+5. Use the imperative mood in the subject line
+6. Wrap the body at 72 characters,
+7. Use the body to explain *what* and *why* instead of *how*
+
+### Pull requests
+
+* Do not include issue numbers in the PR title
+* Include screenshots and animated GIFs in your pull request whenever possible
+* Follow the [Python](https://www.python.org/dev/peps/pep-0008/) styleguide
 
 
+### Naming
 
+* Avoid abbreviations.
+* Avoid object types in names (user_array, email_method CalculatorClass, ReportModule).
+* Prefer naming classes after domain concepts rather than patterns they implement (e.g. Guest vs NullUser, CachedRequest vs RequestDecorator).
+* Name the enumeration parameter the singular of the collection.
+* Name variables created by a factory after the factory (user_factory creates user).
+* Name variables, methods, and classes to reveal intent.
+* Treat acronyms as words in names (XmlHttpRequest not XMLHTTPRequest), even if the acronym is the entire name (class Html not class HTML).
+* Suffix variables holding a factory with _factory (user_factory).
 
