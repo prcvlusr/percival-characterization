@@ -28,7 +28,7 @@ class Plot(PlotBase):
 
         plt.imshow(data)
         plt.xlabel("columns")
-        plt.ylabel("raws")
+        plt.ylabel("rows")
 
         fig.suptitle(plot_title)
         fig.savefig(out_fname)

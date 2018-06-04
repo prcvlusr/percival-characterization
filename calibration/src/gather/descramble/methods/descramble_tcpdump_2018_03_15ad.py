@@ -4,7 +4,6 @@ readable in gather.
 """
 import os  # to list files in a directory
 import time  # to have time
-import h5py
 import numpy as np
 from colorama import init, Fore
 
@@ -233,19 +232,25 @@ class Descramble(DescrambleBase):
                 msg = "metafile file does not exist"
                 print(Fore.RED + msg)
                 raise Exception(msg)
+
             meta_data = np.genfromtxt(self._multiple_metadata_file,
                                       delimiter='\t',
                                       dtype=str)
             fileprefix_list = meta_data[:, 1]
 
             aux_n_of_files = len(fileprefix_list)
-            if (aux_n_of_files*self._multiple_imgperfile) != n_img:
-                msg = ("{0} != {1} x {2} ".format(n_img,aux_n_of_files,self._multiple_imgperfile))
+
+            if (aux_n_of_files * self._multiple_imgperfile) != n_img:
+                msg = ("{} != {} x {} ".format(n_img,
+                                               aux_n_of_files,
+                                               self._multiple_imgperfile))
                 print(Fore.RED + msg)
+
                 msg = ("n of images != metafile enties x Img/file ")
                 print(Fore.RED + msg)
                 raise Exception(msg)
             # ...
+
             (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
                                                               self._err_int16,
                                                               self._err_dlsraw)
@@ -268,6 +273,7 @@ class Descramble(DescrambleBase):
                 if self._verbose:
                     print(Fore.GREEN + "{0} Img saved to file {1}".format(
                         self._multiple_imgperfile, filepath))
+
 
         # that's all folks
         print("------------------------")
