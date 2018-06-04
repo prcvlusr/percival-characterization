@@ -63,7 +63,7 @@ If you have cloned the main project repository on your computer, please add the 
 
 ### Git commit
 
-This an advice for writting your commits and make it understable for everyone:
+This is an advice for writing your commits and make it clear for everyone:
 
 1. Separate subject from body with a blank line
 2. Limit the subject to 50 characters
@@ -72,22 +72,3 @@ This an advice for writting your commits and make it understable for everyone:
 5. Use the imperative mood in the subject line
 6. Wrap the body at 72 characters,
 7. Use the body to explain *what* and *why* instead of *how*
-
-### Pull requests
-
-* Do not include issue numbers in the PR title
-* Include screenshots and animated GIFs in your pull request whenever possible
-* Follow the [Python](https://www.python.org/dev/peps/pep-0008/) styleguide
-
-
-### Naming
-
-* Avoid abbreviations.
-* Avoid object types in names (user_array, email_method CalculatorClass, ReportModule).
-* Prefer naming classes after domain concepts rather than patterns they implement (e.g. Guest vs NullUser, CachedRequest vs RequestDecorator).
-* Name the enumeration parameter the singular of the collection.
-* Name variables created by a factory after the factory (user_factory creates user).
-* Name variables, methods, and classes to reveal intent.
-* Treat acronyms as words in names (XmlHttpRequest not XMLHTTPRequest), even if the acronym is the entire name (class Html not class HTML).
-* Suffix variables holding a factory with _factory (user_factory).
-
