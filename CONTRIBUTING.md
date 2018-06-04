@@ -70,5 +70,12 @@ This is an advice for writing your commits and make it clear for everyone:
 3. Capitalize the subject line
 4. Do not end the subject with a period
 5. Use the imperative mood in the subject line
-6. Wrap the body at 72 characters,
+6. Wrap the body at 72 characters
 7. Use the body to explain *what* and *why* instead of *how*
+
+### Pull requests
+
+* Do not include issue numbers in the PR title
+* Include screenshots and animated GIFs in your pull request whenever possible
+* Follow the [Python](https://www.python.org/dev/peps/pep-0008/) styleguid
+
