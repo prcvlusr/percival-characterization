@@ -111,6 +111,28 @@ def swap_bits(bitarray):
     return 1 - bitarray
 
 
+def convert_slice_to_tuple(item):
+    """Converts an index to something usable in documentation.
+    Args:
+        item (slice or int): The slice to convert.
+    Return:
+        The slice is converted into a tuple or None if it does not have any values.
+        If item was an int nothing is done.
+    """
+
+    if item == slice(None):
+        new_item = None
+    elif type(item) == slice:
+        if item.step == None:
+            new_item = (item.start, item.stop)
+        else:
+            new_item = (item.start, item.stop, item.step)
+    else:
+        new_item = item
+
+    return new_item
+
+
 def split_alessandro(raw_dset):
     """Extracts the coarse, fine and gain bits.
 
