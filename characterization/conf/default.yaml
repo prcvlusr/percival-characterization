@@ -2,16 +2,16 @@ general:
     data_type: processed
     run: DLSraw
 
-    plot_sample: True
-    plot_reset: True
-    plot_combined: True
+    plot_sample: False
+    plot_reset: False
+    plot_combined: False
 
 all:
     output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST
 
 raw:
     input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST8kto32k_80p_AV_MultiFile060_DLSraw.h5
-    metadata_file:  /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/2018.05.31_AV_000_meta.dat
+    metadata_file:  /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/file.dat
 
     output: *output
 

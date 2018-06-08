@@ -1,5 +1,5 @@
 general:
-    run_type: process
+    run_type: gather
     n_cols: 32
 
     measurement: adccal
@@ -9,8 +9,8 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Users/ben/PostDoc/P2M_HDF5 
-    output: &output /Users/ben/PostDoc/P2M_HDF5
+    input: &input /Users/ben/PostDoc/P2M_HDF5/Test_data
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Test_data
 
 gather:
     method: file_per_vin_and_register_file
@@ -18,45 +18,45 @@ gather:
     input: *input
     output: *output
 
-    descramble_tcpdump:
-        descramble_method: descramble_tcpdump_2018_03_15ad
+ #   descramble_tcpdump:
+ #       descramble_method: descramble_tcpdump_2018_03_15ad
 
-        # path & name of tcpdump-files to descramble (ordered by link)
-        input: [p2018.03.15crdAD_h10_lnk0.dmp, p2018.03.15crdAD_h10_lnk1.dmp]
+ #       # path & name of tcpdump-files to descramble (ordered by link)
+ #       input: [p2018.03.15crdAD_h10_lnk0.dmp, p2018.03.15crdAD_h10_lnk1.dmp]
 
-        output_prefix: "p2018.03.15crdAD_h10"
+ #       output_prefix: "p2018.03.15crdAD_h10"
 
         # older Firmware, using (pack_number) to id a packet
-        descramble_tcpdump_2018_03_15ad:
-            save_file: True
-            clean_memory: True
-            verbose: True
-            multiple_save_files: True
-            # multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/VRST=10k_AD_10frames_meta.dat
-            multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/p2018.03.15crdAD_h20_meta.dat
-            multiple_imgperfile: 1
+        #descramble_tcpdump_2018_03_15ad:
+        #    save_file: True
+        #    clean_memory: True
+        #    verbose: True
+        #    multiple_save_files: True
+        #    # multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/VRST=10k_AD_10frames_meta.dat
+        #    multiple_metadata_file: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testFramework/2018.05.25/try1/p2018.03.15crdAD_h20_meta.dat
+        #    multiple_imgperfile: 1
 
-            n_adc: 7
-            n_grp: 212
-            n_pad: 45
+        #    n_adc: 7
+        #    n_grp: 212
+        #    n_pad: 45
 
-            n_col_in_blk: 32
+        #    n_col_in_blk: 32
 
-        # more up-to-date Firmware, using (datatype,subframe,pack) triplet to id a packet
-        descramble_tcpdump_2018_04_13aq:
-            save_file: True
-            clean_memory: True
-            verbose: True
+        ## more up-to-date Firmware, using (datatype,subframe,pack) triplet to id a packet
+        #descramble_tcpdump_2018_04_13aq:
+        #    save_file: True
+        #    clean_memory: True
+        #    verbose: True
 
-            multiple_save_files: True
-            multiple_metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/compare_p2018.04.13crdAQ_h14.dat
-            multiple_imgperfile: 1
+        #    multiple_save_files: True
+        #    multiple_metadata_file: /home/marras/PERCIVAL/PercFramework/data/h5_scrmbl_view/h5in/compare_p2018.04.13crdAQ_h14.dat
+        #    multiple_imgperfile: 1
 
-            n_adc: 7
-            n_grp: 212
-            n_pad: 45
+        #    n_adc: 7
+        #    n_grp: 212
+        #    n_pad: 45
 
-            n_col_in_blk: 32
+        #    n_col_in_blk: 32
 
 process:
     method: process_adccal_default
