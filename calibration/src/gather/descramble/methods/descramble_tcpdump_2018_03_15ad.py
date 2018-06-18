@@ -263,19 +263,17 @@ class Descramble(DescrambleBase):
             reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
             for i, prefix in enumerate(fileprefix_list):
-                output_dir = os.path.dirname(self._output_fname)
-                filepath = os.path.join(output_dir,
-                                        prefix + ".h5")
+            
+                filepath = os.path.dirname(self._output_fname)+'/'+prefix + ".h5"
 
-                self._data_to_write["sample"]["data"] = sample[i, ...]
-                self._data_to_write["reset"]["data"] = reset[i, ...]
-
-                self._write_data(filepath)
+                with h5py.File(filepath, "w", libver='latest') as my5hfile:
+                    my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
+                    my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
 
                 if self._verbose:
-                    msg = ("{} Img saved to file {}"
-                           .format(self._multiple_imgperfile, filepath))
-                    print(Fore.GREEN + msg)
+                    print(Fore.GREEN + "{0} Img saved to file {1}".format(
+                        self._multiple_imgperfile, filepath))
+
 
         # that's all folks
         print("------------------------")

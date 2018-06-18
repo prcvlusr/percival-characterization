@@ -249,32 +249,38 @@ class Descramble(DescrambleBase):
 
             aux_n_of_files = len(fileprefix_list)
             if (aux_n_of_files*self._multiple_imgperfile) != n_img:
+                msg = 'number of images: '+str(n_img)
+                print(Fore.RED + msg)
+                msg = 'number of metafile entries: '+str(aux_n_of_files)
+                print(Fore.RED + msg)
+                msg = 'number of images per file: '+str(self._multiple_imgperfile)
+                print(Fore.RED + msg)
                 msg = ("n of images != metafile enties x Img/file ")
                 print(Fore.RED + msg)
                 raise Exception(msg)
 
-        (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
-                                                          self._err_int16,
-                                                          self._err_dlsraw)
-        (_, aux_nrow, aux_ncol) = sample.shape
-        shape_datamultfiles = (aux_n_of_files,
-                               self._multiple_imgperfile,
-                               aux_nrow,
-                               aux_ncol)
-        sample = sample.reshape(shape_datamultfiles).astype('uint16')
-        reset = reset.reshape(shape_datamultfiles).astype('uint16')
+            (sample, reset) = utils.convert_gncrsfn_to_dlsraw(self._result_data,
+                                                              self._err_int16,
+                                                              self._err_dlsraw)
+            (_, aux_nrow, aux_ncol) = sample.shape
+            shape_datamultfiles = (aux_n_of_files,
+                                   self._multiple_imgperfile,
+                                   aux_nrow,
+                                   aux_ncol)
+            sample = sample.reshape(shape_datamultfiles).astype('uint16')
+            reset = reset.reshape(shape_datamultfiles).astype('uint16')
 
-        for i, prefix in enumerate(fileprefix_list):
+            for i, prefix in enumerate(fileprefix_list):
 
-            filepath = os.path.dirname(self._output_fname) + '/'+ prefix + ".h5"
+                filepath = os.path.dirname(self._output_fname) + '/'+ prefix + ".h5"
 
-            with h5py.File(filepath, "w", libver='latest') as my5hfile:
-                my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
-                my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
+                with h5py.File(filepath, "w", libver='latest') as my5hfile:
+                    my5hfile.create_dataset('/data/', data=sample[i, :, :, :])
+                    my5hfile.create_dataset('/reset/', data=reset[i, :, :, :])
 
-            if self._verbose:
-                print(Fore.GREEN + "{0} Img saved to file {1}".format(
-                    self._multiple_imgperfile, filepath))
+                if self._verbose:
+                    print(Fore.GREEN + "{0} Img saved to file {1}".format(
+                        self._multiple_imgperfile, filepath))
 
         # that's all folks
         print("------------------------")
@@ -428,7 +434,14 @@ class Descramble(DescrambleBase):
                         idx = slice(self._pack_counter, self._pack_counter+2)
                         bytel = file_data[idx]
                         pack_id = utils.convert_bytelist_to_int(bytelist=bytel)
-                        datatype_id = file_data[self._datatype_counter]
+                        
+                        # datatype_id = file_data[self._datatype_counter]
+                        # this is wrong because on header datatype_id=0 means Reset
+                        # but dat is organized so that data[x, 0, ...] means Sample
+                        # it needs to be changed as:
+                        inverted_datatype_id = file_data[self._datatype_counter]
+                        datatype_id = np.absolute(inverted_datatype_id - 1)
+
                         subframe_id = file_data[self._subframe_counter]
 
                         # then save it in the appropriate position
