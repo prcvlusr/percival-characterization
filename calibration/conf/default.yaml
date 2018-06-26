@@ -27,7 +27,7 @@ gather:
         output_prefix: "p2018.03.15crdAD_h10"
 
         # older Firmware, using (pack_number) to id a packet
-        descramble_tcpdump_2018_03_15ad: 
+        descramble_tcpdump_2018_03_15ad:
             save_file: True
             clean_memory: True
             verbose: True
