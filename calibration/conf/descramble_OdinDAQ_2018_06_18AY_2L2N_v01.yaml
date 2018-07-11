@@ -1,0 +1,45 @@
+general:
+    run_type: gather
+    n_cols: null
+
+    measurement: adccal
+
+    run: &run DLSraw
+
+    n_processes: 1
+
+all:
+    input: &input /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testMezzanine/2018.06.18_testAW,AY,AZ,OdinDAQ
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testMezzanine/2018.06.18_testAW,AY,AZ,OdinDAQ/FrameworkOutput/
+
+gather:
+    method: descramble_tcpdump
+
+    input: *input
+    output: *output
+
+    descramble_tcpdump:
+        # to use it 
+        # (base) [prcvlusr@cfeld-percival01]~/PercAuxiliaryTools/Framework/percival-characterization% python3 ./calibration/src/analyse.py --config_file descramble_OdinDAQ_2018_06_18AY_2L2N_v01.yaml
+        descramble_method: descramble_OdinDAQraw_2018_06_18AY_2L2N
+
+        input: [2018.06.20_003a_horse_TestAY_OdinDAQ_fl0.h5, 2018.06.20_003a_horse_TestAY_OdinDAQ_fl0.h5]
+        output_prefix: "2018.06.20_003a_OdinDAQ_evenImgOnly"
+
+        # descramble OdinDAQ saving raw (scrambled, disordered data in 2xh5files)
+        descramble_OdinDAQraw_2018_06_18AY_2L2N:
+            # OdinDAQ as 06/2018 swaps Rst and Smpl images
+            swap_sample_reset: True 
+            # saves descrambed to file
+            save_file: True
+            clean_memory: True
+            verbose: True
+            # show descrambled images
+            debug: False
+
+process:
+    method: process_adccal_default
+
+    input: *output
+    output: *output
+
