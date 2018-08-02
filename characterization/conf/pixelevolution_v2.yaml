@@ -1,0 +1,92 @@
+general:
+    data_type: raw
+    run: DLSraw
+
+    plot_sample: True
+    plot_reset: True
+    plot_combined: False
+
+all:
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled
+
+raw:
+    # this is not used at all. however, this must be a valid h5 file, or the Framework will crash. 
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled/2018.07.24_Vin=21290ADU.h5
+
+    metadata_fname: null
+
+    output: *output
+
+    measurement: adccal
+
+    adc: null
+    frame: null
+
+    # there are row, col of the pixels that will be evaluated
+    row: [140, 147] # means: [140,141,142,143,144,145,146]
+    col: [100, 102] # means: [100, 101]
+
+    #row: [0, 1484] # means: [all]
+    #col: [32, 1440] # means: [all but the ref cols]
+
+    #row: [280, 294] 
+    #col: [160, 257] 
+
+
+    method: [pixelevolution_v2]
+
+    pixelevolution_v2:
+        pixelevolution_metadata_fname: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled/2018.07.24_meta.dat
+        metasuffix: ".h5" # suffix to be added to the filenames listed in the metadata file
+        use_Imgs: [0, 1] # means: [0]
+
+        type_of_scan: "VRST [ADU]"
+
+        plot_lines: True
+        save_file: False
+        verbose: False
+        clean_memory: True
+        # remote operation prevents interaction with the user (no implemented)
+        remote: False
+
+        # need at leat that many points to fit the curve
+        fit_minpoints: 3
+        # when fitting Fn, consider Crs so that FnFit_minCrs<= Crs <=FnFit_maxCrs
+        FnFit_minCrs: 2
+        FnFit_maxCrs: 29
+
+        # when too many pixels, disable showEvolution
+        showEvolution: True
+
+        showFitQuality_R2: False
+        R2_colScaleFloor: 0.85
+
+        showFitQuality_Chi2: False
+
+        showFitQuality_FnHist: True
+
+gathered:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 100
+    row: null
+
+    method: [plot, hist, hist_2d]
+
+processed:
+    input: *output
+    output: *output
+
+    measurement: adccal
+
+    adc: 0
+    frame: null
+    col: 10
+    row: null
+
+    method: [plot]
