@@ -7,7 +7,7 @@ general:
     plot_combined: False
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
 
 raw:
     input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/VRST8kto32k_80p_AV_MultiFile060_DLSraw.h5
