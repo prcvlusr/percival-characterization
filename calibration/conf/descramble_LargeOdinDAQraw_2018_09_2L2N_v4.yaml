@@ -1,0 +1,49 @@
+general:
+    run_type: gather
+    n_cols: null
+
+    measurement: adccal
+
+    run: &run DLSraw
+
+    n_processes: 1
+
+all:
+    input: &input /home/prcvlusr/PercivalDataBackup/testFramework_nd_packIntegr/2018.09.08_largeOdinData/300VRSTx10Img
+    output: &output /home/prcvlusr/PercivalDataBackup/testFramework_nd_packIntegr/2018.09.08_largeOdinData/300VRSTx10Img
+
+gather:
+    method: descramble_tcpdump
+
+    input: *input
+    output: *output
+
+    descramble_tcpdump:
+        # to use it 
+        # (base) [prcvlusr@cfeld-percival01]~/PercAuxiliaryTools/Framework/percival-characterization% python3 ./calibration/src/analyse.py --config_file descramble_LargeOdinDAQraw_2018_09_2L2N_v4.yaml
+        descramble_method: descramble_LargeOdinDAQraw_2018_09_2L2N_v4
+
+        input: [2018.09.08_300VRSTx10Img_OdinDAQ_fl0.h5, 2018.09.08_300VRSTx10Img_OdinDAQ_fl1.h5]
+        output_prefix: "recheck"
+
+        # descramble OdinDAQ saving raw (scrambled, disordered data in 2xh5files)
+        descramble_LargeOdinDAQraw_2018_09_2L2N_v4:
+            # OdinDAQ as 06/2018 swaps Rst and Smpl images
+            swap_sample_reset: True 
+
+            # saves descrambed to several files
+            multiple_save_files: True
+            multiple_metadata_file: /home/prcvlusr/PercivalDataBackup/testFramework_nd_packIntegr/2018.09.08_largeOdinData/300VRSTx10Img/300Fn_meta.dat
+            multiple_imgperfile: 10
+
+            clean_memory: True
+            verbose: True
+            # show descrambled images
+            debug: False
+
+process:
+    method: process_adccal_default
+
+    input: *output
+    output: *output
+
