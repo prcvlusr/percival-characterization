@@ -1,5 +1,5 @@
 general:
-    run_type: process
+    run_type: correction
     n_cols: 32
 
     measurement: adccal
@@ -9,14 +9,19 @@ general:
     n_processes: 1
 
 all:
-    input: &input /Users/ben/PostDoc/P2M_HDF5 
-    output: &output /Users/ben/PostDoc/P2M_HDF5
+    input: &input /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    input_coarse:  &input_coarse /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    input_fine: &input_fine /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan
+    
 
 gather:
     method: file_per_vin_and_register_file
 
     input: *input
     output: *output
+    input_coarse: *input_coarse
+    input_fine: *input_fine
 
     descramble_tcpdump:
         descramble_method: descramble_tcpdump_2018_03_15ad
@@ -61,6 +66,22 @@ gather:
 process:
     method: process_adccal_default
 
-    input: *output
+    input: *output 
+    input_coarse: *input_coarse
+    input_fine: *input_fine
     output: *output
 
+    process_adccal_default:
+        fit_adc_part: coarse
+        coarse_fitting_range: [2, 29]
+        fine_fitting_range: 20 
+
+correction:
+    method: correction_adccal_default
+    
+    #input: *output
+    #input_coarse: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRST/DLSraw/DLSraw/processed/col0-1439_processed.h5
+    input_coarse: *input_coarse
+    input_fine: *input_fine 
+    input_gathered: /Users/ben/PostDoc/P2M_HDF5/Data_0918/Fine_scan/DLSraw/col0-1439_gathered.h5
+    output: /Users/ben/PostDoc/P2M_HDF5/Data_0918/

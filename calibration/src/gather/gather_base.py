@@ -42,11 +42,9 @@ class GatherBase(object):
 
     def _get_output_dir(self, run_dir):
         """Fills up output template and creates output directory.
-
         Args:
             run_dir (string): String to insert in the output directory
                               template.
-
         Return:
             The output directory.
         """
@@ -82,6 +80,7 @@ class GatherBase(object):
         if self._data_to_write == {} or self._data_to_write is None:
             raise Exception("Write data: No data found.")
 
+        print("Output: ", self._out_fname)
         with h5py.File(self._out_fname, "w", libver='latest') as out_f:
 
             for key, dset in self._data_to_write.items():

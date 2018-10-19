@@ -64,7 +64,7 @@ class PlotBase():
                 data: sample and reset data
         """
 
-        return PlotBase.LoadedData(x=self._vin,
+        return PlotBase.LoadedData(vin=self._vin,
                                    data=self._data)
 
     def _generate_single_plot(self, x, data, plot_title, label, out_fname):

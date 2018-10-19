@@ -7,11 +7,11 @@ general:
     plot_combined: False
 
 all:
-    output: &output /home/prcvlusr/PercAuxiliaryTools/temp_data/DLSraw/descrambled
+    output: &output /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled
 
 raw:
     # this is not used at all. however, this must be a valid h5 file, or the Framework will crash. 
-    input:  /home/prcvlusr/PercivalDataBackup/testADC/testADC07_VRST/ADCClk_25MHz/20180906/2018.09.06_iFbiasN3000/DLSraw/descrambled/iFbiasN3000_Vin=21160ADU.h5
+    input: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled/2018.07.24_Vin=21290ADU.h5
 
     metadata_fname: null
 
@@ -23,23 +23,26 @@ raw:
     frame: null
 
     # there are row, col of the pixels that will be evaluated
+
+    row: [140, 147] # means: [140,141,142,143,144,145,146]
+    col: [100, 102] # means: [100, 101]
+
     #row: [0, 1484] # means: [all]
     #col: [32, 1440] # means: [all but the ref cols]
 
-    row: [400, 402] 
-    col: [850, 857] 
-
+    #row: [280, 294] 
+    #col: [160, 257] 
 
     method: [pixelevolution_v2]
 
     pixelevolution_v2:
-        pixelevolution_metadata_fname: /home/prcvlusr/PercAuxiliaryTools/temp_data/2018.09.12_fn-scan/DLSraw/descrambled/fn-scan-30_meta.dat
+        pixelevolution_metadata_fname: /home/prcvlusr/PercAuxiliaryTools/PercPython/data/testADC/testADC07_VRST/ADCClk_25MHz/20180724/8_std,but0to255Fn/DLSraw/descrambled/2018.07.24_meta.dat
         metasuffix: ".h5" # suffix to be added to the filenames listed in the metadata file
         use_Imgs: [0, 1] # means: [0]
 
         type_of_scan: "VRST [ADU]"
 
-        plot_lines: False
+        plot_lines: True
         save_file: False
         verbose: False
         clean_memory: True

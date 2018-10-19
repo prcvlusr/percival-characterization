@@ -1,5 +1,5 @@
 general:
-    data_type: raw
+    data_type: gathered
     run: DLSraw
 
     plot_sample: True
@@ -7,11 +7,11 @@ general:
     plot_combined: True
 
 all:
-    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_0918/Coarse_scan
+    output: &output /Users/ben/PostDoc/P2M_HDF5/Data_lab 
 
 raw:
-    input: /Users/ben/PostDoc/P2M_HDF5/Data_0918/DLSraw/correction/col0-1439_correction.h5
-    metadata_fname: null 
+    input: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.h5
+    metadata_file: /Users/ben/PostDoc/P2M_HDF5/Data_lab/VRSTfromVin_8p1kto32k_AD_240frames_DLSraw.VRST
 
     output: *output
 
@@ -22,11 +22,11 @@ raw:
     col: 100
     row: 100
 
-    method: [viewer]
+    #method: [viewer]
+    method: [image, plot_coarse-fine_vs_image]
 
     viewer:
-      err_below: -0.1
-    #method: [image, plot_coarse-fine_vs_image]
+        err_below: -0.1
 
 gathered:
     input: *output
